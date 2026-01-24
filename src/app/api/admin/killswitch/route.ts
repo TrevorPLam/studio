@@ -17,10 +17,10 @@
  *
  * AUTHENTICATION:
  * - Requires NextAuth session
- * - TODO: Add admin role check (currently allows any authenticated user)
+ * - Requires admin role (checked via isAdmin utility)
  *
  * SECURITY:
- * - Should be restricted to admin users only
+ * - Restricted to admin users only (ADMIN_EMAILS environment variable)
  * - All operations are logged for audit
  *
  * RELATED FILES:
@@ -36,8 +36,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { z } from 'zod';
 import { authOptions } from '@/lib/auth/config';
+import { isAdmin } from '@/lib/auth/admin';
 import { getKillSwitchStatus, setKillSwitch, KillSwitchActiveError } from '@/lib/ops/killswitch';
 import { setUserId } from '@/lib/observability/correlation';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // SECTION: VALIDATION SCHEMAS
@@ -101,10 +103,18 @@ export async function GET(_request: NextRequest) {
       setUserId(userId);
     }
 
-    // TODO: Add admin role check
-    // if (!isAdmin(userId)) {
-    //   return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    // }
+    // ========================================================================
+    // ADMIN ROLE CHECK
+    // ========================================================================
+    // Fail-closed: only admin users can access kill-switch status
+    if (!isAdmin(userId)) {
+      logger.warn('Unauthorized kill-switch status access attempt', {
+        userId,
+        endpoint: '/api/admin/killswitch',
+        method: 'GET',
+      });
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     // ========================================================================
     // GET STATUS
@@ -166,10 +176,18 @@ export async function POST(request: NextRequest) {
     }
     setUserId(userId);
 
-    // TODO: Add admin role check
-    // if (!isAdmin(userId)) {
-    //   return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    // }
+    // ========================================================================
+    // ADMIN ROLE CHECK
+    // ========================================================================
+    // Fail-closed: only admin users can toggle kill-switch
+    if (!isAdmin(userId)) {
+      logger.warn('Unauthorized kill-switch toggle attempt', {
+        userId,
+        endpoint: '/api/admin/killswitch',
+        method: 'POST',
+      });
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     // ========================================================================
     // REQUEST VALIDATION
@@ -183,12 +201,16 @@ export async function POST(request: NextRequest) {
     const status = setKillSwitch(parsed.enabled, userId);
 
     // ========================================================================
-    // LOG FOR AUDIT
+    // AUDIT LOGGING
     // ========================================================================
-    // TODO: Add proper audit logging
-    console.log(
-      `[KILL-SWITCH] ${parsed.enabled ? 'ENABLED' : 'DISABLED'} by ${userId} at ${status.lastToggledAt}`
-    );
+    // Log kill-switch toggle for audit trail (security-critical operation)
+    logger.info('Kill-switch toggled', {
+      enabled: parsed.enabled,
+      userId,
+      lastToggledAt: status.lastToggledAt,
+      operation: 'killswitch_toggle',
+      severity: 'high', // Security-critical operation
+    });
 
     return NextResponse.json(status);
   } catch (error) {

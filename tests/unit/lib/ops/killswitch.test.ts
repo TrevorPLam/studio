@@ -30,7 +30,9 @@ describe('KillSwitch', () => {
       setKillSwitch(false);
       const status = getKillSwitchStatus();
       expect(status.enabled).toBe(false);
-      // Note: lastToggledAt may not be null if kill-switch was previously toggled
+      // Explanation: lastToggledAt will be set when setKillSwitch is called (even when disabling),
+      // so it will not be null if the kill-switch was previously toggled in this test run.
+      // This is expected behavior - the timestamp tracks the last toggle operation.
     });
 
     it('should return enabled status after enabling', () => {

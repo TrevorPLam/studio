@@ -79,8 +79,16 @@ import type { AgentMessageInput, CreateAgentSession } from '@/lib/validation';
 // ============================================================================
 // SECTION: PATH POLICY GUARDRAILS (FILESYSTEM-LEVEL)
 // ============================================================================
-// NOTE: This is for filesystem path protection (data directory).
-// For repository path policy, see @/lib/security/path-policy.ts (RA-SAFE-004)
+// IMPORTANT: This is for filesystem path protection (data directory).
+// This protects against directory traversal attacks when writing session data
+// to the local filesystem (.data/ directory).
+//
+// For repository path policy (which restricts which repository files can be
+// modified by agents), see @/lib/security/path-policy.ts (RA-SAFE-004).
+//
+// These are two separate concerns:
+// - Filesystem path policy: protects local server filesystem (this section)
+// - Repository path policy: protects repository files from agent modifications (RA-SAFE-004)
 
 /**
  * Allowed data directories for file operations.

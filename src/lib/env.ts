@@ -120,4 +120,17 @@ export const env = {
     /** Genkit environment (dev/prod) */
     env: process.env.GENKIT_ENV || 'dev',
   },
+
+  /**
+   * Admin configuration.
+   *
+   * Comma-separated list of admin email addresses.
+   * Used for authorization of administrative operations.
+   *
+   * Example: ADMIN_EMAILS=admin@example.com,superuser@example.com
+   */
+  admin: {
+    /** Comma-separated list of admin email addresses */
+    emails: process.env.ADMIN_EMAILS || '',
+  },
 };
