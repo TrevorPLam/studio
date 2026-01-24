@@ -1,5 +1,14 @@
-// Legacy localStorage helpers retained as a cache/migration aid.
-interface AgentSession {
+/**
+ * DEPRECATED: Optional read-only cache helpers for localStorage.
+ * 
+ * Per AS-CORE-001 and AS-03: Server-side is now the source of truth.
+ * These functions are retained only for reading legacy data during migration.
+ * 
+ * DO NOT use these functions for writing - all writes must go through the API.
+ * The migration code in src/app/agents/page.tsx handles moving data from localStorage to server.
+ */
+
+interface LegacyAgentSession {
   id: string;
   name: string;
   model: string;
@@ -9,35 +18,23 @@ interface AgentSession {
   lastMessage?: string;
 }
 
-export function getAgentSession(sessionId: string): AgentSession | null {
+/**
+ * Read-only: Get a legacy session from localStorage cache.
+ * @deprecated Use API endpoint /api/sessions/[id] instead
+ */
+export function getAgentSession(sessionId: string): LegacyAgentSession | null {
   if (typeof window === 'undefined') return null;
   const stored = localStorage.getItem(`agentSession_${sessionId}`);
   return stored ? JSON.parse(stored) : null;
 }
 
-export function saveAgentSession(session: AgentSession) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(`agentSession_${session.id}`, JSON.stringify(session));
-}
-
-export function saveAgentMessage(
-  sessionId: string,
-  messages: Array<{ role: 'user' | 'assistant'; content: string }>
-) {
-  if (typeof window === 'undefined') return;
-  const session = getAgentSession(sessionId);
-  if (session) {
-    session.messages = messages;
-    if (messages.length > 0) {
-      session.lastMessage = messages[messages.length - 1].content.substring(0, 100);
-    }
-    saveAgentSession(session);
-  }
-}
-
-export function getAllAgentSessions(): AgentSession[] {
+/**
+ * Read-only: Get all legacy sessions from localStorage cache.
+ * @deprecated Use API endpoint /api/sessions instead
+ */
+export function getAllAgentSessions(): LegacyAgentSession[] {
   if (typeof window === 'undefined') return [];
-  const sessions: AgentSession[] = [];
+  const sessions: LegacyAgentSession[] = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key?.startsWith('agentSession_')) {
@@ -49,3 +46,7 @@ export function getAllAgentSessions(): AgentSession[] {
   }
   return sessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
+
+// Removed: saveAgentSession, saveAgentMessage
+// Writing to localStorage is no longer allowed - server-side is source of truth.
+// Use API endpoints instead: POST /api/sessions, PATCH /api/sessions/[id]
