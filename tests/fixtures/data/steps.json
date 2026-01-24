@@ -1,0 +1,19 @@
+[
+  {
+    "id": "step-1",
+    "sessionId": "test-session-1",
+    "type": "plan",
+    "status": "started",
+    "timestamp": "2025-01-24T00:00:00.000Z",
+    "startedAt": "2025-01-24T00:00:00.000Z"
+  },
+  {
+    "id": "step-2",
+    "sessionId": "test-session-1",
+    "type": "context",
+    "status": "succeeded",
+    "timestamp": "2025-01-24T00:05:00.000Z",
+    "startedAt": "2025-01-24T00:05:00.000Z",
+    "endedAt": "2025-01-24T00:10:00.000Z"
+  }
+]

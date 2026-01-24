@@ -1,0 +1,27 @@
+{
+  "allowed": [
+    "docs/guide.md",
+    "docs/subfolder/file.md",
+    ".repo/config.json",
+    "README.md"
+  ],
+  "forbidden": [
+    "package.json",
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    ".github/workflows/ci.yml",
+    ".env",
+    ".env.local"
+  ],
+  "notWhitelisted": [
+    "src/components/Button.tsx",
+    "lib/utils.ts",
+    "app/page.tsx"
+  ],
+  "bypassAttempts": [
+    "docs/../package.json",
+    "docs/./../.github/workflows/ci.yml",
+    ".repo/../../package.json"
+  ]
+}

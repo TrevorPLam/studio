@@ -1,0 +1,135 @@
+{
+  "name": "tests",
+  "description": "Test suite index for the application",
+  "structure": {
+    "unit": {
+      "description": "Unit tests for individual modules and functions",
+      "lib": {
+        "agent": {
+          "session-types.test.ts": {
+            "type": "test",
+            "description": "Tests for session type definitions"
+          }
+        },
+        "db": {
+          "agent-sessions.test.ts": {
+            "type": "test",
+            "description": "Session persistence and CRUD operations tests"
+          },
+          "agent-sessions-state.test.ts": {
+            "type": "test",
+            "description": "State machine transition tests"
+          },
+          "agent-sessions-steps.test.ts": {
+            "type": "test",
+            "description": "Step timeline management tests"
+          }
+        },
+        "github-app.test.ts": {
+          "type": "test",
+          "description": "GitHub App authentication tests"
+        },
+        "security": {
+          "path-policy.test.ts": {
+            "type": "test",
+            "description": "Path policy validation tests"
+          },
+          "secrets.test.ts": {
+            "type": "test",
+            "description": "Secrets management tests"
+          }
+        },
+        "validation.test.ts": {
+          "type": "test",
+          "description": "Validation schema tests"
+        }
+      }
+    },
+    "integration": {
+      "description": "Integration tests for API endpoints and workflows",
+      "api": {
+        "sessions.test.ts": {
+          "type": "test",
+          "description": "Sessions API endpoint tests"
+        },
+        "sessions-detail.test.ts": {
+          "type": "test",
+          "description": "Session detail API endpoint tests"
+        },
+        "sessions-steps.test.ts": {
+          "type": "test",
+          "description": "Session steps API endpoint tests"
+        },
+        "github.test.ts": {
+          "type": "test",
+          "description": "GitHub API endpoint tests"
+        }
+      }
+    },
+    "e2e": {
+      "description": "End-to-end tests for critical user flows",
+      "flows": {
+        "critical.test.ts": {
+          "type": "test",
+          "description": "Critical user flow E2E tests"
+        }
+      }
+    },
+    "security": {
+      "description": "Security and adversarial tests",
+      "adversarial.test.ts": {
+        "type": "test",
+        "description": "Adversarial security scenario tests"
+      },
+      "path-policy-security.test.ts": {
+        "type": "test",
+        "description": "Path policy security enforcement tests"
+      }
+    },
+    "performance": {
+      "description": "Performance and load tests",
+      "load.test.ts": {
+        "type": "test",
+        "description": "Load testing scenarios"
+      },
+      "stress.test.ts": {
+        "type": "test",
+        "description": "Stress testing scenarios"
+      }
+    },
+    "fixtures": {
+      "description": "Test data fixtures",
+      "data": {
+        "sessions.json": {
+          "type": "fixture",
+          "description": "Sample session data for testing"
+        },
+        "steps.json": {
+          "type": "fixture",
+          "description": "Sample step data for testing"
+        },
+        "path-policy-cases.json": {
+          "type": "fixture",
+          "description": "Path policy test cases"
+        }
+      }
+    },
+    "utils": {
+      "description": "Test utility functions",
+      "test-helpers.ts": {
+        "type": "utility",
+        "description": "Helper functions for test setup and teardown"
+      }
+    }
+  },
+  "statistics": {
+    "totalTestFiles": 17,
+    "unitTests": 8,
+    "integrationTests": 4,
+    "e2eTests": 1,
+    "securityTests": 2,
+    "performanceTests": 2,
+    "fixtureFiles": 3,
+    "utilityFiles": 1
+  }
+}
