@@ -1,3 +1,33 @@
+/**
+ * ============================================================================
+ * SESSION DETAIL API ENDPOINT
+ * ============================================================================
+ * 
+ * @file src/app/api/sessions/[id]/route.ts
+ * @route /api/sessions/[id]
+ * @epic AS-CORE-001
+ * 
+ * PURPOSE:
+ * API endpoint for getting and updating individual agent sessions.
+ * 
+ * ENDPOINTS:
+ * - GET /api/sessions/[id] - Get session by ID
+ * - PATCH /api/sessions/[id] - Update session
+ * 
+ * AUTHENTICATION:
+ * - Requires NextAuth session
+ * - User isolation enforced (userId filtering)
+ * 
+ * RELATED FILES:
+ * - src/lib/db/agent-sessions.ts (Database operations)
+ * - src/lib/validation.ts (Request validation)
+ * - src/app/api/sessions/route.ts (List/create endpoint)
+ * 
+ * @see AS-CORE-001 AS-04
+ * 
+ * ============================================================================
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import type { Session } from 'next-auth';
@@ -7,6 +37,17 @@ import { getAgentSessionById, updateAgentSession } from '@/lib/db/agent-sessions
 import { agentMessageSchema, validateRequest } from '@/lib/validation';
 import { ValidationError } from '@/lib/types';
 
+// ============================================================================
+// SECTION: VALIDATION SCHEMAS
+// ============================================================================
+
+/**
+ * Schema for session update requests.
+ * 
+ * Per AS-CORE-001:
+ * - Supports goal and repo binding updates
+ * - repository string is deprecated but accepted
+ */
 const updateAgentSessionSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   model: z.string().min(1).optional(),
@@ -20,27 +61,72 @@ const updateAgentSessionSchema = z.object({
   messages: z.array(agentMessageSchema).optional(),
 });
 
+// ============================================================================
+// SECTION: TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Next.js route parameters for session detail routes.
+ */
 type SessionParams = {
   params: {
     id: string;
   };
 };
 
+// ============================================================================
+// SECTION: HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Extract user ID from NextAuth session.
+ * 
+ * @param session - NextAuth session object
+ * @returns User ID or null if unavailable
+ */
 function getUserId(session: Session | null): string | null {
   return session?.user?.email ?? session?.user?.name ?? null;
 }
 
+// ============================================================================
+// SECTION: GET ENDPOINT - GET SESSION
+// ============================================================================
+
+/**
+ * GET /api/sessions/[id]
+ * 
+ * Get a specific session by ID.
+ * 
+ * Response: AgentSession
+ * 
+ * @param _request - Next.js request object (unused)
+ * @param params - Route parameters containing session ID
+ * @returns JSON response with session data
+ * @returns 401 if not authenticated
+ * @returns 404 if session not found
+ * 
+ * @see AS-CORE-001 AS-04
+ */
 export async function GET(_request: NextRequest, { params }: SessionParams) {
+  // ========================================================================
+  // AUTHENTICATION CHECK
+  // ========================================================================
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // ========================================================================
+  // USER IDENTIFICATION
+  // ========================================================================
   const userId = getUserId(session);
   if (!userId) {
     return NextResponse.json({ error: 'User identity unavailable' }, { status: 400 });
   }
 
+  // ========================================================================
+  // FETCH SESSION
+  // ========================================================================
   const agentSession = await getAgentSessionById(userId, params.id);
   if (!agentSession) {
     return NextResponse.json({ error: 'Session not found' }, { status: 404 });
@@ -49,20 +135,61 @@ export async function GET(_request: NextRequest, { params }: SessionParams) {
   return NextResponse.json(agentSession);
 }
 
+// ============================================================================
+// SECTION: PATCH ENDPOINT - UPDATE SESSION
+// ============================================================================
+
+/**
+ * PATCH /api/sessions/[id]
+ * 
+ * Update a session's fields.
+ * 
+ * Request Body: Partial<AgentSession> (validated)
+ * Response: AgentSession (updated)
+ * 
+ * Per AS-CORE-002:
+ * - State transitions are enforced
+ * - Invalid transitions return error
+ * 
+ * @param request - Next.js request object
+ * @param params - Route parameters containing session ID
+ * @returns JSON response with updated session
+ * @returns 401 if not authenticated
+ * @returns 404 if session not found
+ * @returns 400 if validation fails
+ * @returns 500 if server error
+ * 
+ * @see AS-CORE-001 AS-04
+ * @see AS-CORE-002 AS-08 (state transitions)
+ */
 export async function PATCH(request: NextRequest, { params }: SessionParams) {
   try {
+    // ========================================================================
+    // AUTHENTICATION CHECK
+    // ========================================================================
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // ========================================================================
+    // USER IDENTIFICATION
+    // ========================================================================
     const userId = getUserId(session);
     if (!userId) {
       return NextResponse.json({ error: 'User identity unavailable' }, { status: 400 });
     }
 
+    // ========================================================================
+    // REQUEST VALIDATION
+    // ========================================================================
     const body = await request.json();
     const updates = validateRequest(updateAgentSessionSchema, body);
+    
+    // ========================================================================
+    // UPDATE SESSION
+    // ========================================================================
+    // updateAgentSession enforces state machine transitions
     const updated = await updateAgentSession(userId, params.id, updates);
 
     if (!updated) {
@@ -71,6 +198,9 @@ export async function PATCH(request: NextRequest, { params }: SessionParams) {
 
     return NextResponse.json(updated);
   } catch (error) {
+    // ========================================================================
+    // ERROR HANDLING
+    // ========================================================================
     if (error instanceof ValidationError) {
       return NextResponse.json(
         { error: 'Validation error', message: error.message, field: error.field },
@@ -78,6 +208,7 @@ export async function PATCH(request: NextRequest, { params }: SessionParams) {
       );
     }
 
+    // Generic server error
     return NextResponse.json(
       { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
