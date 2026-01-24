@@ -19,6 +19,9 @@
     "test:watch": "jest --watch",
     "format": "prettier --write \"src/**/*.{ts,tsx,json,md}\" \"*.{ts,tsx,json,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,json,md}\" \"*.{ts,tsx,json,md}\"",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix",
+    "audit:production": "npm audit --production",
     "prepare": "husky"
   },
   "dependencies": {

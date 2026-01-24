@@ -1323,3 +1323,13 @@ CI job must pass before merge to main.
 ```typescript
 function isStale
 ```
+
+## Auto-extracted TODOs (2026-01-24T16:34:28.337Z)
+
+- [x] **src/app/api/admin/killswitch/route.ts:20** - Add admin role check (currently allows any authenticated user) ✅ COMPLETE
+- [x] **src/app/api/admin/killswitch/route.ts:104** - Add admin role check ✅ COMPLETE
+- [x] **src/app/api/admin/killswitch/route.ts:169** - Add admin role check ✅ COMPLETE
+- [x] **src/app/api/admin/killswitch/route.ts:188** - Add proper audit logging ✅ COMPLETE
+- [x] **src/lib/db/agent-sessions.ts:82** - This is for filesystem path protection (data directory). ✅ COMPLETE (clarification comment added)
+- [ ] **src/lib/ops/killswitch.ts:43** - Replace with Redis-based feature flag for distributed systems (future enhancement)
+- [x] **tests/unit/lib/ops/killswitch.test.ts:33** - lastToggledAt may not be null if kill-switch was previously toggled ✅ COMPLETE (comment clarified)
