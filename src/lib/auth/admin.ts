@@ -83,6 +83,16 @@ function getCachedAdminEmails(): string[] {
   return cachedAdminEmails;
 }
 
+/**
+ * Reset cached admin emails (for testing only).
+ * This allows tests to change ADMIN_EMAILS and have it take effect.
+ *
+ * @internal
+ */
+export function _resetAdminCache(): void {
+  cachedAdminEmails = null;
+}
+
 // ============================================================================
 // SECTION: ADMIN CHECK FUNCTION
 // ============================================================================
