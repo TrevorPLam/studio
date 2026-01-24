@@ -1173,3 +1173,218 @@ Checklist
 •  [GITHUB-APP-001-03] GitHub App settings updated with agent egress IPs only
 Acceptance Criteria
 Script exits 1 if any extra permission detected; IP allow-list contains only /32 of production NAT.
+
+Below are only the newly extracted, fully-expanded TASKS.md entries that appeared in the very last report you sent (the comprehensive 2026 security & reliability deep-dive).
+Each block is ready to paste into the master file.
+AI-SAFETY-001 — PALADIN Defense-in-Depth Framework (P0)
+Context
+CVE-2025-53773 (CVSS 9.6) proved single-layer prompt-injection filters are insufficient. PALADIN provides five independent layers: input sanitization, system-prompt hardening, tool-authorisation, output filtering, and behavioural monitoring.
+Expected Files
+•  src/lib/security/paladin/input-guard.ts
+•  src/lib/security/paladin/policy-proxy-llm.ts
+•  src/lib/security/paladin/tool-authz.ts
+•  src/lib/security/paladin/output-filter.ts
+•  src/lib/security/paladin/behaviour-monitor.ts
+Connected Files
+•  src/lib/agent/executor.ts (calls tool-authz)
+•  src/lib/llm/llm-router.ts (routes through policy-proxy)
+Checklist
+•  [AI-SAFETY-001-01] Deploy policy-proxy LLM (≤ 3 B params) with prompt-injection classifier
+•  [AI-SAFETY-001-02] Block on classifier score > 0.8; log to audit table
+•  [AI-SAFETY-001-03] Enforce per-tool RBAC: read|write|admin scopes
+•  [AI-SAFETY-001-04] Strip secrets from LLM output before user/tool exposure
+•  [AI-SAFETY-001-05] Emit anomaly metric if tool call pattern deviates > 2 σ from baseline
+Code Snippet
+export async function policyProxyGuard(text: string): Promise<{
+safe: boolean; score: number; reason?: string }> {
+const res = await classifierModel.predict(text);
+return { safe: res.score < 0.8, score: res.score, reason: res.label };
+}
+Acceptance Criteria
+•  ≥ 95 % block rate on adversarial test suite (see AI-SAFETY-003)
+•  Zero regression on benign prompt throughput
+Verification
+Run pnpm test paladin → expect 100 % pass on 200 injection payloads from cybozu/prompt-hardener dataset.
+AI-SAFETY-002 — Hidden-Unicode Sanitization (P0)
+Context
+Invisible Unicode (zero-width space, bidi-markers) can hide malicious instructions from human reviewers while still being parsed by the LLM.
+Expected Files
+•  src/lib/security/sanitise.ts
+Checklist
+•  [AI-SAFETY-002-01] Allow-list printable ASCII, tabs, newlines; reject all C0/C1 control codes
+•  [AI-SAFETY-002-02] Normalise NFC before filtering
+•  [AI-SAFETY-002-03] Flag (do not block) non-Latin scripts for audit
+Code Snippet
+const ALLOWED = /^[\x20-\x7E\t\n\r]+$/;
+export function sanitise(input: string): { clean: string; rejected: string[] } {
+const rejected: string[] = [];
+const clean = [...input].filter(ch => {
+if (ALLOWED.test(ch)) return true;
+rejected.push(unicodeName(ch));
+return false;
+}).join('');
+return { clean, rejected };
+}
+Acceptance Criteria
+•  Payload "delete\u200bFiles()" becomes "deleteFiles()"
+•  Emoji, accented chars, CJK pass through flag-only
+Verification
+Unit test feeds 50 OWASP-hidden-unicode samples; zero bypasses allowed.
+AI-SAFETY-003 — Automated Adversarial Testing in CI (P0)
+Expected Files
+•  tests/security/adversarial.test.ts
+•  .github/workflows/adversarial.yml
+Checklist
+•  [AI-SAFETY-003-01] Integrate cybozu/prompt-hardener CLI in CI
+•  [AI-SAFETY-003-02] Fail build if block-rate < 95 %
+•  [AI-SAFETY-003-03] Upload HTML report as artifact
+Code Snippet
+•  name: Adversarial test
+run: |
+npx prompt-hardener test 
+--model http://localhost:11434/policy-proxy 
+--payloads tests/fixtures/payloads.json 
+--threshold 0.95
+Acceptance Criteria
+CI job must pass before merge to main.
+SUPPLY-CHAIN-001 — Dependency Mutation Policy (P1)
+Expected Files
+•  .lockfile-lint.yml
+•  src/lib/security/lockfile-gate.ts
+Checklist
+•  [SUPPLY-CHAIN-001-01] Host allow-list: npm, yarn, pypi.org, files.pythonhosted.org
+•  [SUPPLY-CHAIN-001-02] Enforce HTTPS only
+•  [SUPPLY-CHAIN-001-03] Reject unknown hash algorithms
+Code Snippet
+const policy = {
+hosts: ['registry.npmjs.org', 'pypi.org'],
+schemes: ['https'],
+algorithms: ['sha512']
+};
+export function gate(lockfilePath: string) {
+return lockfileLint(lockfilePath, policy);
+}
+Acceptance Criteria
+CI fails on policy violation; zero false positives on existing lockfiles.
+SUPPLY-CHAIN-002 — GitHub Advisory DB Integration (P1)
+Expected Files
+•  src/lib/security/advisory-check.ts
+Checklist
+•  [SUPPLY-CHAIN-002-01] Query https://api.github.com/advisories for each new dependency
+•  [SUPPLY-CHAIN-002-02] Inject summary into PR body
+•  [SUPPLY-CHAIN-002-03] Block merge if high/critical CVE and no override
+Code Snippet
+const advisories = await getAdvisories(pkgName, version);
+if (advisories.some(a => a.severity === 'critical')) {
+prBody += \n🚨 **CRITICAL** CVE-${a.id} – upgrade to ${a.patched_version};
+}
+Acceptance Criteria
+Human reviewer sees coloured warning in PR; override checkbox logged.
+SUPPLY-CHAIN-003 — Mandatory Security Review for Lockfiles (P1)
+Expected Files
+•  CODEOWNERS
+•  .github/lockfile-review.yml
+Checklist
+•  [SUPPLY-CHAIN-003-01] Assign *.lock, package-lock.json, poetry.lock to @security-team
+•  [SUPPLY-CHAIN-003-02] Branch protection requires CODEOWNER approval
+Acceptance Criteria
+No lockfile PR can merge without security-team ✅.
+IDEMPOTENCY-001 — Idempotency-Key Pattern for PR Creation (P1)
+Expected Files
+•  src/lib/github/idempotency.ts
+•  src/lib/redis/idempotency-store.ts
+Checklist
+•  [IDEMPOTENCY-001-01] Key = sha256(owner+repo+action+headBranch+sha)
+•  [IDEMPOTENCY-001-02] TTL 24 h
+•  [IDEMPOTENCY-001-03] Return cached PR URL on duplicate
+Code Snippet
+export async function createPrIdempotent(req: CreatePrRequest) {
+const key = create-pr:${req.owner}/${req.repo}/${req.headBranch}/${req.sha};
+const cached = await redis.get(key);
+if (cached) return JSON.parse(cached);
+const pr = await octokit.pulls.create(req);
+await redis.setex(key, 86400, JSON.stringify(pr));
+return pr;
+}
+Acceptance Criteria
+Webhook replay test shows 1 PR created, 2nd returns same URL.
+IDEMPOTENCY-002 — Per-Repo/Per-PR Distributed Lock (P1)
+Expected Files
+•  src/lib/redis/redlock.ts
+Checklist
+•  [IDEMPOTENCY-002-01] Lock key lock:repo:{id}:branch:{name}
+•  [IDEMPOTENCY-002-02] Lease 5 min with 10 s auto-extend while active
+•  [IDEMPOTENCY-002-03] Use Lua script to release only if token matches
+Code Snippet (Lua)
+local key, token = KEYS[1], ARGV[1]
+if redis.call("get", key) == token then
+return redis.call("del", key)
+else
+return 0
+end
+Acceptance Criteria
+Concurrent webhook deliveries on same branch serialise without duplicate commits.
+IDEMPOTENCY-003 — Webhook Deduplication (P1)
+Expected Files
+•  src/app/api/github/webhooks/idempotency-middleware.ts
+Checklist
+•  [IDEMPOTENCY-003-01] Include X-GitHub-Delivery UUID in idempotency key
+•  [IDEMPOTENCY-003-02] 409 Conflict response on duplicate within TTL
+Acceptance Criteria
+Replay of same delivery ID returns 409 within 5 min window.
+OBS-001 — OpenTelemetry GenAI Semantic Conventions (P1)
+Expected Files
+•  src/lib/obs/otel-genai.ts
+Checklist
+•  [OBS-001-01] Root span gen_ai.agent.session
+•  [OBS-001-02] LLM span attributes: gen_ai.system, gen_ai.request.model, gen_ai.usage.input_tokens, gen_ai.usage.output_tokens
+•  [OBS-001-03] Tool span attributes: gen_ai.tool.name, gen_ai.tool.result
+Code Snippet
+const span = tracer.startSpan('gen_ai.llm.chat');
+span.setAttributes({
+'gen_ai.system': 'openai',
+'gen_ai.request.model': 'gpt-4-turbo',
+'gen_ai.usage.input_tokens': tokens.prompt,
+'gen_ai.usage.output_tokens': tokens.completion
+});
+Acceptance Criteria
+Traces validated by Jaeger show full parent-child hierarchy; attributes present on 100 % of spans.
+OBS-002 — Real-Time Cost & Anomaly Dashboard (P2)
+Expected Files
+•  grafana/dashboards/agent-cost.json
+•  alerts/agent-cost.yml
+Checklist
+•  [OBS-002-01] OTel metric agent.cost.usd per session
+•  [OBS-002-02] Alert if > $10 in 1 h or > $50 in 24 h
+•  [OBS-002-03] Slack webhook for alerts
+Acceptance Criteria
+Synthetic test burns $11 in 30 min → alert fires and appears in Slack #alerts.
+TEST-001 — Security & Chaos Tests in CI (P2)
+Expected Files
+•  .github/workflows/security-chaos.yml
+Checklist
+•  [TEST-001-01] Job runs cybozu/prompt-hardener (block rate ≥ 95 %)
+•  [TEST-001-02] Job runs Toxiproxy chaos: GitHub API 500 errors, 2 s latency
+•  [TEST-001-03] CI fails on any security or resilience regression
+Acceptance Criteria
+Pipeline red when prompt injection success > 5 % or outage simulation causes unrecoverable error.
+TEST-002 — Chaos Testing for External Dependencies (P2)
+Expected Files
+•  tests/chaos/github-outage.test.ts
+•  tests/chaos/llm-timeout.test.ts
+Checklist
+•  [TEST-002-01] Simulate 50 % packet loss to api.github.com
+•  [TEST-002-02] Simulate OpenAI 429 rate-limit storm
+•  [TEST-002-03] Assert graceful degradation & recovery
+Acceptance Criteria
+Agent queues work, retries with exponential backoff, and resumes without duplicate actions.
+GITHUB-APP-001 — Token Scope Audit & IP Allow-list (P2)
+Expected Files
+•  scripts/audit-app-permissions.ts
+•  src/lib/github/ip-allowlist.ts
+Checklist
+•  [GITHUB-APP-001-01] Monthly script diffs current vs baseline permissions
+•  [GITHUB-APP-001-02] Alert on drift
+•  [GITHUB-APP-001-03] GitHub App settings updated with agent egress IPs only
+Acceptance Criteria
+Script exits 1 if any extra permission detected; IP allow-list contains only /32 of production NAT.
