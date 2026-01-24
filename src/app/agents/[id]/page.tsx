@@ -1,4 +1,36 @@
+/**
+ * ============================================================================
+ * AGENT SESSION DETAIL PAGE COMPONENT
+ * ============================================================================
+ * 
+ * @file src/app/agents/[id]/page.tsx
+ * @route /agents/[id]
+ * 
+ * PURPOSE:
+ * Chat interface for individual agent session.
+ * Supports both streaming and non-streaming chat modes.
+ * 
+ * FEATURES:
+ * - Load session from server
+ * - Send messages to AI agent
+ * - Streaming response support (SSE)
+ * - Non-streaming response support
+ * - Message persistence to server
+ * - Real-time message updates
+ * 
+ * RELATED FILES:
+ * - src/app/api/sessions/[id]/route.ts (Session API)
+ * - src/app/api/agents/chat/route.ts (Non-streaming chat)
+ * - src/app/api/agents/chat-stream/route.ts (Streaming chat)
+ * 
+ * ============================================================================
+ */
+
 'use client';
+
+// ============================================================================
+// SECTION: IMPORTS
+// ============================================================================
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -9,6 +41,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Send } from 'lucide-react';
 
+// ============================================================================
+// SECTION: HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Ensure all messages have timestamps.
+ * 
+ * @param messages - Array of messages
+ * @returns Array of messages with timestamps
+ */
 function ensureTimestamps(messages: AgentMessage[]): AgentMessage[] {
   return messages.map((message) => ({
     ...message,
@@ -16,12 +58,29 @@ function ensureTimestamps(messages: AgentMessage[]): AgentMessage[] {
   }));
 }
 
+// ============================================================================
+// SECTION: AGENT SESSION PAGE COMPONENT
+// ============================================================================
+
+/**
+ * Agent session detail page component.
+ * 
+ * Displays chat interface for a specific agent session.
+ * 
+ * @returns Session detail page JSX
+ */
 export default function AgentSessionPage() {
+  // ========================================================================
+  // ROUTE & SESSION
+  // ========================================================================
   const params = useParams();
   const router = useRouter();
   const { data: session, status } = useSession();
   const sessionId = params?.id as string;
 
+  // ========================================================================
+  // STATE MANAGEMENT
+  // ========================================================================
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -29,16 +88,28 @@ export default function AgentSessionPage() {
   const [sessionName, setSessionName] = useState('');
   const [sessionError, setSessionError] = useState<string | null>(null);
 
+  // ========================================================================
+  // COMPUTED VALUES
+  // ========================================================================
+  /**
+   * Messages sorted chronologically.
+   */
   const sortedMessages = useMemo(
     () => [...messages].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()),
     [messages]
   );
 
+  // ========================================================================
+  // EFFECT: LOAD SESSION
+  // ========================================================================
   useEffect(() => {
     if (status !== 'authenticated') {
       return;
     }
 
+    /**
+     * Load session data from server.
+     */
     const loadSession = async () => {
       setIsLoadingSession(true);
       setSessionError(null);
@@ -46,6 +117,7 @@ export default function AgentSessionPage() {
       try {
         const response = await fetch(`/api/sessions/${sessionId}`, { cache: 'no-store' });
         if (response.status === 404) {
+          // Session not found, redirect to list
           router.push('/agents');
           return;
         }
@@ -67,7 +139,18 @@ export default function AgentSessionPage() {
     void loadSession();
   }, [router, sessionId, status]);
 
-  const persistMessages = async (nextMessages: AgentMessage[]) => {
+  // ========================================================================
+  // FUNCTION: PERSIST MESSAGES
+  // ========================================================================
+
+  /**
+   * Persist messages to server.
+   * 
+   * Called after receiving AI response to save conversation.
+   * 
+   * @param nextMessages - Updated message array
+   */
+  const persistMessages = async (nextMessages: AgentMessage[]) {
     try {
       await fetch(`/api/sessions/${sessionId}`, {
         method: 'PATCH',
@@ -79,11 +162,25 @@ export default function AgentSessionPage() {
     }
   };
 
+  // ========================================================================
+  // FUNCTION: SEND MESSAGE
+  // ========================================================================
+
+  /**
+   * Send message to AI agent.
+   * 
+   * Supports both streaming and non-streaming modes.
+   * 
+   * @param useStreaming - Whether to use streaming response (default: false)
+   */
   const sendMessage = async (useStreaming = false) => {
     if (!input.trim() || isLoading) {
       return;
     }
 
+    // ====================================================================
+    // CREATE USER MESSAGE
+    // ====================================================================
     const userMessage: AgentMessage = {
       role: 'user',
       content: input.trim(),
@@ -95,6 +192,9 @@ export default function AgentSessionPage() {
     setInput('');
     setIsLoading(true);
 
+    // ====================================================================
+    // CREATE PLACEHOLDER FOR ASSISTANT RESPONSE
+    // ====================================================================
     const assistantPlaceholder: AgentMessage = {
       role: 'assistant',
       content: '',
@@ -106,6 +206,9 @@ export default function AgentSessionPage() {
 
     try {
       if (useStreaming) {
+        // ================================================================
+        // STREAMING MODE
+        // ================================================================
         const response = await fetch('/api/agents/chat-stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -119,6 +222,9 @@ export default function AgentSessionPage() {
           throw new Error('Streaming request failed');
         }
 
+        // ================================================================
+        // PROCESS SSE STREAM
+        // ================================================================
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
         let accumulatedText = '';
@@ -135,6 +241,7 @@ export default function AgentSessionPage() {
             const chunk = decoder.decode(value);
             const lines = chunk.split('\n');
 
+            // Parse SSE format: data: {json}\n\n
             for (const line of lines) {
               if (!line.startsWith('data: ')) {
                 continue;
@@ -152,6 +259,7 @@ export default function AgentSessionPage() {
                   continue;
                 }
 
+                // Accumulate text and update UI in real-time
                 accumulatedText += parsed.chunk;
                 setMessages((prev) => {
                   const updated = [...prev];
@@ -169,12 +277,16 @@ export default function AgentSessionPage() {
           }
         }
 
+        // Finalize messages
         const finalMessages = messagesWithPlaceholder.map((message, index) =>
           index === messagesWithPlaceholder.length - 1 ? { ...message, content: accumulatedText } : message
         );
         setMessages(finalMessages);
         await persistMessages(finalMessages);
       } else {
+        // ================================================================
+        // NON-STREAMING MODE
+        // ================================================================
         const response = await fetch('/api/agents/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -200,6 +312,9 @@ export default function AgentSessionPage() {
         await persistMessages(updatedMessages);
       }
     } catch (error) {
+      // ====================================================================
+      // ERROR HANDLING
+      // ====================================================================
       console.error('Error sending message', error);
       const errorMessage: AgentMessage = {
         role: 'assistant',
@@ -214,6 +329,9 @@ export default function AgentSessionPage() {
     }
   };
 
+  // ========================================================================
+  // RENDER: LOADING STATE
+  // ========================================================================
   if (status === 'loading' || isLoadingSession) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -222,13 +340,22 @@ export default function AgentSessionPage() {
     );
   }
 
+  // ========================================================================
+  // RENDER: AUTHENTICATION CHECK
+  // ========================================================================
   if (!session) {
     router.push('/');
     return null;
   }
 
+  // ========================================================================
+  // RENDER: MAIN CONTENT
+  // ========================================================================
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* ====================================================================
+          HEADER
+          ==================================================================== */}
       <div className="border-b">
         <div className="max-w-4xl mx-auto p-4 flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => router.push('/agents')}>
@@ -238,13 +365,19 @@ export default function AgentSessionPage() {
         </div>
       </div>
 
+      {/* ====================================================================
+          MESSAGES AREA
+          ==================================================================== */}
       <div className="flex-1 overflow-y-auto p-4">
         <div className="max-w-4xl mx-auto space-y-4">
+          {/* Error message */}
           {sessionError && (
             <Card className="border-destructive/50">
               <CardContent className="py-4 text-sm text-destructive">{sessionError}</CardContent>
             </Card>
           )}
+          
+          {/* Empty state */}
           {sortedMessages.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
@@ -252,6 +385,7 @@ export default function AgentSessionPage() {
               </CardContent>
             </Card>
           ) : (
+            // Messages list
             sortedMessages.map((message, index) => (
               <Card
                 key={index}
@@ -268,6 +402,8 @@ export default function AgentSessionPage() {
               </Card>
             ))
           )}
+          
+          {/* Loading indicator */}
           {isLoading && (
             <Card className="mr-auto max-w-[80%]">
               <CardContent className="p-4">
@@ -278,12 +414,16 @@ export default function AgentSessionPage() {
         </div>
       </div>
 
+      {/* ====================================================================
+          INPUT AREA
+          ==================================================================== */}
       <div className="border-t p-4">
         <div className="max-w-4xl mx-auto flex gap-2">
           <Input
             value={input}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={(event) => {
+              // Send on Enter (but not Shift+Enter)
               if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
                 void sendMessage();

@@ -1,4 +1,33 @@
+/**
+ * ============================================================================
+ * REPOSITORY DETAIL PAGE COMPONENT
+ * ============================================================================
+ * 
+ * @file src/app/repositories/[owner]/[repo]/page.tsx
+ * @route /repositories/[owner]/[repo]
+ * 
+ * PURPOSE:
+ * Display repository details, commits, and agent session options.
+ * 
+ * FEATURES:
+ * - Repository information display
+ * - Commit history
+ * - Tabbed interface (Code, Commits, Agent)
+ * - Start agent session for repository
+ * 
+ * RELATED FILES:
+ * - src/app/api/github/repositories/[owner]/[repo]/route.ts (Repository API)
+ * - src/app/api/github/repositories/[owner]/[repo]/commits/route.ts (Commits API)
+ * - src/app/agents/[id]/page.tsx (Agent session page)
+ * 
+ * ============================================================================
+ */
+
 'use client';
+
+// ============================================================================
+// SECTION: IMPORTS
+// ============================================================================
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -9,6 +38,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Bot, Code, GitCommit } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
+// ============================================================================
+// SECTION: TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Repository data structure from GitHub API.
+ */
 interface Repository {
   name: string;
   full_name: string;
@@ -17,6 +53,9 @@ interface Repository {
   default_branch: string;
 }
 
+/**
+ * Commit data structure from GitHub API.
+ */
 interface Commit {
   sha: string;
   commit: {
@@ -32,19 +71,43 @@ interface Commit {
   } | null;
 }
 
+// ============================================================================
+// SECTION: REPOSITORY PAGE COMPONENT
+// ============================================================================
+
+/**
+ * Repository detail page component.
+ * 
+ * Displays repository information, commits, and agent session options.
+ * 
+ * @returns Repository detail page JSX
+ */
 export default function RepositoryPage() {
+  // ========================================================================
+  // ROUTE & SESSION
+  // ========================================================================
   const params = useParams();
   const router = useRouter();
   const { data: session } = useSession();
   const owner = params?.owner as string;
   const repo = params?.repo as string;
 
+  // ========================================================================
+  // STATE MANAGEMENT
+  // ========================================================================
   const [repository, setRepository] = useState<Repository | null>(null);
   const [commits, setCommits] = useState<Commit[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('code');
 
+  // ========================================================================
+  // FUNCTION: LOAD REPOSITORY
+  // ========================================================================
+
+  /**
+   * Load repository details from GitHub API.
+   */
   const loadRepository = useCallback(async () => {
     if (!session?.accessToken) return;
 
@@ -68,6 +131,13 @@ export default function RepositoryPage() {
     }
   }, [session?.accessToken, owner, repo]);
 
+  // ========================================================================
+  // FUNCTION: LOAD COMMITS
+  // ========================================================================
+
+  /**
+   * Load commit history from GitHub API.
+   */
   const loadCommits = useCallback(async () => {
     if (!session?.accessToken) return;
 
@@ -87,6 +157,9 @@ export default function RepositoryPage() {
     }
   }, [session?.accessToken, owner, repo]);
 
+  // ========================================================================
+  // EFFECT: LOAD DATA ON MOUNT
+  // ========================================================================
   useEffect(() => {
     if (session?.accessToken && owner && repo) {
       loadRepository();
@@ -94,6 +167,9 @@ export default function RepositoryPage() {
     }
   }, [session?.accessToken, owner, repo, loadRepository, loadCommits]);
 
+  // ========================================================================
+  // RENDER: LOADING STATE
+  // ========================================================================
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -102,6 +178,9 @@ export default function RepositoryPage() {
     );
   }
 
+  // ========================================================================
+  // RENDER: ERROR STATE
+  // ========================================================================
   if (error || !repository) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -120,8 +199,14 @@ export default function RepositoryPage() {
     );
   }
 
+  // ========================================================================
+  // RENDER: MAIN CONTENT
+  // ========================================================================
   return (
     <div className="min-h-screen bg-background">
+      {/* ====================================================================
+          HEADER
+          ==================================================================== */}
       <div className="border-b">
         <div className="max-w-6xl mx-auto p-4">
           <div className="flex items-center gap-4 mb-4">
@@ -139,6 +224,9 @@ export default function RepositoryPage() {
         </div>
       </div>
 
+      {/* ====================================================================
+          TABS CONTENT
+          ==================================================================== */}
       <div className="max-w-6xl mx-auto p-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
@@ -156,6 +244,9 @@ export default function RepositoryPage() {
             </TabsTrigger>
           </TabsList>
 
+          {/* ================================================================
+              CODE TAB
+              ================================================================ */}
           <TabsContent value="code" className="mt-4">
             <Card>
               <CardHeader>
@@ -175,6 +266,9 @@ export default function RepositoryPage() {
             </Card>
           </TabsContent>
 
+          {/* ================================================================
+              COMMITS TAB
+              ================================================================ */}
           <TabsContent value="commits" className="mt-4">
             <Card>
               <CardHeader>
@@ -213,6 +307,9 @@ export default function RepositoryPage() {
             </Card>
           </TabsContent>
 
+          {/* ================================================================
+              AGENT TAB
+              ================================================================ */}
           <TabsContent value="agent" className="mt-4">
             <Card>
               <CardHeader>

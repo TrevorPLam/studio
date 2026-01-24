@@ -1,4 +1,32 @@
+/**
+ * ============================================================================
+ * REPOSITORIES LIST PAGE COMPONENT
+ * ============================================================================
+ * 
+ * @file src/app/repositories/page.tsx
+ * @route /repositories
+ * 
+ * PURPOSE:
+ * Display list of user's GitHub repositories.
+ * 
+ * FEATURES:
+ * - Load repositories from GitHub API
+ * - Navigate to repository detail pages
+ * - Authentication-gated access
+ * - Error handling and retry
+ * 
+ * RELATED FILES:
+ * - src/app/api/github/repositories/route.ts (Repositories API)
+ * - src/app/repositories/[owner]/[repo]/page.tsx (Repository detail page)
+ * 
+ * ============================================================================
+ */
+
 'use client';
+
+// ============================================================================
+// SECTION: IMPORTS
+// ============================================================================
 
 import { useState, useEffect, useCallback } from 'react';
 import { useSession, signIn } from 'next-auth/react';
@@ -8,6 +36,13 @@ import { Button } from '@/components/ui/button';
 import { FolderGit2, Loader2 } from 'lucide-react';
 import { getRepositories } from '@/lib/github';
 
+// ============================================================================
+// SECTION: TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Repository data structure from GitHub API.
+ */
 interface Repository {
   id: number;
   name: string;
@@ -21,13 +56,40 @@ interface Repository {
   };
 }
 
+// ============================================================================
+// SECTION: REPOSITORIES PAGE COMPONENT
+// ============================================================================
+
+/**
+ * Repositories list page component.
+ * 
+ * Displays user's GitHub repositories with navigation to detail pages.
+ * 
+ * @returns Repositories page JSX
+ */
 export default function RepositoriesPage() {
+  // ========================================================================
+  // HOOKS
+  // ========================================================================
   const { data: session, status } = useSession();
   const router = useRouter();
+
+  // ========================================================================
+  // STATE MANAGEMENT
+  // ========================================================================
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // ========================================================================
+  // FUNCTION: LOAD REPOSITORIES
+  // ========================================================================
+
+  /**
+   * Load repositories from GitHub API.
+   * 
+   * Uses authenticated session token to fetch user's repositories.
+   */
   const loadRepositories = useCallback(async () => {
     if (!session?.accessToken) return;
     
@@ -53,12 +115,18 @@ export default function RepositoriesPage() {
     }
   }, [session?.accessToken]);
 
+  // ========================================================================
+  // EFFECT: LOAD ON MOUNT
+  // ========================================================================
   useEffect(() => {
     if (session?.accessToken) {
       loadRepositories();
     }
   }, [session?.accessToken, loadRepositories]);
 
+  // ========================================================================
+  // RENDER: LOADING STATE
+  // ========================================================================
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -67,6 +135,9 @@ export default function RepositoriesPage() {
     );
   }
 
+  // ========================================================================
+  // RENDER: AUTHENTICATION REQUIRED
+  // ========================================================================
   if (!session) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -87,9 +158,15 @@ export default function RepositoriesPage() {
     );
   }
 
+  // ========================================================================
+  // RENDER: MAIN CONTENT
+  // ========================================================================
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto">
+        {/* ================================================================
+            HEADER
+            ================================================================ */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Repositories</h1>
           <p className="text-muted-foreground mt-1">
@@ -97,6 +174,9 @@ export default function RepositoriesPage() {
           </p>
         </div>
 
+        {/* ================================================================
+            ERROR MESSAGE
+            ================================================================ */}
         {error && (
           <Card className="mb-4 border-destructive">
             <CardContent className="pt-6">
@@ -108,11 +188,15 @@ export default function RepositoriesPage() {
           </Card>
         )}
 
+        {/* ================================================================
+            REPOSITORIES LIST
+            ================================================================ */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : repositories.length === 0 ? (
+          // Empty state
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <FolderGit2 className="h-12 w-12 text-muted-foreground mb-4" />
@@ -125,6 +209,7 @@ export default function RepositoriesPage() {
             </CardContent>
           </Card>
         ) : (
+          // Repositories grid
           <div className="grid gap-4">
             {repositories.map((repo) => (
               <Card

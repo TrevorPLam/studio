@@ -1,4 +1,38 @@
+/**
+ * ============================================================================
+ * AGENTS PAGE COMPONENT
+ * ============================================================================
+ * 
+ * @file src/app/agents/page.tsx
+ * @route /agents
+ * @epic AS-CORE-001, AS-03
+ * 
+ * PURPOSE:
+ * Main page for listing and creating agent sessions.
+ * Handles legacy localStorage migration and session management.
+ * 
+ * FEATURES:
+ * - List user's agent sessions
+ * - Create new sessions
+ * - Migrate legacy localStorage sessions to server
+ * - Authentication-gated access
+ * 
+ * RELATED FILES:
+ * - src/app/api/sessions/route.ts (Session API)
+ * - src/app/agents/[id]/page.tsx (Session detail page)
+ * - src/lib/agents.ts (Legacy localStorage helpers)
+ * 
+ * MIGRATION:
+ * Per AS-03: Migrates localStorage sessions to server on first load.
+ * 
+ * ============================================================================
+ */
+
 'use client';
+
+// ============================================================================
+// SECTION: IMPORTS
+// ============================================================================
 
 import { useEffect, useMemo, useState } from 'react';
 import { useSession, signIn } from 'next-auth/react';
@@ -19,6 +53,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Bot, Plus } from 'lucide-react';
 import Link from 'next/link';
 
+// ============================================================================
+// SECTION: TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Legacy session format from localStorage.
+ * 
+ * Used during migration from localStorage to server-side storage.
+ * 
+ * @deprecated Use AgentSession from @/lib/agent/session-types
+ */
 interface LegacyAgentSession {
   id: string;
   name: string;
@@ -28,6 +73,16 @@ interface LegacyAgentSession {
   repository?: string;
 }
 
+// ============================================================================
+// SECTION: HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Convert legacy messages to AgentMessage format with timestamps.
+ * 
+ * @param messages - Legacy message array
+ * @returns AgentMessage array with timestamps
+ */
 function withTimestamps(messages: LegacyAgentSession['messages']): AgentMessage[] {
   if (!messages) {
     return [];
@@ -40,7 +95,21 @@ function withTimestamps(messages: LegacyAgentSession['messages']): AgentMessage[
   }));
 }
 
+// ============================================================================
+// SECTION: AGENTS PAGE COMPONENT
+// ============================================================================
+
+/**
+ * Agents page component.
+ * 
+ * Displays list of user's agent sessions and allows creating new ones.
+ * 
+ * @returns Agents page JSX
+ */
 export default function AgentsPage() {
+  // ========================================================================
+  // STATE MANAGEMENT
+  // ========================================================================
   const { data: session, status } = useSession();
   const [sessions, setSessions] = useState<AgentSession[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -49,8 +118,14 @@ export default function AgentsPage() {
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
 
+  // ========================================================================
+  // COMPUTED VALUES
+  // ========================================================================
   const isAuthenticated = status === 'authenticated' && !!session;
 
+  /**
+   * Sessions sorted by most recently updated.
+   */
   const sortedSessions = useMemo(
     () =>
       [...sessions].sort(
@@ -59,19 +134,34 @@ export default function AgentsPage() {
     [sessions]
   );
 
+  // ========================================================================
+  // EFFECT: LOAD SESSIONS & MIGRATE LEGACY DATA
+  // ========================================================================
+  // Per AS-03: Migrate localStorage sessions to server on first load
+
   useEffect(() => {
     if (!isAuthenticated) {
       return;
     }
 
+    /**
+     * Migrate legacy localStorage sessions to server.
+     * 
+     * Per AS-03: Server-side is now source of truth.
+     * This function runs once to migrate existing localStorage data.
+     */
     const migrateLegacySessions = async () => {
       if (typeof window === 'undefined') {
         return;
       }
 
+      // ====================================================================
+      // COLLECT LEGACY SESSIONS FROM LOCALSTORAGE
+      // ====================================================================
       const legacySessions: LegacyAgentSession[] = [];
       const legacyKeys: string[] = [];
 
+      // Find all agentSession_* keys
       for (let index = 0; index < localStorage.length; index += 1) {
         const key = localStorage.key(index);
         if (!key || !key.startsWith('agentSession_')) {
@@ -91,6 +181,7 @@ export default function AgentsPage() {
         }
       }
 
+      // Also check for agentSessions collection
       const legacyCollection = localStorage.getItem('agentSessions');
       if (legacyCollection) {
         try {
@@ -105,6 +196,9 @@ export default function AgentsPage() {
         return;
       }
 
+      // ====================================================================
+      // MIGRATE EACH LEGACY SESSION TO SERVER
+      // ====================================================================
       for (const legacy of legacySessions) {
         if (!legacy.id || !legacy.name) {
           continue;
@@ -112,10 +206,12 @@ export default function AgentsPage() {
 
         try {
           // Extract goal from initial message or use session name as fallback
+          // Per AS-CORE-001: goal field is required
           const goal = legacy.messages && legacy.messages.length > 0 
             ? legacy.messages[0].content.slice(0, 200) // Use first message as goal
             : legacy.name; // Fallback to session name
           
+          // Create session on server
           const createResponse = await fetch('/api/sessions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -132,6 +228,7 @@ export default function AgentsPage() {
             continue;
           }
 
+          // Migrate messages if present
           if (legacy.messages && legacy.messages.length > 0) {
             await fetch(`/api/sessions/${legacy.id}`, {
               method: 'PATCH',
@@ -144,18 +241,30 @@ export default function AgentsPage() {
         }
       }
 
+      // ====================================================================
+      // CLEAN UP LOCALSTORAGE
+      // ====================================================================
+      // Remove migrated sessions from localStorage
       for (const key of legacyKeys) {
         localStorage.removeItem(key);
       }
       localStorage.removeItem('agentSessions');
     };
 
+    /**
+     * Load sessions from server.
+     * 
+     * Runs after migration to fetch all sessions (including migrated ones).
+     */
     const loadSessions = async () => {
       setIsLoadingSessions(true);
       setSessionError(null);
 
       try {
+        // Migrate legacy data first
         await migrateLegacySessions();
+        
+        // Then load from server
         const response = await fetch('/api/sessions', { cache: 'no-store' });
         if (!response.ok) {
           throw new Error('Failed to load sessions');
@@ -174,6 +283,18 @@ export default function AgentsPage() {
     void loadSessions();
   }, [isAuthenticated]);
 
+  // ========================================================================
+  // FUNCTION: CREATE SESSION
+  // ========================================================================
+
+  /**
+   * Create a new agent session.
+   * 
+   * Per AS-CORE-001: goal field is required.
+   * Uses initialPrompt as goal if provided, otherwise uses session name.
+   * 
+   * @see AS-CORE-001 AS-01
+   */
   const createSession = async () => {
     if (!newSessionName.trim()) {
       return;
@@ -195,6 +316,7 @@ export default function AgentsPage() {
       }
 
       const created = (await response.json()) as AgentSession;
+      // Update local state (optimistic update)
       setSessions((prev) => [created, ...prev.filter((sessionItem) => sessionItem.id !== created.id)]);
       setNewSessionName('');
       setNewSessionPrompt('');
@@ -205,6 +327,9 @@ export default function AgentsPage() {
     }
   };
 
+  // ========================================================================
+  // RENDER: LOADING STATE
+  // ========================================================================
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -213,6 +338,9 @@ export default function AgentsPage() {
     );
   }
 
+  // ========================================================================
+  // RENDER: AUTHENTICATION REQUIRED
+  // ========================================================================
   if (!session) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -231,9 +359,15 @@ export default function AgentsPage() {
     );
   }
 
+  // ========================================================================
+  // RENDER: MAIN CONTENT
+  // ========================================================================
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto">
+        {/* ================================================================
+            HEADER & CREATE BUTTON
+            ================================================================ */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">Agent Sessions</h1>
@@ -279,17 +413,24 @@ export default function AgentsPage() {
           </Dialog>
         </div>
 
+        {/* ================================================================
+            ERROR MESSAGE
+            ================================================================ */}
         {sessionError && (
           <Card className="mb-4 border-destructive/50">
             <CardContent className="py-4 text-sm text-destructive">{sessionError}</CardContent>
           </Card>
         )}
 
+        {/* ================================================================
+            SESSIONS LIST
+            ================================================================ */}
         {isLoadingSessions ? (
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">Loading sessions...</CardContent>
           </Card>
         ) : sortedSessions.length === 0 ? (
+          // Empty state
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Bot className="h-12 w-12 text-muted-foreground mb-4" />
@@ -303,6 +444,7 @@ export default function AgentsPage() {
             </CardContent>
           </Card>
         ) : (
+          // Sessions grid
           <div className="grid gap-4">
             {sortedSessions.map((agentSession) => (
               <Link key={agentSession.id} href={`/agents/${agentSession.id}`}>
