@@ -30,4 +30,4 @@
 - [ ] Add a kill switch / read-only mode guard for mutative agent endpoints.
 
 ### Follow-ups
-- [ ] Address remaining ESLint warnings around custom fonts and hook dependency arrays.
+- [x] Address remaining ESLint warnings around custom fonts and hook dependency arrays.
