@@ -50,7 +50,7 @@ export default function RepositoryPage() {
       loadRepository();
       loadCommits();
     }
-  }, [session, owner, repo]);
+  }, [session, owner, repo, loadRepository, loadCommits]);
 
   const loadRepository = async () => {
     if (!session?.accessToken) return;

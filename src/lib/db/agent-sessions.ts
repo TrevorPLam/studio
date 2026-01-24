@@ -1,6 +1,36 @@
+// --- Kill Switch / Read-Only Mode ---
+let AGENT_READ_ONLY_MODE = false;
+export function setAgentReadOnlyMode(enabled: boolean) {
+  AGENT_READ_ONLY_MODE = enabled;
+}
+function assertNotReadOnly() {
+  if (AGENT_READ_ONLY_MODE) {
+    throw new Error('Agent endpoints are in read-only mode');
+  }
+}
 import { randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
+
+// --- Path Policy Guardrails ---
+const ALLOWED_DATA_DIRS = [
+  path.join(process.cwd(), '.data'),
+];
+const DO_NOT_TOUCH_FILES = [
+  path.join(process.cwd(), '.env'),
+  path.join(process.cwd(), 'package.json'),
+  path.join(process.cwd(), 'package-lock.json'),
+  path.join(process.cwd(), 'yarn.lock'),
+];
+
+function isPathAllowed(targetPath: string): boolean {
+  const normalized = path.resolve(targetPath);
+  // Must be under an allowed data dir
+  const allowed = ALLOWED_DATA_DIRS.some((dir) => normalized.startsWith(dir));
+  // Must not be a do-not-touch file
+  const forbidden = DO_NOT_TOUCH_FILES.some((file) => normalized === file);
+  return allowed && !forbidden;
+}
 import type { AgentMessage, AgentSession, AgentSessionState } from '@/lib/agent/session-types';
 import type { AgentMessageInput, CreateAgentSession } from '@/lib/validation';
 
@@ -17,6 +47,10 @@ let cache: SessionsFile | null = null;
 let writeQueue: Promise<void> = Promise.resolve();
 
 async function ensureDataFile() {
+  assertNotReadOnly();
+  if (!isPathAllowed(SESSIONS_FILE)) {
+    throw new Error('Write access denied by path policy');
+  }
   await fs.mkdir(DATA_DIR, { recursive: true });
   try {
     await fs.access(SESSIONS_FILE);
@@ -47,6 +81,10 @@ async function loadSessions(): Promise<SessionsFile> {
 }
 
 async function persistSessions(data: SessionsFile) {
+  assertNotReadOnly();
+  if (!isPathAllowed(SESSIONS_FILE)) {
+    throw new Error('Write access denied by path policy');
+  }
   cache = data;
   writeQueue = writeQueue.then(() => fs.writeFile(SESSIONS_FILE, JSON.stringify(data, null, 2), 'utf8'));
   await writeQueue;
@@ -123,12 +161,16 @@ export async function createAgentSession(userId: string, input: CreateAgentSessi
   return session;
 }
 
+import type { AgentSessionStep } from '@/lib/agent/session-types';
+
 interface UpdateAgentSessionInput {
   name?: string;
   model?: string;
   repository?: string;
   state?: AgentSessionState;
   messages?: AgentMessageInput[];
+  steps?: AgentSessionStep[];
+  addStep?: AgentSessionStep;
 }
 
 export async function updateAgentSession(
@@ -147,10 +189,45 @@ export async function updateAgentSession(
   const nextMessages = updates.messages ? normaliseMessages(updates.messages) : current.messages;
   const updatedAt = new Date().toISOString();
 
+  // --- Session state transition enforcement ---
+  const allowedTransitions: Record<string, string[]> = {
+    created: ['planning', 'failed'],
+    planning: ['preview_ready', 'failed'],
+    preview_ready: ['awaiting_approval', 'failed'],
+    awaiting_approval: ['applying', 'failed'],
+    applying: ['applied', 'failed'],
+    applied: [],
+    failed: [],
+  };
+
+  let nextState = current.state;
+  if (typeof updates.state === 'string' && updates.state !== current.state) {
+    const allowed = allowedTransitions[current.state] || [];
+    if (!allowed.includes(updates.state)) {
+      // Fail closed: invalid transition
+      throw new Error(
+        `Invalid session state transition: ${current.state} -> ${updates.state}`
+      );
+    }
+    nextState = updates.state;
+  }
+
+
+  // Step timeline logic
+  let nextSteps = Array.isArray(current.steps) ? [...current.steps] : [];
+  if (Array.isArray(updates.steps)) {
+    nextSteps = updates.steps;
+  }
+  if (updates.addStep) {
+    nextSteps.push(updates.addStep);
+  }
+
   const updated: AgentSession = {
     ...current,
     ...updates,
+    state: nextState,
     messages: nextMessages,
+    steps: nextSteps,
     lastMessage: computeLastMessage(nextMessages),
     updatedAt,
   };

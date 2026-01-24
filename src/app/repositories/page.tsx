@@ -32,7 +32,7 @@ export default function RepositoriesPage() {
     if (session?.accessToken) {
       loadRepositories();
     }
-  }, [session]);
+  }, [session, loadRepositories]);
 
   const loadRepositories = async () => {
     if (!session?.accessToken) return;

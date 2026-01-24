@@ -1,3 +1,11 @@
+export type AgentSessionStepStatus = 'started' | 'succeeded' | 'failed';
+
+export interface AgentSessionStep {
+  name: string;
+  status: AgentSessionStepStatus;
+  timestamp: string;
+  details?: string;
+}
 export type AgentSessionState =
   | 'created'
   | 'planning'
@@ -31,6 +39,7 @@ export interface AgentSession {
   repository?: string;
   state: AgentSessionState;
   messages: AgentMessage[];
+  steps?: AgentSessionStep[];
   previewId?: string;
   pr?: { number: number; url: string; head: string; base: string };
   lastMessage?: string;
