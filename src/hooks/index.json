@@ -1,0 +1,31 @@
+{
+  "name": "hooks",
+  "description": "React hooks directory",
+  "structure": {
+    "use-mobile.tsx": {
+      "type": "hook",
+      "description": "Mobile device detection hook"
+    },
+    "use-toast.ts": {
+      "type": "hook",
+      "description": "Toast notification hook with state management"
+    },
+    "BEST_PRACTICES.md": {
+      "type": "documentation",
+      "description": "Best practices guide for React hooks"
+    },
+    "index.json": {
+      "type": "index",
+      "description": "Directory index file"
+    }
+  },
+  "statistics": {
+    "totalFiles": 4,
+    "hooks": 2,
+    "documentation": 2
+  },
+  "bestPractices": {
+    "file": "BEST_PRACTICES.md",
+    "summary": "Hook structure, naming conventions, return types, state management, effect dependencies, cleanup, memoization"
+  }
+}

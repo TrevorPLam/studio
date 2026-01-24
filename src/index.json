@@ -11,6 +11,14 @@
       "genkit.ts": {
         "type": "module",
         "description": "Genkit AI integration"
+      },
+      "BEST_PRACTICES.md": {
+        "type": "documentation",
+        "description": "Best practices guide for AI modules"
+      },
+      "index.json": {
+        "type": "index",
+        "description": "Directory index file"
       }
     },
     "app": {
@@ -129,6 +137,14 @@
       "page.tsx": {
         "type": "page",
         "description": "Home page"
+      },
+      "BEST_PRACTICES.md": {
+        "type": "documentation",
+        "description": "Best practices guide for App Router"
+      },
+      "index.json": {
+        "type": "index",
+        "description": "Directory index file"
       }
     },
     "components": {
@@ -283,6 +299,14 @@
           "type": "component",
           "description": "Tooltip UI component"
         }
+      },
+      "BEST_PRACTICES.md": {
+        "type": "documentation",
+        "description": "Best practices guide for React components"
+      },
+      "index.json": {
+        "type": "index",
+        "description": "Directory index file"
       }
     },
     "hooks": {
@@ -294,6 +318,14 @@
       "use-toast.ts": {
         "type": "hook",
         "description": "Toast notification hook"
+      },
+      "BEST_PRACTICES.md": {
+        "type": "documentation",
+        "description": "Best practices guide for React hooks"
+      },
+      "index.json": {
+        "type": "index",
+        "description": "Directory index file"
       }
     },
     "lib": {
@@ -371,6 +403,14 @@
       "validation.ts": {
         "type": "module",
         "description": "Validation schemas (Zod)"
+      },
+      "BEST_PRACTICES.md": {
+        "type": "documentation",
+        "description": "Best practices guide for library modules"
+      },
+      "index.json": {
+        "type": "index",
+        "description": "Directory index file"
       }
     },
     "pages": {
@@ -378,6 +418,14 @@
       "_document.js": {
         "type": "page",
         "description": "Custom document (legacy)"
+      },
+      "BEST_PRACTICES.md": {
+        "type": "documentation",
+        "description": "Best practices guide for Pages Router"
+      },
+      "index.json": {
+        "type": "index",
+        "description": "Directory index file"
       }
     },
     "types": {
@@ -385,11 +433,27 @@
       "next-auth.d.ts": {
         "type": "types",
         "description": "NextAuth type extensions"
+      },
+      "BEST_PRACTICES.md": {
+        "type": "documentation",
+        "description": "Best practices guide for type definitions"
+      },
+      "index.json": {
+        "type": "index",
+        "description": "Directory index file"
       }
+    },
+    "BEST_PRACTICES.md": {
+      "type": "documentation",
+      "description": "Comprehensive best practices guide for src/ directory"
+    },
+    "index.json": {
+      "type": "index",
+      "description": "Main directory index file"
     }
   },
   "statistics": {
-    "totalFiles": 77,
+    "totalFiles": 91,
     "pages": 7,
     "apiRoutes": 10,
     "components": 38,
@@ -397,6 +461,20 @@
     "libModules": 15,
     "types": 1,
     "assets": 2,
-    "scripts": 2
+    "scripts": 2,
+    "documentation": 8,
+    "indexFiles": 8
+  },
+  "bestPractices": {
+    "mainGuide": "BEST_PRACTICES.md",
+    "subfolderGuides": {
+      "ai": "ai/BEST_PRACTICES.md",
+      "app": "app/BEST_PRACTICES.md",
+      "components": "components/BEST_PRACTICES.md",
+      "hooks": "hooks/BEST_PRACTICES.md",
+      "lib": "lib/BEST_PRACTICES.md",
+      "pages": "pages/BEST_PRACTICES.md",
+      "types": "types/BEST_PRACTICES.md"
+    }
   }
 }

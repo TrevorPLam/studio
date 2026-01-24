@@ -2,24 +2,24 @@
  * ============================================================================
  * GENKIT DEVELOPMENT FLOWS
  * ============================================================================
- * 
+ *
  * @file src/ai/dev.ts
- * 
+ *
  * PURPOSE:
  * Development-only Genkit flows for testing and development.
  * These flows can be used with Genkit CLI for local development.
- * 
+ *
  * NOTE:
  * This file is for development/testing purposes.
  * Production code should use API routes instead.
- * 
+ *
  * RELATED FILES:
  * - src/ai/genkit.ts (Genkit configuration)
  * - src/app/api/agents/chat/route.ts (Production chat endpoint)
- * 
+ *
  * USAGE:
  * Run with: npm run genkit:dev
- * 
+ *
  * ============================================================================
  */
 
@@ -49,15 +49,17 @@ type AgentChatInput = z.infer<typeof agentChatInputSchema>;
 
 /**
  * Agent chat flow for Genkit development.
- * 
+ *
  * Processes chat messages and returns AI response.
- * 
+ *
  * @param input - Chat input with messages and optional model
  * @returns AI-generated response text
  */
 export async function agentChatFlow(input: AgentChatInput): Promise<string> {
   const parsed = agentChatInputSchema.parse(input);
-  const lastUserMessage = parsed.messages.filter((message) => message.role === 'user').slice(-1)[0]?.content;
+  const lastUserMessage = parsed.messages
+    .filter((message) => message.role === 'user')
+    .slice(-1)[0]?.content;
 
   if (!lastUserMessage) {
     return 'I did not receive a message. Please try again.';
@@ -90,9 +92,9 @@ type RepositoryAnalysisInput = z.infer<typeof repositoryAnalysisInputSchema>;
 
 /**
  * Repository analysis flow for Genkit development.
- * 
+ *
  * Analyzes a GitHub repository based on user query.
- * 
+ *
  * @param input - Repository and query input
  * @returns AI-generated analysis text
  */

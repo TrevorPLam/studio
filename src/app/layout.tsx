@@ -2,23 +2,23 @@
  * ============================================================================
  * ROOT LAYOUT COMPONENT
  * ============================================================================
- * 
+ *
  * @file src/app/layout.tsx
- * 
+ *
  * PURPOSE:
  * Root layout component wrapping all pages with providers and error boundary.
- * 
+ *
  * FEATURES:
  * - NextAuth SessionProvider
  * - Error boundary for error handling
  * - Global CSS imports
  * - Metadata configuration
- * 
+ *
  * RELATED FILES:
  * - src/components/providers.tsx (SessionProvider wrapper)
  * - src/components/error-boundary.tsx (Error boundary component)
  * - src/app/globals.css (Global styles)
- * 
+ *
  * ============================================================================
  */
 
@@ -45,11 +45,11 @@ export const metadata: Metadata = {
 
 /**
  * Root layout component.
- * 
+ *
  * Wraps all pages with:
  * - Error boundary (catches React errors)
  * - Providers (NextAuth session provider)
- * 
+ *
  * @param children - Page content
  * @returns Root layout JSX
  */

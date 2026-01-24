@@ -66,7 +66,7 @@ describe('Steps API Tests', () => {
       });
 
       const response = await GET(new NextRequest('http://localhost'), {
-        params: { id: mockSessionId },
+        params: Promise.resolve({ id: mockSessionId }),
       });
       const data = await response.json();
 
@@ -78,7 +78,7 @@ describe('Steps API Tests', () => {
       (getAgentSessionById as jest.Mock).mockResolvedValue(mockAgentSession);
 
       const response = await GET(new NextRequest('http://localhost'), {
-        params: { id: mockSessionId },
+        params: Promise.resolve({ id: mockSessionId }),
       });
       const data = await response.json();
 
@@ -116,7 +116,7 @@ describe('Steps API Tests', () => {
       });
 
       const response = await POST(request, {
-        params: { id: mockSessionId },
+        params: Promise.resolve({ id: mockSessionId }),
       });
       const data = await response.json();
 
@@ -133,7 +133,7 @@ describe('Steps API Tests', () => {
       });
 
       const response = await POST(request, {
-        params: { id: mockSessionId },
+        params: Promise.resolve({ id: mockSessionId }),
       });
       const data = await response.json();
 
@@ -168,7 +168,7 @@ describe('Steps API Tests', () => {
       });
 
       const response = await POST(request, {
-        params: { id: mockSessionId },
+        params: Promise.resolve({ id: mockSessionId }),
       });
       const data = await response.json();
 
@@ -203,7 +203,7 @@ describe('Steps API Tests', () => {
       });
 
       const response = await POST(request, {
-        params: { id: mockSessionId },
+        params: Promise.resolve({ id: mockSessionId }),
       });
       const data = await response.json();
 
@@ -237,7 +237,7 @@ describe('Steps API Tests', () => {
       });
 
       const response = await POST(request, {
-        params: { id: mockSessionId },
+        params: Promise.resolve({ id: mockSessionId }),
       });
       const data = await response.json();
 

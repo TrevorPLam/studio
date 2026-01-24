@@ -2,34 +2,35 @@
  * ============================================================================
  * VALIDATION SCHEMAS MODULE
  * ============================================================================
- * 
+ *
  * @file src/lib/validation.ts
  * @module validation
  * @epic AS-CORE-001
- * 
+ *
  * PURPOSE:
  * Zod validation schemas for API request validation and type inference.
  * Ensures type safety and runtime validation for all user inputs.
- * 
+ *
  * DEPENDENCIES:
  * - zod (schema validation library)
  * - @/lib/types (ValidationError)
- * 
+ *
  * RELATED FILES:
  * - src/lib/agent/session-types.ts (Type definitions matching these schemas)
  * - src/app/api/sessions/route.ts (Uses createAgentSessionSchema)
  * - src/app/api/sessions/[id]/route.ts (Uses updateAgentSessionSchema)
- * 
+ *
  * VALIDATION STRATEGY:
  * - Fail-closed: reject invalid input with descriptive errors
  * - Type inference: TypeScript types derived from schemas
  * - Backward compatibility: supports deprecated fields
- * 
+ *
  * ============================================================================
  */
 
 import { z } from 'zod';
 import { ValidationError } from './types';
+import { sanitizeString, sanitise } from './security/sanitize';
 
 // ============================================================================
 // SECTION: MESSAGE VALIDATION
@@ -37,12 +38,21 @@ import { ValidationError } from './types';
 
 /**
  * Schema for agent message validation.
- * 
+ *
  * Used in chat requests and session message arrays.
+ * Content is sanitized to prevent XSS attacks.
  */
 export const agentMessageSchema = z.object({
   role: z.enum(['user', 'assistant']),
-  content: z.string().min(1, 'Message content cannot be empty'),
+  content: z
+    .string()
+    .min(1, 'Message content cannot be empty')
+    .transform((val) => {
+      // First remove hidden Unicode characters
+      const unicodeResult = sanitise(val);
+      // Then apply XSS sanitization
+      return sanitizeString(unicodeResult.clean, { maxLength: 10000 }).clean;
+    }),
   timestamp: z.string().optional(),
 });
 
@@ -52,7 +62,7 @@ export const agentMessageSchema = z.object({
 
 /**
  * Schema for agent chat request validation.
- * 
+ *
  * Used by /api/agents/chat and /api/agents/chat-stream endpoints.
  */
 export const agentChatRequestSchema = z.object({
@@ -77,12 +87,27 @@ export type AgentMessageInput = z.infer<typeof agentMessageSchema>;
 
 /**
  * Schema for repository URL parameters validation.
- * 
+ *
  * Used in GitHub API routes: /api/github/repositories/[owner]/[repo]
+ * Parameters are sanitized to prevent injection attacks.
  */
 export const repositoryParamsSchema = z.object({
-  owner: z.string().min(1, 'Owner is required'),
-  repo: z.string().min(1, 'Repository name is required'),
+  owner: z
+    .string()
+    .min(1, 'Owner is required')
+    .max(100, 'Owner name too long')
+    .transform((val) => {
+      const unicodeResult = sanitise(val);
+      return sanitizeString(unicodeResult.clean, { removeHtml: true, escapeHtml: false }).clean;
+    }),
+  repo: z
+    .string()
+    .min(1, 'Repository name is required')
+    .max(100, 'Repository name too long')
+    .transform((val) => {
+      const unicodeResult = sanitise(val);
+      return sanitizeString(unicodeResult.clean, { removeHtml: true, escapeHtml: false }).clean;
+    }),
 });
 
 /**
@@ -97,15 +122,37 @@ export type RepositoryParams = z.infer<typeof repositoryParamsSchema>;
 
 /**
  * Schema for agent repository binding validation.
- * 
+ *
  * Primary format for repository association in sessions.
- * 
+ * All fields are sanitized to prevent injection attacks.
+ *
  * @see AS-CORE-001 AS-01
  */
 export const agentRepositoryBindingSchema = z.object({
-  owner: z.string().min(1, 'Repository owner is required'),
-  name: z.string().min(1, 'Repository name is required'),
-  baseBranch: z.string().min(1, 'Base branch is required'),
+  owner: z
+    .string()
+    .min(1, 'Repository owner is required')
+    .max(100, 'Owner name too long')
+    .transform((val) => {
+      const unicodeResult = sanitise(val);
+      return sanitizeString(unicodeResult.clean, { removeHtml: true, escapeHtml: false }).clean;
+    }),
+  name: z
+    .string()
+    .min(1, 'Repository name is required')
+    .max(100, 'Repository name too long')
+    .transform((val) => {
+      const unicodeResult = sanitise(val);
+      return sanitizeString(unicodeResult.clean, { removeHtml: true, escapeHtml: false }).clean;
+    }),
+  baseBranch: z
+    .string()
+    .min(1, 'Base branch is required')
+    .max(200, 'Branch name too long')
+    .transform((val) => {
+      const unicodeResult = sanitise(val);
+      return sanitizeString(unicodeResult.clean, { removeHtml: true, escapeHtml: false }).clean;
+    }),
 });
 
 /**
@@ -120,32 +167,70 @@ export type AgentRepositoryBinding = z.infer<typeof agentRepositoryBindingSchema
 
 /**
  * Schema for agent session creation validation.
- * 
+ *
  * Per AS-CORE-001:
  * - goal field is required (or initialPrompt as fallback)
  * - repo binding is primary format
  * - repository string is deprecated but accepted
- * 
+ *
  * Validation Rules:
  * - name: required, 1-100 characters
  * - goal OR initialPrompt: at least one must be provided
  * - repo: optional, but preferred over repository
  * - repository: deprecated, kept for backward compatibility
- * 
+ *
  * @see AS-CORE-001 AS-01
  */
-export const createAgentSessionSchema = z.object({
-  id: z.string().optional(),
-  name: z.string().min(1, 'Session name is required').max(100, 'Session name too long'),
-  model: z.string().optional(),
-  goal: z.string().min(1, 'Goal is required').optional(), // Required per AS-CORE-001, but can be derived from initialPrompt
-  repo: agentRepositoryBindingSchema.optional(), // Primary format
-  repository: z.string().optional(), // Deprecated: kept for backward compatibility
-  initialPrompt: z.string().optional(), // Can be used as goal if goal not provided
-}).refine((data) => data.goal || data.initialPrompt, {
-  message: 'Either goal or initialPrompt must be provided',
-  path: ['goal'],
-});
+export const createAgentSessionSchema = z
+  .object({
+    id: z.string().optional(),
+    name: z
+      .string()
+      .min(1, 'Session name is required')
+      .max(100, 'Session name too long')
+      .transform((val) => {
+        const unicodeResult = sanitise(val);
+        return sanitizeString(unicodeResult.clean, { maxLength: 100 }).clean;
+      }),
+    model: z
+      .string()
+      .optional()
+      .transform((val) => {
+        if (!val) return val;
+        const unicodeResult = sanitise(val);
+        return sanitizeString(unicodeResult.clean, { maxLength: 50 }).clean;
+      }),
+    goal: z
+      .string()
+      .min(1, 'Goal is required')
+      .optional()
+      .transform((val) => {
+        if (!val) return val;
+        const unicodeResult = sanitise(val);
+        return sanitizeString(unicodeResult.clean, { maxLength: 5000 }).clean;
+      }), // Required per AS-CORE-001, but can be derived from initialPrompt
+    repo: agentRepositoryBindingSchema.optional(), // Primary format
+    repository: z
+      .string()
+      .optional()
+      .transform((val) => {
+        if (!val) return val;
+        const unicodeResult = sanitise(val);
+        return sanitizeString(unicodeResult.clean, { maxLength: 200 }).clean;
+      }), // Deprecated: kept for backward compatibility
+    initialPrompt: z
+      .string()
+      .optional()
+      .transform((val) => {
+        if (!val) return val;
+        const unicodeResult = sanitise(val);
+        return sanitizeString(unicodeResult.clean, { maxLength: 5000 }).clean;
+      }), // Can be used as goal if goal not provided
+  })
+  .refine((data) => data.goal || data.initialPrompt, {
+    message: 'Either goal or initialPrompt must be provided',
+    path: ['goal'],
+  });
 
 /**
  * TypeScript type inferred from createAgentSessionSchema.
@@ -158,15 +243,15 @@ export type CreateAgentSession = z.infer<typeof createAgentSessionSchema>;
 
 /**
  * Validate request data against a Zod schema.
- * 
+ *
  * Throws ValidationError with field path for invalid input.
  * Returns typed data for valid input.
- * 
+ *
  * @param schema - Zod schema to validate against
  * @param data - Unknown data to validate
  * @returns Typed data matching schema
  * @throws ValidationError if validation fails
- * 
+ *
  * @example
  * ```typescript
  * const input = validateRequest(createAgentSessionSchema, requestBody);

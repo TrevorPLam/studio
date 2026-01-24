@@ -51,7 +51,7 @@ describe('Sessions Detail API Tests', () => {
       (getAgentSessionById as jest.Mock).mockResolvedValue(mockAgentSession);
 
       const response = await GET(new NextRequest('http://localhost'), {
-        params: { id: mockSessionId },
+        params: Promise.resolve({ id: mockSessionId }),
       });
       const data = await response.json();
 
@@ -64,7 +64,7 @@ describe('Sessions Detail API Tests', () => {
       (getAgentSessionById as jest.Mock).mockResolvedValue(null);
 
       const response = await GET(new NextRequest('http://localhost'), {
-        params: { id: 'non-existent' },
+        params: Promise.resolve({ id: 'non-existent' }),
       });
       const data = await response.json();
 
@@ -76,7 +76,7 @@ describe('Sessions Detail API Tests', () => {
       (getAgentSessionById as jest.Mock).mockResolvedValue(null);
 
       const response = await GET(new NextRequest('http://localhost'), {
-        params: { id: mockSessionId },
+        params: Promise.resolve({ id: mockSessionId }),
       });
       const data = await response.json();
 
@@ -107,7 +107,7 @@ describe('Sessions Detail API Tests', () => {
       });
 
       const response = await PATCH(request, {
-        params: { id: mockSessionId },
+        params: Promise.resolve({ id: mockSessionId }),
       });
       const data = await response.json();
 
@@ -128,7 +128,7 @@ describe('Sessions Detail API Tests', () => {
       });
 
       const response = await PATCH(request, {
-        params: { id: mockSessionId },
+        params: Promise.resolve({ id: mockSessionId }),
       });
       const data = await response.json();
 
@@ -150,7 +150,7 @@ describe('Sessions Detail API Tests', () => {
       });
 
       const response = await PATCH(request, {
-        params: { id: mockSessionId },
+        params: Promise.resolve({ id: mockSessionId }),
       });
 
       // Current implementation returns 500, but ideally should be 409

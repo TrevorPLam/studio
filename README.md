@@ -24,15 +24,18 @@ A Next.js application for AI-powered agent sessions and GitHub repository manage
 ## Documentation
 
 ### Getting Started
+
 - **[SETUP.md](./SETUP.md)** - Environment setup and configuration guide
 - **[docs/CONFIGURATION.md](./docs/CONFIGURATION.md)** - Complete configuration reference
 
 ### Core Documentation
+
 - **[docs/API.md](./docs/API.md)** - Complete API endpoint reference
 - **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** - System architecture and design
 - **[docs/FEATURES.md](./docs/FEATURES.md)** - Feature documentation and usage examples
 
 ### Development
+
 - **[docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md)** - Development workflow and guidelines
 - **[docs/CODE_STYLE.md](./docs/CODE_STYLE.md)** - Coding standards and conventions
 - **[docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md)** - Contribution guidelines
@@ -40,22 +43,26 @@ A Next.js application for AI-powered agent sessions and GitHub repository manage
 - **[TESTS.md](./TESTS.md)** - Comprehensive test plan
 
 ### Deployment & Operations
+
 - **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)** - Production deployment guide
 - **[docs/MONITORING.md](./docs/MONITORING.md)** - Logging and monitoring guide
 - **[docs/PERFORMANCE.md](./docs/PERFORMANCE.md)** - Performance optimization guide
 - **[docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)** - Common issues and solutions
 
 ### Security & Configuration
+
 - **[docs/SECURITY.md](./docs/SECURITY.md)** - Security model and best practices
 - **[docs/PATH_POLICY.md](./docs/PATH_POLICY.md)** - Path policy documentation
 - **[docs/GITHUB_APP_SETUP.md](./docs/GITHUB_APP_SETUP.md)** - GitHub App setup guide
 
 ### Technical Reference
+
 - **[docs/DATABASE.md](./docs/DATABASE.md)** - Database schema and data models
 - **[docs/STATE_MACHINE.md](./docs/STATE_MACHINE.md)** - Session state machine documentation
 - **[docs/CHANGELOG.md](./docs/CHANGELOG.md)** - Version history and changes
 
 ### Project Management
+
 - **[TODO.md](./TODO.md)** - Task list and development roadmap
 - **[docs/archive/01.24.2026/2026_ENHANCEMENTS.md](./docs/archive/01.24.2026/2026_ENHANCEMENTS.md)** - Recent feature additions
 
@@ -126,6 +133,7 @@ npm run test:watch       # Run tests in watch mode
 Firebase Studio follows a **fail-closed security model** - deny by default, require explicit approval for risky operations.
 
 Key security features:
+
 - User isolation enforced
 - Path policy for repository files
 - Kill-switch (read-only mode)

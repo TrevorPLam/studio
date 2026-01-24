@@ -71,7 +71,7 @@ export async function waitForState<T>(
   checkFn: () => Promise<T | null>,
   expectedValue: T,
   timeout = 5000
-): Promise<T> {
+): Promise<T | null> {
   const startTime = Date.now();
 
   while (Date.now() - startTime < timeout) {

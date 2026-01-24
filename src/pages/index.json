@@ -1,0 +1,29 @@
+{
+  "name": "pages",
+  "description": "Legacy Next.js Pages Router directory (minimal usage)",
+  "structure": {
+    "_document.js": {
+      "type": "page",
+      "description": "Custom document configuration (legacy)",
+      "note": "Should migrate to App Router (src/app/)"
+    },
+    "BEST_PRACTICES.md": {
+      "type": "documentation",
+      "description": "Best practices guide for Pages Router"
+    },
+    "index.json": {
+      "type": "index",
+      "description": "Directory index file"
+    }
+  },
+  "statistics": {
+    "totalFiles": 3,
+    "pages": 1,
+    "documentation": 2
+  },
+  "bestPractices": {
+    "file": "BEST_PRACTICES.md",
+    "summary": "Prefer App Router, migration strategy, legacy file maintenance"
+  },
+  "note": "This directory is legacy. All new development should use src/app/ (App Router)."
+}

@@ -1,0 +1,27 @@
+{
+  "name": "types",
+  "description": "TypeScript type definitions and extensions",
+  "structure": {
+    "next-auth.d.ts": {
+      "type": "types",
+      "description": "NextAuth type extensions (Session interface augmentation)"
+    },
+    "BEST_PRACTICES.md": {
+      "type": "documentation",
+      "description": "Best practices guide for type definitions"
+    },
+    "index.json": {
+      "type": "index",
+      "description": "Directory index file"
+    }
+  },
+  "statistics": {
+    "totalFiles": 3,
+    "typeFiles": 1,
+    "documentation": 2
+  },
+  "bestPractices": {
+    "file": "BEST_PRACTICES.md",
+    "summary": "Type extensions, module augmentation, global types, type organization"
+  }
+}

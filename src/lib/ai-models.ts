@@ -2,23 +2,23 @@
  * ============================================================================
  * AI MODELS CONFIGURATION MODULE
  * ============================================================================
- * 
+ *
  * @file src/lib/ai-models.ts
  * @module ai-models
- * 
+ *
  * PURPOSE:
  * Configuration and registry for available AI models.
  * Supports multiple providers (Google, OpenAI, Anthropic).
- * 
+ *
  * RELATED FILES:
  * - src/ai/genkit.ts (Genkit model configuration)
  * - src/app/api/agents/chat/route.ts (Uses model configuration)
- * 
+ *
  * MODEL PROVIDERS:
  * - google: Google AI (Gemini) models
  * - openai: OpenAI models (GPT-4, etc.)
  * - anthropic: Anthropic models (Claude)
- * 
+ *
  * ============================================================================
  */
 
@@ -32,19 +32,19 @@
 export interface AIModel {
   /** Unique model identifier */
   id: string;
-  
+
   /** Human-readable model name */
   name: string;
-  
+
   /** Model provider */
   provider: 'google' | 'openai' | 'anthropic';
-  
+
   /** Provider-specific model identifier */
   model: string;
-  
+
   /** Model description */
   description: string;
-  
+
   /** Maximum tokens (optional) */
   maxTokens?: number;
 }
@@ -55,7 +55,7 @@ export interface AIModel {
 
 /**
  * Registry of available AI models.
- * 
+ *
  * Add new models here as they become available.
  */
 export const availableModels: AIModel[] = [
@@ -94,10 +94,10 @@ export const availableModels: AIModel[] = [
 
 /**
  * Get model configuration by ID.
- * 
+ *
  * @param id - Model identifier
  * @returns Model configuration or undefined if not found
- * 
+ *
  * @example
  * ```typescript
  * const model = getModelById('gemini-2.5-flash');
@@ -112,9 +112,9 @@ export function getModelById(id: string): AIModel | undefined {
 
 /**
  * Get default model (first in registry).
- * 
+ *
  * @returns Default model configuration
- * 
+ *
  * @example
  * ```typescript
  * const defaultModel = getDefaultModel();

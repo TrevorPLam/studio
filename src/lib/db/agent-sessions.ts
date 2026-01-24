@@ -2,36 +2,36 @@
  * ============================================================================
  * AGENT SESSIONS DATABASE MODULE
  * ============================================================================
- * 
+ *
  * @file src/lib/db/agent-sessions.ts
  * @module agent-sessions
  * @epic AS-CORE-001, AS-CORE-002
- * 
+ *
  * PURPOSE:
  * Server-side persistence layer for agent sessions with CRUD operations,
  * state machine enforcement, and step timeline management.
- * 
+ *
  * DEPENDENCIES:
  * - @/lib/agent/session-types (AgentSession, AgentSessionState, etc.)
  * - @/lib/validation (CreateAgentSession, AgentMessageInput)
- * 
+ *
  * RELATED FILES:
  * - src/app/api/sessions/route.ts (API endpoints)
  * - src/app/api/sessions/[id]/route.ts (Session detail API)
  * - src/app/api/sessions/[id]/steps/route.ts (Step timeline API)
  * - src/lib/agent/session-types.ts (Type definitions)
- * 
+ *
  * SECURITY:
  * - User isolation enforced (userId filtering)
  * - Kill-switch protection (read-only mode)
  * - Path policy for file system access
  * - Fail-closed state transitions
- * 
+ *
  * STORAGE:
  * - File-based JSON storage in .data/agent-sessions.json
  * - In-memory cache for performance
  * - Write queue for concurrent write safety
- * 
+ *
  * ============================================================================
  */
 
@@ -46,9 +46,9 @@ let AGENT_READ_ONLY_MODE = false;
 /**
  * Enable/disable read-only mode (kill-switch).
  * When enabled, all write operations are blocked.
- * 
+ *
  * @param enabled - true to enable read-only mode, false to disable
- * 
+ *
  * @see TODO.md P0 Kill-switch for full implementation requirements
  */
 export function setAgentReadOnlyMode(enabled: boolean) {
@@ -58,7 +58,7 @@ export function setAgentReadOnlyMode(enabled: boolean) {
 /**
  * Assert that the system is not in read-only mode.
  * Throws error if kill-switch is enabled.
- * 
+ *
  * @throws Error if read-only mode is enabled
  */
 function assertNotReadOnly() {
@@ -74,7 +74,12 @@ function assertNotReadOnly() {
 import { randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
-import type { AgentMessage, AgentSession, AgentSessionState, AgentRepositoryBinding } from '@/lib/agent/session-types';
+import type {
+  AgentMessage,
+  AgentSession,
+  AgentSessionState,
+  AgentRepositoryBinding,
+} from '@/lib/agent/session-types';
 import type { AgentMessageInput, CreateAgentSession } from '@/lib/validation';
 
 // ============================================================================
@@ -87,9 +92,7 @@ import type { AgentMessageInput, CreateAgentSession } from '@/lib/validation';
  * Allowed data directories for file operations.
  * Sessions file must be within these directories.
  */
-const ALLOWED_DATA_DIRS = [
-  path.join(process.cwd(), '.data'),
-];
+const ALLOWED_DATA_DIRS = [path.join(process.cwd(), '.data')];
 
 /**
  * Files that cannot be modified by the agent system.
@@ -104,7 +107,7 @@ const DO_NOT_TOUCH_FILES = [
 
 /**
  * Check if a filesystem path is allowed for agent operations.
- * 
+ *
  * @param targetPath - Absolute filesystem path
  * @returns true if path is allowed
  */
@@ -159,7 +162,7 @@ let writeQueue: Promise<void> = Promise.resolve();
 
 /**
  * Ensure the data file exists, creating it if necessary.
- * 
+ *
  * @throws Error if path policy violation or read-only mode
  */
 async function ensureDataFile() {
@@ -178,7 +181,7 @@ async function ensureDataFile() {
 
 /**
  * Load sessions from file, using cache if available.
- * 
+ *
  * @returns SessionsFile with all sessions
  */
 async function loadSessions(): Promise<SessionsFile> {
@@ -203,7 +206,7 @@ async function loadSessions(): Promise<SessionsFile> {
 
 /**
  * Persist sessions to file with write queue serialization.
- * 
+ *
  * @param data - SessionsFile to persist
  * @throws Error if path policy violation or read-only mode
  */
@@ -213,7 +216,9 @@ async function persistSessions(data: SessionsFile) {
     throw new Error('Write access denied by path policy');
   }
   cache = data;
-  writeQueue = writeQueue.then(() => fs.writeFile(SESSIONS_FILE, JSON.stringify(data, null, 2), 'utf8'));
+  writeQueue = writeQueue.then(() =>
+    fs.writeFile(SESSIONS_FILE, JSON.stringify(data, null, 2), 'utf8')
+  );
   await writeQueue;
 }
 
@@ -224,7 +229,7 @@ async function persistSessions(data: SessionsFile) {
 /**
  * Compute the last message preview for a session.
  * Used for session list display.
- * 
+ *
  * @param messages - Array of agent messages
  * @returns Last message content (truncated to 100 chars) or undefined
  */
@@ -241,7 +246,7 @@ function computeLastMessage(messages: AgentMessage[]): string | undefined {
 /**
  * Normalize message inputs to AgentMessage format.
  * Ensures timestamps are present.
- * 
+ *
  * @param messages - Array of message inputs
  * @returns Array of normalized AgentMessage objects
  */
@@ -259,10 +264,10 @@ function normaliseMessages(messages: AgentMessageInput[]): AgentMessage[] {
 
 /**
  * List all sessions for a user, sorted by most recently updated.
- * 
+ *
  * @param userId - User identifier (from auth session)
  * @returns Array of user's sessions, sorted by updatedAt descending
- * 
+ *
  * @see AS-CORE-001 AS-02
  */
 export async function listAgentSessions(userId: string): Promise<AgentSession[]> {
@@ -274,39 +279,49 @@ export async function listAgentSessions(userId: string): Promise<AgentSession[]>
 
 /**
  * Get a specific session by ID, enforcing user isolation.
- * 
+ *
  * @param userId - User identifier (from auth session)
  * @param sessionId - Session identifier
  * @returns Session if found and belongs to user, null otherwise
- * 
+ *
  * @see AS-CORE-001 AS-02
  */
-export async function getAgentSessionById(userId: string, sessionId: string): Promise<AgentSession | null> {
+export async function getAgentSessionById(
+  userId: string,
+  sessionId: string
+): Promise<AgentSession | null> {
   const data = await loadSessions();
-  return data.sessions.find((session) => session.userId === userId && session.id === sessionId) ?? null;
+  return (
+    data.sessions.find((session) => session.userId === userId && session.id === sessionId) ?? null
+  );
 }
 
 /**
  * Create a new agent session.
- * 
+ *
  * Per AS-CORE-001:
  * - Generates UUID if id not provided
  * - Sets default state to 'created'
  * - Requires goal field (from input.goal or input.initialPrompt)
  * - Supports repo binding (primary) and repository string (deprecated)
- * 
+ *
  * @param userId - User identifier (from auth session)
  * @param input - Session creation input
  * @returns Created session (or existing if duplicate ID)
- * 
+ *
  * @see AS-CORE-001 AS-01, AS-02
  */
-export async function createAgentSession(userId: string, input: CreateAgentSession): Promise<AgentSession> {
+export async function createAgentSession(
+  userId: string,
+  input: CreateAgentSession
+): Promise<AgentSession> {
   const data = await loadSessions();
   const now = new Date().toISOString();
 
   const sessionId = input.id?.trim() || randomUUID();
-  const existing = data.sessions.find((session) => session.userId === userId && session.id === sessionId);
+  const existing = data.sessions.find(
+    (session) => session.userId === userId && session.id === sessionId
+  );
   if (existing) {
     return existing;
   }
@@ -367,13 +382,13 @@ interface UpdateAgentSessionInput {
 
 /**
  * Update an existing agent session.
- * 
+ *
  * Per AS-CORE-002:
  * - Enforces state machine transitions (fail-closed)
  * - Allows retry from failed state
  * - Manages step timeline
  * - Preserves unchanged fields
- * 
+ *
  * State Transitions:
  * - created → planning, failed
  * - planning → preview_ready, failed
@@ -382,13 +397,13 @@ interface UpdateAgentSessionInput {
  * - applying → applied, failed
  * - applied → (terminal, no transitions)
  * - failed → planning (retry)
- * 
+ *
  * @param userId - User identifier (from auth session)
  * @param sessionId - Session identifier
  * @param updates - Fields to update
  * @returns Updated session or null if not found
  * @throws Error if invalid state transition
- * 
+ *
  * @see AS-CORE-002 AS-05, AS-06, AS-08
  */
 export async function updateAgentSession(
@@ -397,7 +412,9 @@ export async function updateAgentSession(
   updates: UpdateAgentSessionInput
 ): Promise<AgentSession | null> {
   const data = await loadSessions();
-  const index = data.sessions.findIndex((session) => session.userId === userId && session.id === sessionId);
+  const index = data.sessions.findIndex(
+    (session) => session.userId === userId && session.id === sessionId
+  );
 
   if (index === -1) {
     return null;
@@ -412,7 +429,7 @@ export async function updateAgentSession(
   // ========================================================================
   // Per AS-CORE-002: allow retry from failed state
   // Fail-closed: reject invalid transitions with descriptive error
-  
+
   const allowedTransitions: Record<string, string[]> = {
     created: ['planning', 'failed'],
     planning: ['preview_ready', 'failed'],
@@ -428,9 +445,7 @@ export async function updateAgentSession(
     const allowed = allowedTransitions[current.state] || [];
     if (!allowed.includes(updates.state)) {
       // Fail closed: invalid transition
-      throw new Error(
-        `Invalid session state transition: ${current.state} -> ${updates.state}`
-      );
+      throw new Error(`Invalid session state transition: ${current.state} -> ${updates.state}`);
     }
     nextState = updates.state;
   }
@@ -439,7 +454,7 @@ export async function updateAgentSession(
   // STEP TIMELINE MANAGEMENT
   // ========================================================================
   // Per AS-CORE-002 AS-06: persist steps with type, status, timestamps
-  
+
   let nextSteps = Array.isArray(current.steps) ? [...current.steps] : [];
   if (Array.isArray(updates.steps)) {
     nextSteps = updates.steps;
@@ -451,7 +466,7 @@ export async function updateAgentSession(
   // ========================================================================
   // BUILD UPDATED SESSION
   // ========================================================================
-  
+
   const updated: AgentSession = {
     ...current,
     name: updates.name ?? current.name,

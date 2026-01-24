@@ -2,24 +2,24 @@
  * ============================================================================
  * REPOSITORY DETAIL PAGE COMPONENT
  * ============================================================================
- * 
+ *
  * @file src/app/repositories/[owner]/[repo]/page.tsx
  * @route /repositories/[owner]/[repo]
- * 
+ *
  * PURPOSE:
  * Display repository details, commits, and agent session options.
- * 
+ *
  * FEATURES:
  * - Repository information display
  * - Commit history
  * - Tabbed interface (Code, Commits, Agent)
  * - Start agent session for repository
- * 
+ *
  * RELATED FILES:
  * - src/app/api/github/repositories/[owner]/[repo]/route.ts (Repository API)
  * - src/app/api/github/repositories/[owner]/[repo]/commits/route.ts (Commits API)
  * - src/app/agents/[id]/page.tsx (Agent session page)
- * 
+ *
  * ============================================================================
  */
 
@@ -77,9 +77,9 @@ interface Commit {
 
 /**
  * Repository detail page component.
- * 
+ *
  * Displays repository information, commits, and agent session options.
- * 
+ *
  * @returns Repository detail page JSX
  */
 export default function RepositoryPage() {
@@ -251,9 +251,7 @@ export default function RepositoryPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Repository Files</CardTitle>
-                <CardDescription>
-                  Browse and edit your code files
-                </CardDescription>
+                <CardDescription>Browse and edit your code files</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-12">
@@ -273,9 +271,7 @@ export default function RepositoryPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Recent Commits</CardTitle>
-                <CardDescription>
-                  View commit history for {repository.name}
-                </CardDescription>
+                <CardDescription>View commit history for {repository.name}</CardDescription>
               </CardHeader>
               <CardContent>
                 {commits.length === 0 ? (
@@ -314,9 +310,7 @@ export default function RepositoryPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Agent Session</CardTitle>
-                <CardDescription>
-                  Start an AI agent session for this repository
-                </CardDescription>
+                <CardDescription>Start an AI agent session for this repository</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-12">
@@ -328,7 +322,9 @@ export default function RepositoryPage() {
                     onClick={() => {
                       // Create a session linked to this repo
                       const sessionId = `repo-${owner}-${repo}-${Date.now()}`;
-                      router.push(`/agents/${sessionId}?repo=${encodeURIComponent(repository.full_name)}`);
+                      router.push(
+                        `/agents/${sessionId}?repo=${encodeURIComponent(repository.full_name)}`
+                      );
                     }}
                   >
                     Start Agent Session

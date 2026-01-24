@@ -2,14 +2,14 @@
  * ============================================================================
  * AGENT SESSION DETAIL PAGE COMPONENT
  * ============================================================================
- * 
+ *
  * @file src/app/agents/[id]/page.tsx
  * @route /agents/[id]
- * 
+ *
  * PURPOSE:
  * Chat interface for individual agent session.
  * Supports both streaming and non-streaming chat modes.
- * 
+ *
  * FEATURES:
  * - Load session from server
  * - Send messages to AI agent
@@ -17,12 +17,12 @@
  * - Non-streaming response support
  * - Message persistence to server
  * - Real-time message updates
- * 
+ *
  * RELATED FILES:
  * - src/app/api/sessions/[id]/route.ts (Session API)
  * - src/app/api/agents/chat/route.ts (Non-streaming chat)
  * - src/app/api/agents/chat-stream/route.ts (Streaming chat)
- * 
+ *
  * ============================================================================
  */
 
@@ -47,7 +47,7 @@ import { ArrowLeft, Send } from 'lucide-react';
 
 /**
  * Ensure all messages have timestamps.
- * 
+ *
  * @param messages - Array of messages
  * @returns Array of messages with timestamps
  */
@@ -64,9 +64,9 @@ function ensureTimestamps(messages: AgentMessage[]): AgentMessage[] {
 
 /**
  * Agent session detail page component.
- * 
+ *
  * Displays chat interface for a specific agent session.
- * 
+ *
  * @returns Session detail page JSX
  */
 export default function AgentSessionPage() {
@@ -95,7 +95,10 @@ export default function AgentSessionPage() {
    * Messages sorted chronologically.
    */
   const sortedMessages = useMemo(
-    () => [...messages].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()),
+    () =>
+      [...messages].sort(
+        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      ),
     [messages]
   );
 
@@ -145,12 +148,12 @@ export default function AgentSessionPage() {
 
   /**
    * Persist messages to server.
-   * 
+   *
    * Called after receiving AI response to save conversation.
-   * 
+   *
    * @param nextMessages - Updated message array
    */
-  const persistMessages = async (nextMessages: AgentMessage[]) {
+  const persistMessages = async (nextMessages: AgentMessage[]) => {
     try {
       await fetch(`/api/sessions/${sessionId}`, {
         method: 'PATCH',
@@ -168,9 +171,9 @@ export default function AgentSessionPage() {
 
   /**
    * Send message to AI agent.
-   * 
+   *
    * Supports both streaming and non-streaming modes.
-   * 
+   *
    * @param useStreaming - Whether to use streaming response (default: false)
    */
   const sendMessage = async (useStreaming = false) => {
@@ -279,7 +282,9 @@ export default function AgentSessionPage() {
 
         // Finalize messages
         const finalMessages = messagesWithPlaceholder.map((message, index) =>
-          index === messagesWithPlaceholder.length - 1 ? { ...message, content: accumulatedText } : message
+          index === messagesWithPlaceholder.length - 1
+            ? { ...message, content: accumulatedText }
+            : message
         );
         setMessages(finalMessages);
         await persistMessages(finalMessages);
@@ -376,7 +381,7 @@ export default function AgentSessionPage() {
               <CardContent className="py-4 text-sm text-destructive">{sessionError}</CardContent>
             </Card>
           )}
-          
+
           {/* Empty state */}
           {sortedMessages.length === 0 ? (
             <Card>
@@ -402,7 +407,7 @@ export default function AgentSessionPage() {
               </Card>
             ))
           )}
-          
+
           {/* Loading indicator */}
           {isLoading && (
             <Card className="mr-auto max-w-[80%]">

@@ -2,25 +2,25 @@
  * ============================================================================
  * ERROR BOUNDARY COMPONENT
  * ============================================================================
- * 
+ *
  * @file src/components/error-boundary.tsx
- * 
+ *
  * PURPOSE:
  * React error boundary for catching and handling component errors gracefully.
  * Prevents entire app from crashing on component errors.
- * 
+ *
  * FEATURES:
  * - Catches React component errors
  * - Displays user-friendly error UI
  * - Provides reload and home navigation options
  * - Logs errors to console
- * 
+ *
  * USAGE:
  * Wrap app in root layout to catch all errors.
- * 
+ *
  * RELATED FILES:
  * - src/app/layout.tsx (Uses ErrorBoundary)
- * 
+ *
  * ============================================================================
  */
 
@@ -41,7 +41,7 @@ import { AlertCircle } from 'lucide-react';
 interface ErrorBoundaryState {
   /** Whether an error has been caught */
   hasError: boolean;
-  
+
   /** The error that was caught */
   error: Error | null;
 }
@@ -52,9 +52,9 @@ interface ErrorBoundaryState {
 
 /**
  * Error boundary component.
- * 
+ *
  * Catches React component errors and displays fallback UI.
- * 
+ *
  * @see React Error Boundaries documentation
  */
 export class ErrorBoundary extends React.Component<
@@ -63,7 +63,7 @@ export class ErrorBoundary extends React.Component<
 > {
   /**
    * Initialize error boundary state.
-   * 
+   *
    * @param props - Component props
    */
   constructor(props: { children: React.ReactNode }) {
@@ -73,9 +73,9 @@ export class ErrorBoundary extends React.Component<
 
   /**
    * Update state when error is caught.
-   * 
+   *
    * Called automatically by React when error occurs.
-   * 
+   *
    * @param error - The error that was caught
    * @returns New state with error information
    */
@@ -85,9 +85,9 @@ export class ErrorBoundary extends React.Component<
 
   /**
    * Log error information.
-   * 
+   *
    * Called automatically by React when error occurs.
-   * 
+   *
    * @param error - The error that was caught
    * @param errorInfo - React error information
    */
@@ -97,7 +97,7 @@ export class ErrorBoundary extends React.Component<
 
   /**
    * Render component or error UI.
-   * 
+   *
    * @returns Error UI if error caught, otherwise children
    */
   render() {
@@ -128,7 +128,7 @@ export class ErrorBoundary extends React.Component<
                   </p>
                 </div>
               )}
-              
+
               {/* ============================================================
                   ACTION BUTTONS
                   ============================================================ */}

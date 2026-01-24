@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run TODO extraction script
+node scripts/extract-todos.js --block
+
+# Run Prettier check
+npm run format:check
+
+# Run ESLint
+npm run lint

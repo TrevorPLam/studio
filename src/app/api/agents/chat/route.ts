@@ -2,30 +2,30 @@
  * ============================================================================
  * AGENT CHAT API ENDPOINT (NON-STREAMING)
  * ============================================================================
- * 
+ *
  * @file src/app/api/agents/chat/route.ts
  * @route /api/agents/chat
- * 
+ *
  * PURPOSE:
  * Non-streaming chat endpoint for AI agent interactions.
  * Returns complete response after generation.
- * 
+ *
  * ENDPOINT:
  * - POST /api/agents/chat - Send chat message and get response
- * 
+ *
  * AUTHENTICATION:
  * - Requires NextAuth session
- * 
+ *
  * FEATURES:
  * - Request timeout protection (30s)
  * - Optional session persistence
  * - Error handling with proper status codes
- * 
+ *
  * RELATED FILES:
  * - src/app/api/agents/chat-stream/route.ts (Streaming version)
  * - src/ai/genkit.ts (AI model integration)
  * - src/lib/db/agent-sessions.ts (Session persistence)
- * 
+ *
  * ============================================================================
  */
 
@@ -33,7 +33,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import type { Session } from 'next-auth';
 import { ai, defaultModel } from '@/ai/genkit';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth/config';
 import { updateAgentSession } from '@/lib/db/agent-sessions';
 import type { AgentMessage } from '@/lib/agent/session-types';
 import { agentChatRequestSchema, validateRequest, type AgentMessageInput } from '@/lib/validation';
@@ -46,7 +46,7 @@ import { logger } from '@/lib/logger';
 
 /**
  * Extract user ID from NextAuth session.
- * 
+ *
  * @param session - NextAuth session object
  * @returns User ID or null if unavailable
  */
@@ -56,7 +56,7 @@ function getUserId(session: Session | null): string | null {
 
 /**
  * Ensure all messages have timestamps.
- * 
+ *
  * @param messages - Array of message inputs
  * @returns Array of messages with timestamps
  */
@@ -74,19 +74,19 @@ function ensureTimestamps(messages: AgentMessageInput[]): AgentMessage[] {
 
 /**
  * POST /api/agents/chat
- * 
+ *
  * Send chat message to AI agent and get response.
- * 
+ *
  * Request Body: {
  *   messages: AgentMessageInput[],
  *   model?: string,
  *   sessionId?: string
  * }
- * 
+ *
  * Response: {
  *   response: string
  * }
- * 
+ *
  * @param request - Next.js request object
  * @returns JSON response with AI-generated text
  * @returns 401 if not authenticated
@@ -124,7 +124,8 @@ export async function POST(request: NextRequest) {
     // EXTRACT USER MESSAGE
     // ========================================================================
     // Use last user message as prompt
-    const lastUserMessage = messages.filter((message) => message.role === 'user').slice(-1)[0]?.content || '';
+    const lastUserMessage =
+      messages.filter((message) => message.role === 'user').slice(-1)[0]?.content || '';
 
     if (!lastUserMessage) {
       return NextResponse.json({ error: 'No user message found' }, { status: 400 });
@@ -158,7 +159,9 @@ export async function POST(request: NextRequest) {
           ...messages,
           { role: 'assistant', content: responseText, timestamp: new Date().toISOString() },
         ]);
-        const updated = await updateAgentSession(userId, sessionId, { messages: persistedMessages });
+        const updated = await updateAgentSession(userId, sessionId, {
+          messages: persistedMessages,
+        });
         if (!updated) {
           logger.warn('Session not found while persisting chat response', { sessionId });
         }
@@ -184,7 +187,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (error instanceof AIAPIError) {
-      return NextResponse.json({ error: 'AI API error', message: error.message }, { status: error.statusCode });
+      return NextResponse.json(
+        { error: 'AI API error', message: error.message },
+        { status: error.statusCode }
+      );
     }
 
     logger.error('Error in chat API', error instanceof Error ? error : new Error(String(error)), {

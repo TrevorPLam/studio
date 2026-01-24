@@ -6,7 +6,7 @@
 import { NextRequest } from 'next/server';
 import { GET, POST } from '@/app/api/sessions/route';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth/config';
 
 // Mock NextAuth
 jest.mock('next-auth', () => ({

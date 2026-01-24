@@ -17,10 +17,10 @@ jest.mock('@/lib/github-client', () => ({
   getAuthenticatedUser: jest.fn(),
   getRepositories: jest.fn(),
   getRepository: jest.fn(),
-  getCommits: jest.fn(),
+  getRepositoryCommits: jest.fn(),
 }));
 
-import { getRepositories, getRepository, getCommits } from '@/lib/github-client';
+import { getRepositories, getRepository, getRepositoryCommits } from '@/lib/github-client';
 
 describe('GitHub API Tests', () => {
   const mockUserId = 'test-user@example.com';
@@ -63,7 +63,8 @@ describe('GitHub API Tests', () => {
 
       (getRepositories as jest.Mock).mockResolvedValue(mockRepos);
 
-      const response = await GET();
+      const request = new NextRequest('http://localhost:3000/api/github/repositories');
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -73,7 +74,8 @@ describe('GitHub API Tests', () => {
     it('requires authentication', async () => {
       (getServerSession as jest.Mock).mockResolvedValue(null);
 
-      const response = await GET();
+      const request = new NextRequest('http://localhost:3000/api/github/repositories');
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -144,9 +146,9 @@ describe('GitHub API Tests', () => {
         },
       ];
 
-      (getCommits as jest.Mock).mockResolvedValue(mockCommits);
+      (getRepositoryCommits as jest.Mock).mockResolvedValue(mockCommits);
 
-      const result = await getCommits('test-owner', 'test-repo', 'main', 'mock-token');
+      const result = await getRepositoryCommits('mock-token', 'test-owner', 'test-repo', 30);
       expect(result).toEqual(mockCommits);
     });
   });

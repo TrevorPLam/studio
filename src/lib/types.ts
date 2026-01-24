@@ -2,24 +2,24 @@
  * ============================================================================
  * SHARED TYPE DEFINITIONS
  * ============================================================================
- * 
+ *
  * @file src/lib/types.ts
  * @module types
- * 
+ *
  * PURPOSE:
  * Shared TypeScript type definitions and error classes used across the application.
  * Includes GitHub API types, agent types, and custom error classes.
- * 
+ *
  * NOTE:
  * Some types here are legacy/deprecated. New code should use:
  * - @/lib/agent/session-types.ts for AgentSession, AgentMessage
  * - @/lib/validation.ts for validation-related types
- * 
+ *
  * RELATED FILES:
  * - src/lib/agent/session-types.ts (Current session types)
  * - src/lib/validation.ts (Validation types)
  * - src/lib/github-client.ts (Uses GitHub types)
- * 
+ *
  * ============================================================================
  */
 
@@ -29,7 +29,7 @@
 
 /**
  * GitHub repository information from API.
- * 
+ *
  * @see GitHub REST API: GET /repos/{owner}/{repo}
  */
 export interface GitHubRepository {
@@ -54,7 +54,7 @@ export interface GitHubRepository {
 
 /**
  * GitHub commit information from API.
- * 
+ *
  * @see GitHub REST API: GET /repos/{owner}/{repo}/commits
  */
 export interface GitHubCommit {
@@ -87,7 +87,7 @@ export interface GitHubCommit {
 
 /**
  * GitHub user information from API.
- * 
+ *
  * @see GitHub REST API: GET /user
  */
 export interface GitHubUser {
@@ -105,7 +105,7 @@ export interface GitHubUser {
 
 /**
  * Agent message (LEGACY - use AgentMessage from @/lib/agent/session-types.ts).
- * 
+ *
  * @deprecated Use AgentMessage from @/lib/agent/session-types.ts
  */
 export interface AgentMessage {
@@ -116,7 +116,7 @@ export interface AgentMessage {
 
 /**
  * Agent session (LEGACY - use AgentSession from @/lib/agent/session-types.ts).
- * 
+ *
  * @deprecated Use AgentSession from @/lib/agent/session-types.ts
  */
 export interface AgentSession {
@@ -135,7 +135,7 @@ export interface AgentSession {
 
 /**
  * GitHub API error with rate limit information.
- * 
+ *
  * Thrown when GitHub API requests fail.
  * Includes status code and rate limit details.
  */
@@ -153,7 +153,7 @@ export class GitHubAPIError extends Error {
 
 /**
  * AI API error with model information.
- * 
+ *
  * Thrown when AI model API requests fail.
  * Includes status code and model identifier.
  */
@@ -170,14 +170,17 @@ export class AIAPIError extends Error {
 
 /**
  * Validation error with field path.
- * 
+ *
  * Thrown when request validation fails.
  * Includes field path for error reporting.
- * 
+ *
  * @see src/lib/validation.ts validateRequest()
  */
 export class ValidationError extends Error {
-  constructor(message: string, public field?: string) {
+  constructor(
+    message: string,
+    public field?: string
+  ) {
     super(message);
     this.name = 'ValidationError';
   }
@@ -189,7 +192,7 @@ export class ValidationError extends Error {
 
 /**
  * Extended NextAuth session with access token.
- * 
+ *
  * Used in API routes to access GitHub OAuth token.
  */
 export interface ExtendedSession {

@@ -2,36 +2,36 @@
  * ============================================================================
  * SESSIONS API ENDPOINT
  * ============================================================================
- * 
+ *
  * @file src/app/api/sessions/route.ts
  * @route /api/sessions
  * @epic AS-CORE-001
- * 
+ *
  * PURPOSE:
  * API endpoint for listing and creating agent sessions.
- * 
+ *
  * ENDPOINTS:
  * - GET /api/sessions - List user's sessions
  * - POST /api/sessions - Create new session
- * 
+ *
  * AUTHENTICATION:
  * - Requires NextAuth session
  * - User isolation enforced (userId filtering)
- * 
+ *
  * RELATED FILES:
  * - src/lib/db/agent-sessions.ts (Database operations)
  * - src/lib/validation.ts (Request validation)
  * - src/app/api/sessions/[id]/route.ts (Session detail endpoint)
- * 
+ *
  * @see AS-CORE-001 AS-04
- * 
+ *
  * ============================================================================
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import type { Session } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth/config';
 import { createAgentSession, listAgentSessions } from '@/lib/db/agent-sessions';
 import { createAgentSessionSchema, validateRequest } from '@/lib/validation';
 import { ValidationError } from '@/lib/types';
@@ -42,9 +42,9 @@ import { ValidationError } from '@/lib/types';
 
 /**
  * Extract user ID from NextAuth session.
- * 
+ *
  * Uses email as primary identifier, falls back to name.
- * 
+ *
  * @param session - NextAuth session object
  * @returns User ID or null if unavailable
  */
@@ -58,15 +58,15 @@ function getUserId(session: Session | null): string | null {
 
 /**
  * GET /api/sessions
- * 
+ *
  * List all sessions for the authenticated user.
- * 
+ *
  * Response: { sessions: AgentSession[] }
- * 
+ *
  * @returns JSON response with user's sessions
  * @returns 401 if not authenticated
  * @returns 400 if user identity unavailable
- * 
+ *
  * @see AS-CORE-001 AS-04
  */
 export async function GET() {
@@ -99,18 +99,18 @@ export async function GET() {
 
 /**
  * POST /api/sessions
- * 
+ *
  * Create a new agent session.
- * 
+ *
  * Request Body: CreateAgentSession (validated)
  * Response: AgentSession (created)
- * 
+ *
  * @param request - Next.js request object
  * @returns JSON response with created session
  * @returns 401 if not authenticated
  * @returns 400 if validation fails or user identity unavailable
  * @returns 500 if server error
- * 
+ *
  * @see AS-CORE-001 AS-04
  */
 export async function POST(request: NextRequest) {
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
     // ========================================================================
     const body = await request.json();
     const input = validateRequest(createAgentSessionSchema, body);
-    
+
     // ========================================================================
     // CREATE SESSION
     // ========================================================================
@@ -156,7 +156,10 @@ export async function POST(request: NextRequest) {
 
     // Generic server error
     return NextResponse.json(
-      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Internal server error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

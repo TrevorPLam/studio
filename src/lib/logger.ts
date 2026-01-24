@@ -2,29 +2,29 @@
  * ============================================================================
  * LOGGING MODULE
  * ============================================================================
- * 
+ *
  * @file src/lib/logger.ts
  * @module logger
- * 
+ *
  * PURPOSE:
  * Structured logging utility with context support and environment-aware output.
  * Provides consistent logging interface across the application.
- * 
+ *
  * FEATURES:
  * - Structured logging with context objects
  * - Environment-aware (debug only in development)
  * - Timestamp and log level formatting
  * - Error stack trace support
- * 
+ *
  * RELATED FILES:
  * - src/lib/github-app.ts (Uses logger for token operations)
  * - All API routes (Use logger for request/response logging)
- * 
+ *
  * FUTURE ENHANCEMENTS:
  * - Integration with error tracking (Sentry, etc.)
  * - Structured logging to external service
  * - Log correlation IDs (sessionId, requestId)
- * 
+ *
  * ============================================================================
  */
 
@@ -43,16 +43,16 @@ type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 interface LogEntry {
   /** Log severity level */
   level: LogLevel;
-  
+
   /** Log message */
   message: string;
-  
+
   /** ISO 8601 timestamp */
   timestamp: string;
-  
+
   /** Additional context data */
   context?: Record<string, unknown>;
-  
+
   /** Error object (for error logs) */
   error?: Error;
 }
@@ -63,7 +63,7 @@ interface LogEntry {
 
 /**
  * Logger class providing structured logging functionality.
- * 
+ *
  * Features:
  * - Environment-aware output (debug only in development)
  * - Context support for structured data
@@ -76,7 +76,7 @@ class Logger {
 
   /**
    * Format log entry into human-readable string.
-   * 
+   *
    * @param entry - Log entry to format
    * @returns Formatted log string
    */
@@ -88,7 +88,7 @@ class Logger {
 
   /**
    * Internal log method handling all log levels.
-   * 
+   *
    * @param level - Log severity level
    * @param message - Log message
    * @param context - Optional context data
@@ -127,7 +127,7 @@ class Logger {
 
   /**
    * Log debug message (development only).
-   * 
+   *
    * @param message - Debug message
    * @param context - Optional context data
    */
@@ -137,7 +137,7 @@ class Logger {
 
   /**
    * Log info message.
-   * 
+   *
    * @param message - Info message
    * @param context - Optional context data
    */
@@ -147,7 +147,7 @@ class Logger {
 
   /**
    * Log warning message.
-   * 
+   *
    * @param message - Warning message
    * @param context - Optional context data
    */
@@ -157,7 +157,7 @@ class Logger {
 
   /**
    * Log error message with error object.
-   * 
+   *
    * @param message - Error message
    * @param error - Error object (optional)
    * @param context - Optional context data
@@ -173,9 +173,9 @@ class Logger {
 
 /**
  * Singleton logger instance.
- * 
+ *
  * Use this throughout the application for consistent logging.
- * 
+ *
  * @example
  * ```typescript
  * logger.info('User logged in', { userId: '123' });

@@ -1,0 +1,143 @@
+{
+  "name": "app",
+  "description": "Next.js App Router directory containing pages and API routes",
+  "structure": {
+    "agents": {
+      "description": "Agent pages",
+      "[id]": {
+        "page.tsx": {
+          "type": "page",
+          "description": "Agent detail page (dynamic route)"
+        }
+      },
+      "page.tsx": {
+        "type": "page",
+        "description": "Agents listing page"
+      }
+    },
+    "api": {
+      "description": "API routes",
+      "agents": {
+        "chat": {
+          "route.ts": {
+            "type": "api",
+            "method": "POST",
+            "description": "Agent chat endpoint (non-streaming)"
+          }
+        },
+        "chat-stream": {
+          "route.ts": {
+            "type": "api",
+            "method": "POST",
+            "description": "Agent chat streaming endpoint (Server-Sent Events)"
+          }
+        }
+      },
+      "auth": {
+        "[...nextauth]": {
+          "route.ts": {
+            "type": "api",
+            "description": "NextAuth authentication routes"
+          }
+        }
+      },
+      "github": {
+        "repositories": {
+          "[owner]": {
+            "[repo]": {
+              "route.ts": {
+                "type": "api",
+                "method": "GET",
+                "description": "Repository detail endpoint"
+              },
+              "commits": {
+                "route.ts": {
+                  "type": "api",
+                  "method": "GET",
+                  "description": "Repository commits endpoint"
+                }
+              }
+            }
+          },
+          "route.ts": {
+            "type": "api",
+            "method": "GET",
+            "description": "Repositories listing endpoint"
+          }
+        }
+      },
+      "sessions": {
+        "[id]": {
+          "route.ts": {
+            "type": "api",
+            "methods": ["GET", "PATCH"],
+            "description": "Session detail endpoint"
+          },
+          "steps": {
+            "route.ts": {
+              "type": "api",
+              "methods": ["GET", "POST"],
+              "description": "Session steps endpoint"
+            }
+          }
+        },
+        "route.ts": {
+          "type": "api",
+          "methods": ["GET", "POST"],
+          "description": "Sessions listing and creation endpoint"
+        }
+      }
+    },
+    "repositories": {
+      "description": "Repository pages",
+      "[owner]": {
+        "[repo]": {
+          "page.tsx": {
+            "type": "page",
+            "description": "Repository detail page (nested dynamic routes)"
+          }
+        }
+      },
+      "page.tsx": {
+        "type": "page",
+        "description": "Repositories listing page"
+      }
+    },
+    "favicon.ico": {
+      "type": "asset",
+      "description": "Application favicon"
+    },
+    "globals.css": {
+      "type": "style",
+      "description": "Global CSS styles"
+    },
+    "layout.tsx": {
+      "type": "layout",
+      "description": "Root layout component"
+    },
+    "page.tsx": {
+      "type": "page",
+      "description": "Home page"
+    },
+    "BEST_PRACTICES.md": {
+      "type": "documentation",
+      "description": "Best practices guide for App Router"
+    },
+    "index.json": {
+      "type": "index",
+      "description": "Directory index file"
+    }
+  },
+  "statistics": {
+    "totalFiles": 17,
+    "pages": 7,
+    "apiRoutes": 10,
+    "layouts": 1,
+    "assets": 2,
+    "documentation": 2
+  },
+  "bestPractices": {
+    "file": "BEST_PRACTICES.md",
+    "summary": "Server Components, API routes, authentication, validation, error handling, dynamic routes, streaming responses"
+  }
+}

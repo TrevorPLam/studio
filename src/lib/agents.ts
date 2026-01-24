@@ -1,9 +1,9 @@
 /**
  * DEPRECATED: Optional read-only cache helpers for localStorage.
- * 
+ *
  * Per AS-CORE-001 and AS-03: Server-side is now the source of truth.
  * These functions are retained only for reading legacy data during migration.
- * 
+ *
  * DO NOT use these functions for writing - all writes must go through the API.
  * The migration code in src/app/agents/page.tsx handles moving data from localStorage to server.
  */

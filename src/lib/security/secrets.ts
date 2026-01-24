@@ -1,13 +1,13 @@
 /**
  * Secrets Management Module
- * 
+ *
  * Centralized secure handling of sensitive configuration values.
  * Per GH-AUTH-001: GitHub App private key management.
  */
 
 /**
  * Get GitHub App configuration from environment variables.
- * 
+ *
  * @returns GitHub App configuration
  * @throws Error if required values are missing
  */
@@ -34,7 +34,7 @@ export function getGitHubAppConfig() {
 
 /**
  * Check if GitHub App authentication is configured.
- * 
+ *
  * @returns true if all required config is present
  */
 export function isGitHubAppConfigured(): boolean {

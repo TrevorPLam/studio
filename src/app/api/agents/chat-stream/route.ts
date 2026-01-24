@@ -2,30 +2,30 @@
  * ============================================================================
  * AGENT CHAT API ENDPOINT (STREAMING)
  * ============================================================================
- * 
+ *
  * @file src/app/api/agents/chat-stream/route.ts
  * @route /api/agents/chat-stream
- * 
+ *
  * PURPOSE:
  * Streaming chat endpoint for AI agent interactions.
  * Returns Server-Sent Events (SSE) stream for real-time response.
- * 
+ *
  * ENDPOINT:
  * - POST /api/agents/chat-stream - Send chat message and stream response
- * 
+ *
  * AUTHENTICATION:
  * - Requires NextAuth session
- * 
+ *
  * FEATURES:
  * - Server-Sent Events (SSE) streaming
  * - Real-time token streaming
  * - Optional session persistence after completion
- * 
+ *
  * RELATED FILES:
  * - src/app/api/agents/chat/route.ts (Non-streaming version)
  * - src/ai/genkit.ts (AI model integration)
  * - src/lib/db/agent-sessions.ts (Session persistence)
- * 
+ *
  * ============================================================================
  */
 
@@ -33,7 +33,7 @@ import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import type { Session } from 'next-auth';
 import { ai, defaultModel } from '@/ai/genkit';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth/config';
 import { updateAgentSession } from '@/lib/db/agent-sessions';
 import type { AgentMessage } from '@/lib/agent/session-types';
 import { agentChatRequestSchema, validateRequest, type AgentMessageInput } from '@/lib/validation';
@@ -46,7 +46,7 @@ import { logger } from '@/lib/logger';
 
 /**
  * Extract user ID from NextAuth session.
- * 
+ *
  * @param session - NextAuth session object
  * @returns User ID or null if unavailable
  */
@@ -56,7 +56,7 @@ function getUserId(session: Session | null): string | null {
 
 /**
  * Ensure all messages have timestamps.
- * 
+ *
  * @param messages - Array of message inputs
  * @returns Array of messages with timestamps
  */
@@ -74,19 +74,19 @@ function ensureTimestamps(messages: AgentMessageInput[]): AgentMessage[] {
 
 /**
  * POST /api/agents/chat-stream
- * 
+ *
  * Send chat message to AI agent and stream response.
- * 
+ *
  * Request Body: {
  *   messages: AgentMessageInput[],
  *   model?: string,
  *   sessionId?: string
  * }
- * 
+ *
  * Response: Server-Sent Events (SSE) stream
  * Format: data: {"chunk": "text"}\n\n
  * End: data: [DONE]\n\n
- * 
+ *
  * @param request - Next.js request object
  * @returns SSE stream with AI-generated text chunks
  * @returns 401 if not authenticated
@@ -126,7 +126,8 @@ export async function POST(request: NextRequest) {
     // ========================================================================
     // EXTRACT USER MESSAGE
     // ========================================================================
-    const lastUserMessage = messages.filter((message) => message.role === 'user').slice(-1)[0]?.content || '';
+    const lastUserMessage =
+      messages.filter((message) => message.role === 'user').slice(-1)[0]?.content || '';
 
     if (!lastUserMessage) {
       return new Response(JSON.stringify({ error: 'No user message found' }), {
@@ -183,14 +184,21 @@ export async function POST(request: NextRequest) {
                 timestamp: new Date().toISOString(),
               },
             ]);
-            const updated = await updateAgentSession(userId, sessionId, { messages: persistedMessages });
+            const updated = await updateAgentSession(userId, sessionId, {
+              messages: persistedMessages,
+            });
             if (!updated) {
               logger.warn('Session not found while persisting streaming response', { sessionId });
             }
           }
         } catch (error) {
-          logger.error('Streaming error', error instanceof Error ? error : new Error(String(error)));
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'Streaming failed' })}\n\n`));
+          logger.error(
+            'Streaming error',
+            error instanceof Error ? error : new Error(String(error))
+          );
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({ error: 'Streaming failed' })}\n\n`)
+          );
           controller.close();
         }
       },
@@ -207,7 +215,10 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    logger.error('Chat stream API error', error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      'Chat stream API error',
+      error instanceof Error ? error : new Error(String(error))
+    );
 
     // ========================================================================
     // ERROR HANDLING

@@ -2,29 +2,29 @@
  * ============================================================================
  * AGENTS PAGE COMPONENT
  * ============================================================================
- * 
+ *
  * @file src/app/agents/page.tsx
  * @route /agents
  * @epic AS-CORE-001, AS-03
- * 
+ *
  * PURPOSE:
  * Main page for listing and creating agent sessions.
  * Handles legacy localStorage migration and session management.
- * 
+ *
  * FEATURES:
  * - List user's agent sessions
  * - Create new sessions
  * - Migrate legacy localStorage sessions to server
  * - Authentication-gated access
- * 
+ *
  * RELATED FILES:
  * - src/app/api/sessions/route.ts (Session API)
  * - src/app/agents/[id]/page.tsx (Session detail page)
  * - src/lib/agents.ts (Legacy localStorage helpers)
- * 
+ *
  * MIGRATION:
  * Per AS-03: Migrates localStorage sessions to server on first load.
- * 
+ *
  * ============================================================================
  */
 
@@ -59,9 +59,9 @@ import Link from 'next/link';
 
 /**
  * Legacy session format from localStorage.
- * 
+ *
  * Used during migration from localStorage to server-side storage.
- * 
+ *
  * @deprecated Use AgentSession from @/lib/agent/session-types
  */
 interface LegacyAgentSession {
@@ -79,7 +79,7 @@ interface LegacyAgentSession {
 
 /**
  * Convert legacy messages to AgentMessage format with timestamps.
- * 
+ *
  * @param messages - Legacy message array
  * @returns AgentMessage array with timestamps
  */
@@ -101,9 +101,9 @@ function withTimestamps(messages: LegacyAgentSession['messages']): AgentMessage[
 
 /**
  * Agents page component.
- * 
+ *
  * Displays list of user's agent sessions and allows creating new ones.
- * 
+ *
  * @returns Agents page JSX
  */
 export default function AgentsPage() {
@@ -129,7 +129,9 @@ export default function AgentsPage() {
   const sortedSessions = useMemo(
     () =>
       [...sessions].sort(
-        (a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime()
+        (a, b) =>
+          new Date(b.updatedAt || b.createdAt).getTime() -
+          new Date(a.updatedAt || a.createdAt).getTime()
       ),
     [sessions]
   );
@@ -146,7 +148,7 @@ export default function AgentsPage() {
 
     /**
      * Migrate legacy localStorage sessions to server.
-     * 
+     *
      * Per AS-03: Server-side is now source of truth.
      * This function runs once to migrate existing localStorage data.
      */
@@ -207,10 +209,11 @@ export default function AgentsPage() {
         try {
           // Extract goal from initial message or use session name as fallback
           // Per AS-CORE-001: goal field is required
-          const goal = legacy.messages && legacy.messages.length > 0 
-            ? legacy.messages[0].content.slice(0, 200) // Use first message as goal
-            : legacy.name; // Fallback to session name
-          
+          const goal =
+            legacy.messages && legacy.messages.length > 0
+              ? legacy.messages[0].content.slice(0, 200) // Use first message as goal
+              : legacy.name; // Fallback to session name
+
           // Create session on server
           const createResponse = await fetch('/api/sessions', {
             method: 'POST',
@@ -253,7 +256,7 @@ export default function AgentsPage() {
 
     /**
      * Load sessions from server.
-     * 
+     *
      * Runs after migration to fetch all sessions (including migrated ones).
      */
     const loadSessions = async () => {
@@ -263,7 +266,7 @@ export default function AgentsPage() {
       try {
         // Migrate legacy data first
         await migrateLegacySessions();
-        
+
         // Then load from server
         const response = await fetch('/api/sessions', { cache: 'no-store' });
         if (!response.ok) {
@@ -289,10 +292,10 @@ export default function AgentsPage() {
 
   /**
    * Create a new agent session.
-   * 
+   *
    * Per AS-CORE-001: goal field is required.
    * Uses initialPrompt as goal if provided, otherwise uses session name.
-   * 
+   *
    * @see AS-CORE-001 AS-01
    */
   const createSession = async () => {
@@ -317,7 +320,10 @@ export default function AgentsPage() {
 
       const created = (await response.json()) as AgentSession;
       // Update local state (optimistic update)
-      setSessions((prev) => [created, ...prev.filter((sessionItem) => sessionItem.id !== created.id)]);
+      setSessions((prev) => [
+        created,
+        ...prev.filter((sessionItem) => sessionItem.id !== created.id),
+      ]);
       setNewSessionName('');
       setNewSessionPrompt('');
       setIsDialogOpen(false);
@@ -427,7 +433,9 @@ export default function AgentsPage() {
             ================================================================ */}
         {isLoadingSessions ? (
           <Card>
-            <CardContent className="py-12 text-center text-muted-foreground">Loading sessions...</CardContent>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              Loading sessions...
+            </CardContent>
           </Card>
         ) : sortedSessions.length === 0 ? (
           // Empty state
@@ -456,7 +464,8 @@ export default function AgentsPage() {
                         <div>
                           <CardTitle className="text-lg">{agentSession.name}</CardTitle>
                           <CardDescription>
-                            {agentSession.model} • {new Date(agentSession.createdAt).toLocaleDateString()}
+                            {agentSession.model} •{' '}
+                            {new Date(agentSession.createdAt).toLocaleDateString()}
                           </CardDescription>
                         </div>
                       </div>
@@ -464,7 +473,9 @@ export default function AgentsPage() {
                   </CardHeader>
                   {agentSession.lastMessage && (
                     <CardContent>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{agentSession.lastMessage}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {agentSession.lastMessage}
+                      </p>
                     </CardContent>
                   )}
                 </Card>

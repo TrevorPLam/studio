@@ -2,29 +2,29 @@
  * ============================================================================
  * SESSION STEPS API ENDPOINT
  * ============================================================================
- * 
+ *
  * @file src/app/api/sessions/[id]/steps/route.ts
  * @route /api/sessions/[id]/steps
  * @epic AS-CORE-002
- * 
+ *
  * PURPOSE:
  * API endpoint for managing session step timeline.
- * 
+ *
  * ENDPOINTS:
  * - GET /api/sessions/[id]/steps - Get session steps
  * - POST /api/sessions/[id]/steps - Add step to timeline
- * 
+ *
  * AUTHENTICATION:
  * - Requires NextAuth session
  * - User isolation enforced (userId filtering)
- * 
+ *
  * RELATED FILES:
  * - src/lib/db/agent-sessions.ts (Step persistence)
  * - src/lib/agent/session-types.ts (Step type definitions)
  * - src/app/api/sessions/[id]/route.ts (Session detail endpoint)
- * 
+ *
  * @see AS-CORE-002 AS-06, AS-07
- * 
+ *
  * ============================================================================
  */
 
@@ -33,9 +33,9 @@ import { getServerSession } from 'next-auth';
 import type { Session } from 'next-auth';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth/config';
 import { getAgentSessionById, updateAgentSession } from '@/lib/db/agent-sessions';
-import type { AgentSessionStep, AgentStepType } from '@/lib/agent/session-types';
+import type { AgentSessionStep } from '@/lib/agent/session-types';
 import { ValidationError } from '@/lib/types';
 
 // ============================================================================
@@ -44,7 +44,7 @@ import { ValidationError } from '@/lib/types';
 
 /**
  * Schema for adding a step to session timeline.
- * 
+ *
  * Per AS-CORE-002:
  * - type field is required (plan/context/model/diff/apply)
  * - name field is deprecated but accepted
@@ -69,9 +69,9 @@ const addStepSchema = z.object({
  * Next.js route parameters for session steps routes.
  */
 type SessionParams = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 // ============================================================================
@@ -80,7 +80,7 @@ type SessionParams = {
 
 /**
  * Extract user ID from NextAuth session.
- * 
+ *
  * @param session - NextAuth session object
  * @returns User ID or null if unavailable
  */
@@ -94,17 +94,17 @@ function getUserId(session: Session | null): string | null {
 
 /**
  * GET /api/sessions/[id]/steps
- * 
+ *
  * Get step timeline for a session.
- * 
+ *
  * Response: { steps: AgentSessionStep[] }
- * 
+ *
  * @param _request - Next.js request object (unused)
  * @param params - Route parameters containing session ID
  * @returns JSON response with session steps
  * @returns 401 if not authenticated
  * @returns 404 if session not found
- * 
+ *
  * @see AS-CORE-002 AS-07
  */
 export async function GET(_request: NextRequest, { params }: SessionParams) {
@@ -115,7 +115,7 @@ export async function GET(_request: NextRequest, { params }: SessionParams) {
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
+
   // ========================================================================
   // USER IDENTIFICATION
   // ========================================================================
@@ -123,11 +123,12 @@ export async function GET(_request: NextRequest, { params }: SessionParams) {
   if (!userId) {
     return NextResponse.json({ error: 'User identity unavailable' }, { status: 400 });
   }
-  
+
   // ========================================================================
   // FETCH SESSION & STEPS
   // ========================================================================
-  const agentSession = await getAgentSessionById(userId, params.id);
+  const { id } = await params;
+  const agentSession = await getAgentSessionById(userId, id);
   if (!agentSession) {
     return NextResponse.json({ error: 'Session not found' }, { status: 404 });
   }
@@ -140,18 +141,18 @@ export async function GET(_request: NextRequest, { params }: SessionParams) {
 
 /**
  * POST /api/sessions/[id]/steps
- * 
+ *
  * Add a step to the session timeline.
- * 
+ *
  * Request Body: Step data (validated)
  * Response: { steps: AgentSessionStep[] } (updated timeline)
- * 
+ *
  * Per AS-CORE-002:
  * - Generates unique step ID
  * - Sets sessionId from route params
  * - Uses type field (primary), name field (deprecated)
  * - Sets timestamps (startedAt/endedAt preferred)
- * 
+ *
  * @param request - Next.js request object
  * @param params - Route parameters containing session ID
  * @returns JSON response with updated steps
@@ -159,7 +160,7 @@ export async function GET(_request: NextRequest, { params }: SessionParams) {
  * @returns 404 if session not found
  * @returns 400 if validation fails
  * @returns 500 if server error
- * 
+ *
  * @see AS-CORE-002 AS-06, AS-07
  */
 export async function POST(request: NextRequest, { params }: SessionParams) {
@@ -171,7 +172,7 @@ export async function POST(request: NextRequest, { params }: SessionParams) {
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     // ========================================================================
     // USER IDENTIFICATION
     // ========================================================================
@@ -179,21 +180,22 @@ export async function POST(request: NextRequest, { params }: SessionParams) {
     if (!userId) {
       return NextResponse.json({ error: 'User identity unavailable' }, { status: 400 });
     }
-    
+
     // ========================================================================
     // REQUEST VALIDATION
     // ========================================================================
     const body = await request.json();
     const parsed = addStepSchema.parse(body);
     const now = new Date().toISOString();
-    
+
     // ========================================================================
     // CREATE STEP OBJECT
     // ========================================================================
     // Per AS-CORE-002: proper step structure with id, sessionId, type, etc.
+    const { id } = await params;
     const step: AgentSessionStep = {
       id: randomUUID(),
-      sessionId: params.id,
+      sessionId: id,
       type: parsed.type,
       name: parsed.name, // Optional backward compatibility
       status: parsed.status,
@@ -203,11 +205,11 @@ export async function POST(request: NextRequest, { params }: SessionParams) {
       details: parsed.details,
       meta: parsed.meta,
     };
-    
+
     // ========================================================================
     // UPDATE SESSION WITH STEP
     // ========================================================================
-    const updated = await updateAgentSession(userId, params.id, { addStep: step });
+    const updated = await updateAgentSession(userId, id, { addStep: step });
     if (!updated) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
@@ -218,7 +220,11 @@ export async function POST(request: NextRequest, { params }: SessionParams) {
     // ========================================================================
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', message: error.errors[0]?.message, field: error.errors[0]?.path.join('.') },
+        {
+          error: 'Validation error',
+          message: error.errors[0]?.message,
+          field: error.errors[0]?.path.join('.'),
+        },
         { status: 400 }
       );
     }
@@ -229,7 +235,10 @@ export async function POST(request: NextRequest, { params }: SessionParams) {
       );
     }
     return NextResponse.json(
-      { error: 'Internal server error', message: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Internal server error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
