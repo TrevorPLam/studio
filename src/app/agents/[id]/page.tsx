@@ -27,7 +27,7 @@ export default function AgentSessionPage() {
     }
   }, [params.id]);
 
-  const sendMessage = async () => {
+  const sendMessage = async (useStreaming = false) => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = { role: 'user' as const, content: input };
@@ -36,21 +36,89 @@ export default function AgentSessionPage() {
     setInput('');
     setIsLoading(true);
 
-    try {
-      const response = await fetch('/api/agents/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId: params.id,
-          messages: newMessages,
-        }),
-      });
+    // Add placeholder for assistant response
+    const assistantPlaceholder = { role: 'assistant' as const, content: '' };
+    const messagesWithPlaceholder = [...newMessages, assistantPlaceholder];
+    setMessages(messagesWithPlaceholder);
 
-      const data = await response.json();
-      const assistantMessage = { role: 'assistant' as const, content: data.response };
-      const updatedMessages = [...newMessages, assistantMessage];
-      setMessages(updatedMessages);
-      saveAgentMessage(params.id as string, updatedMessages);
+    try {
+      if (useStreaming) {
+        // Use streaming endpoint (2026 enhancement)
+        const response = await fetch('/api/agents/chat-stream', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: params.id,
+            messages: newMessages,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Streaming request failed');
+        }
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let accumulatedText = '';
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                if (data === '[DONE]') {
+                  break;
+                }
+                try {
+                  const parsed = JSON.parse(data);
+                  if (parsed.chunk) {
+                    accumulatedText += parsed.chunk;
+                    // Update the last message in real-time
+                    setMessages((prev) => {
+                      const updated = [...prev];
+                      updated[updated.length - 1] = {
+                        role: 'assistant',
+                        content: accumulatedText,
+                      };
+                      return updated;
+                    });
+                  }
+                } catch (e) {
+                  // Ignore parse errors
+                }
+              }
+            }
+          }
+        }
+
+        saveAgentMessage(params.id as string, messagesWithPlaceholder.map((m, i) => 
+          i === messagesWithPlaceholder.length - 1 
+            ? { ...m, content: accumulatedText }
+            : m
+        ));
+      } else {
+        // Use regular endpoint
+        const response = await fetch('/api/agents/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: params.id,
+            messages: newMessages,
+          }),
+        });
+
+        const data = await response.json();
+        const assistantMessage = { role: 'assistant' as const, content: data.response };
+        const updatedMessages = [...newMessages, assistantMessage];
+        setMessages(updatedMessages);
+        saveAgentMessage(params.id as string, updatedMessages);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage = { role: 'assistant' as const, content: 'Sorry, I encountered an error. Please try again.' };

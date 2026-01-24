@@ -5,6 +5,7 @@ import { generate } from '@genkit-ai/ai/model';
 import { defaultModel } from '@/ai/genkit';
 import { validateRequest, agentChatRequestSchema } from '@/lib/validation';
 import { AIAPIError, ValidationError } from '@/lib/types';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,7 +62,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Error in chat API:', error);
+    logger.error('Error in chat API', error instanceof Error ? error : new Error(String(error)), {
+      model: body?.model,
+    });
     return NextResponse.json(
       { 
         error: 'Internal server error', 

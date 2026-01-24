@@ -5,6 +5,8 @@ import { GitHubClient } from '@/lib/github-client';
 import { GitHubAPIError } from '@/lib/types';
 import { ExtendedSession } from '@/lib/types';
 import { validateRequest, repositoryParamsSchema } from '@/lib/validation';
+import { cache } from '@/lib/cache';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -17,6 +19,15 @@ export async function GET(
     }
 
     const validatedParams = validateRequest(repositoryParamsSchema, params);
+    
+    // Check cache
+    const cacheKey = `repo:${validatedParams.owner}:${validatedParams.repo}`;
+    const cached = cache.get<unknown>(cacheKey);
+    if (cached) {
+      logger.debug('Returning cached repository', { owner: validatedParams.owner, repo: validatedParams.repo });
+      return NextResponse.json(cached);
+    }
+
     const client = new GitHubClient({ 
       token: session.accessToken,
       timeout: 10000,
@@ -27,6 +38,11 @@ export async function GET(
       validatedParams.owner,
       validatedParams.repo
     );
+    
+    // Cache for 5 minutes
+    cache.set(cacheKey, repository, 5 * 60 * 1000);
+    logger.info('Fetched and cached repository', { owner: validatedParams.owner, repo: validatedParams.repo });
+    
     return NextResponse.json(repository);
   } catch (error) {
     if (error instanceof GitHubAPIError) {
@@ -39,7 +55,10 @@ export async function GET(
       );
     }
 
-    console.error('Error fetching repository:', error);
+    logger.error('Error fetching repository', error instanceof Error ? error : new Error(String(error)), {
+      owner: params.owner,
+      repo: params.repo,
+    });
     return NextResponse.json(
       { error: 'Failed to fetch repository', message: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
