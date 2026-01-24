@@ -1,79 +1,59 @@
-// Flows will be imported for their side effects in this file.
-// For now, we'll use the direct API approach in the route handlers.
-// Flows can be added here later for more complex agent interactions.
+// Development-only helpers. Flows can be introduced later if needed.
 
-import { defineFlow } from 'genkit';
 import { z } from 'zod';
-import { generate } from '@genkit-ai/ai/model';
-import { defaultModel } from './genkit';
+import { ai, defaultModel } from './genkit';
 
-// Define a flow for agent chat
-export const agentChatFlow = defineFlow(
-  {
-    name: 'agentChat',
-    inputSchema: z.object({
-      messages: z.array(
-        z.object({
-          role: z.enum(['user', 'assistant']),
-          content: z.string(),
-        })
-      ),
-      model: z.string().optional(),
-    }),
-    outputSchema: z.string(),
-  },
-  async (input) => {
-    const lastUserMessage = input.messages
-      .filter((m) => m.role === 'user')
-      .slice(-1)[0]?.content;
+const agentChatInputSchema = z.object({
+  messages: z.array(
+    z.object({
+      role: z.enum(['user', 'assistant']),
+      content: z.string(),
+    })
+  ),
+  model: z.string().optional(),
+});
 
-    if (!lastUserMessage) {
-      return 'I did not receive a message. Please try again.';
-    }
+type AgentChatInput = z.infer<typeof agentChatInputSchema>;
 
-    const model = input.model || defaultModel;
+export async function agentChatFlow(input: AgentChatInput): Promise<string> {
+  const parsed = agentChatInputSchema.parse(input);
+  const lastUserMessage = parsed.messages.filter((message) => message.role === 'user').slice(-1)[0]?.content;
 
-    try {
-      const response = await generate({
-        model,
-        prompt: lastUserMessage,
-      });
-
-      return response.text || 'I apologize, but I could not generate a response.';
-    } catch (error) {
-      console.error('Error in agentChatFlow:', error);
-      return 'I encountered an error while processing your request. Please try again.';
-    }
+  if (!lastUserMessage) {
+    return 'I did not receive a message. Please try again.';
   }
-);
 
-// Define a flow for repository analysis
-export const repositoryAnalysisFlow = defineFlow(
-  {
-    name: 'repositoryAnalysis',
-    inputSchema: z.object({
-      repository: z.string(),
-      query: z.string(),
-    }),
-    outputSchema: z.string(),
-  },
-  async (input) => {
-    const prompt = `You are analyzing the GitHub repository: ${input.repository}
+  const model = parsed.model || defaultModel;
 
-User query: ${input.query}
+  try {
+    const response = await ai.generate({ model, prompt: lastUserMessage });
+    return response.text || 'I apologize, but I could not generate a response.';
+  } catch (error) {
+    console.error('Error in agentChatFlow:', error);
+    return 'I encountered an error while processing your request. Please try again.';
+  }
+}
+
+const repositoryAnalysisInputSchema = z.object({
+  repository: z.string(),
+  query: z.string(),
+});
+
+type RepositoryAnalysisInput = z.infer<typeof repositoryAnalysisInputSchema>;
+
+export async function repositoryAnalysisFlow(input: RepositoryAnalysisInput): Promise<string> {
+  const parsed = repositoryAnalysisInputSchema.parse(input);
+  const prompt = `You are analyzing the GitHub repository: ${parsed.repository}
+
+User query: ${parsed.query}
 
 Please provide helpful insights or assistance related to this repository.`;
 
-    try {
-      const response = await generate({
-        model: defaultModel,
-        prompt,
-      });
-
-      return response.text || 'I could not analyze the repository at this time.';
-    } catch (error) {
-      console.error('Error in repositoryAnalysisFlow:', error);
-      return 'I encountered an error while analyzing the repository.';
-    }
+  try {
+    const response = await ai.generate({ model: defaultModel, prompt });
+    return response.text || 'I could not analyze the repository at this time.';
+  } catch (error) {
+    console.error('Error in repositoryAnalysisFlow:', error);
+    return 'I encountered an error while analyzing the repository.';
   }
-);
+}
