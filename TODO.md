@@ -23,23 +23,26 @@
 **Legend:** `[x]` = Complete | `[~]` = Partially Implemented | `[ ]` = Not Started
 
 **Summary:**
-- **Fully Implemented:** 2 tasks (AS-02, AS-04, AS-05, AS-06, AS-07, AS-08)
-- **Partially Implemented:** 4 tasks (AS-CORE-001, AS-CORE-002, P0 Kill-switch, P0 Path policy, RA-SAFE-004)
-- **Not Implemented:** ~46+ tasks
+- **Fully Implemented:** 6 tasks (AS-01, AS-02, AS-03, AS-04, AS-05, AS-06, AS-07, AS-08, RA-11, RA-12, GH-01, GH-02, GH-03, GH-04)
+- **Partially Implemented:** 2 tasks (AS-CORE-001, AS-CORE-002, P0 Kill-switch, P0 Path policy)
+- **Not Implemented:** ~44+ tasks
 
 **Key Implementations:**
 - ✅ Server-side session persistence with CRUD operations
-- ✅ Session state machine with transition enforcement
-- ✅ Step timeline API and persistence
+- ✅ Session state machine with transition enforcement (including retry from failed)
+- ✅ Step timeline API and persistence with proper type structure
+- ✅ Session schema with required goal field and repo binding
+- ✅ localStorage removed as source-of-truth (read-only cache only)
+- ✅ Path policy module with allowlist/forbidden prefixes (RA-SAFE-004)
+- ✅ GitHub App JWT authentication with installation token caching (GH-AUTH-001)
 - ✅ Basic kill-switch (read-only mode) for session writes
-- ✅ Basic path policy for data directory protection
 
 **Critical Gaps:**
 - ❌ Preview/Apply workflow (RA-PREV-003, GH-WRITE-002)
 - ❌ Approval system (AS-CTRL-003)
-- ❌ GitHub App JWT authentication (GH-AUTH-001)
 - ❌ Security frameworks (PALADIN, Unicode sanitization)
 - ❌ AI integration (structured output, context building)
+- ❌ Path policy enforcement at preview/apply endpoints (RA-13)
 
 ---
 
@@ -88,7 +91,7 @@ A task is Done only if:
   - **Status:** Basic implementation exists in `src/lib/db/agent-sessions.ts` (`setAgentReadOnlyMode()`), but not centralized. Missing: Redis-based feature flag, admin API endpoint, protection for all mutative actions (currently only session writes).
 - [ ] **P0 OTel GenAI spans:** gen_ai.system, gen_ai.request.model, gen_ai.usage.* on every LLM call
 - [~] **P0 Path policy:** allowlist + do-not-touch enforced (preview + apply)
-  - **Status:** Basic path checking exists in `src/lib/db/agent-sessions.ts` for data directory only. Missing: separate `src/lib/security/path-policy.ts` module, repository path allowlist/forbidden prefixes, enforcement at preview/apply level.
+  - **Status:** Path policy module complete in `src/lib/security/path-policy.ts`. Missing: enforcement at preview/apply endpoints (pending endpoint creation - RA-13).
 - [ ] **P0 Observability:** correlated logs by sessionId + requestId + (if webhook) deliveryId
 - [ ] **P0 Hallucination detection:** verify all paths exist before preview
 - [ ] **P0 Async webhook processing:** 202 response within 10s
@@ -112,12 +115,12 @@ A task is Done only if:
 - `src/app/agents/page.tsx`
 - `src/app/agents/[id]/page.tsx`
 **Checklist:**
-- [~] **[AS-01]** Define schema: session, repo binding, goal, state
-  - **Status:** Schema exists in `src/lib/agent/session-types.ts`, but differs: uses `repository?: string` instead of `repo: { owner, name, baseBranch }`, missing `goal` field
+- [x] **[AS-01]** Define schema: session, repo binding, goal, state
+  - **Status:** ✅ Complete - Schema updated in `src/lib/agent/session-types.ts`: `goal` is required, `repo` is primary format, `repository` kept for backward compatibility
 - [x] **[AS-02]** Implement CRUD store (create/get/list/update)
   - **Status:** ✅ Implemented in `src/lib/db/agent-sessions.ts`
-- [~] **[AS-03]** Remove localStorage as source-of-truth (optional cache only)
-  - **Status:** Server-side persistence exists, but client code may still use localStorage (needs verification)
+- [x] **[AS-03]** Remove localStorage as source-of-truth (optional cache only)
+  - **Status:** ✅ Complete - `src/lib/agents.ts` converted to read-only cache helpers, write functions removed, migration code handles legacy data
 - [x] **[AS-04]** Add API: create session + list sessions + fetch by id
   - **Status:** ✅ Implemented: `src/app/api/sessions/route.ts` (GET/POST) and `src/app/api/sessions/[id]/route.ts` (GET/PATCH)
 **Code Snippet:**
@@ -310,10 +313,10 @@ Preview endpoint returns diffs without writing to GitHub
 **Expected Files:**
 - `src/lib/security/path-policy.ts`
 **Checklist:**
-- [~] **[RA-11]** Allowlist prefixes (docs/, .repo/, README.md)
-  - **Status:** Basic path checking exists in `agent-sessions.ts` for data directory only. Missing: repository path allowlist prefixes
-- [~] **[RA-12]** Do-not-touch list (package.json, lockfiles, workflows) unless explicit override
-  - **Status:** Basic forbidden list exists in `agent-sessions.ts` (package.json, lockfiles). Missing: workflows protection, repository-level enforcement
+- [x] **[RA-11]** Allowlist prefixes (docs/, .repo/, README.md)
+  - **Status:** ✅ Complete - Implemented in `src/lib/security/path-policy.ts` with `ALLOWED_PREFIXES` constant
+- [x] **[RA-12]** Do-not-touch list (package.json, lockfiles, workflows) unless explicit override
+  - **Status:** ✅ Complete - Implemented in `src/lib/security/path-policy.ts` with `FORBIDDEN_PREFIXES` constant, supports override via options
 - [ ] **[RA-13]** Enforce at preview AND apply
   - **Status:** Not implemented - preview/apply endpoints don't exist yet
 **Code Snippet:**
@@ -817,10 +820,14 @@ CI job must pass before merge to main.
 - `src/lib/github-app.ts`
 - `src/lib/security/secrets.ts`
 **Checklist:**
-- [ ] **[GH-01]** Generate GitHub App JWT from private key
-- [ ] **[GH-02]** Exchange JWT for installation token (repo-scoped)
-- [ ] **[GH-03]** Cache token; expire 60s early
-- [ ] **[GH-04]** Split reader vs actor permissions (where feasible)
+- [x] **[GH-01]** Generate GitHub App JWT from private key
+  - **Status:** ✅ Complete - Implemented in `src/lib/github-app.ts` using `@octokit/auth-app`
+- [x] **[GH-02]** Exchange JWT for installation token (repo-scoped)
+  - **Status:** ✅ Complete - `getInstallationToken()` function in `src/lib/github-app.ts`
+- [x] **[GH-03]** Cache token; expire 60s early
+  - **Status:** ✅ Complete - Token caching with 60s early expiration buffer implemented
+- [x] **[GH-04]** Split reader vs actor permissions (where feasible)
+  - **Status:** ✅ Complete - `getReaderToken()` and `getActorToken()` functions with different permission scopes
 **Code Snippet:**
 ```typescript
 function isStale

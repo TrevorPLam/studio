@@ -1,21 +1,100 @@
-// --- Kill Switch / Read-Only Mode ---
+/**
+ * ============================================================================
+ * AGENT SESSIONS DATABASE MODULE
+ * ============================================================================
+ * 
+ * @file src/lib/db/agent-sessions.ts
+ * @module agent-sessions
+ * @epic AS-CORE-001, AS-CORE-002
+ * 
+ * PURPOSE:
+ * Server-side persistence layer for agent sessions with CRUD operations,
+ * state machine enforcement, and step timeline management.
+ * 
+ * DEPENDENCIES:
+ * - @/lib/agent/session-types (AgentSession, AgentSessionState, etc.)
+ * - @/lib/validation (CreateAgentSession, AgentMessageInput)
+ * 
+ * RELATED FILES:
+ * - src/app/api/sessions/route.ts (API endpoints)
+ * - src/app/api/sessions/[id]/route.ts (Session detail API)
+ * - src/app/api/sessions/[id]/steps/route.ts (Step timeline API)
+ * - src/lib/agent/session-types.ts (Type definitions)
+ * 
+ * SECURITY:
+ * - User isolation enforced (userId filtering)
+ * - Kill-switch protection (read-only mode)
+ * - Path policy for file system access
+ * - Fail-closed state transitions
+ * 
+ * STORAGE:
+ * - File-based JSON storage in .data/agent-sessions.json
+ * - In-memory cache for performance
+ * - Write queue for concurrent write safety
+ * 
+ * ============================================================================
+ */
+
+// ============================================================================
+// SECTION: KILL SWITCH / READ-ONLY MODE
+// ============================================================================
+// Per P0 Kill-switch: feature-flag disables all mutative actions globally ≤ 5s
+// TODO: Centralize kill-switch, add Redis-based feature flag, admin API endpoint
+
 let AGENT_READ_ONLY_MODE = false;
+
+/**
+ * Enable/disable read-only mode (kill-switch).
+ * When enabled, all write operations are blocked.
+ * 
+ * @param enabled - true to enable read-only mode, false to disable
+ * 
+ * @see TODO.md P0 Kill-switch for full implementation requirements
+ */
 export function setAgentReadOnlyMode(enabled: boolean) {
   AGENT_READ_ONLY_MODE = enabled;
 }
+
+/**
+ * Assert that the system is not in read-only mode.
+ * Throws error if kill-switch is enabled.
+ * 
+ * @throws Error if read-only mode is enabled
+ */
 function assertNotReadOnly() {
   if (AGENT_READ_ONLY_MODE) {
     throw new Error('Agent endpoints are in read-only mode');
   }
 }
+
+// ============================================================================
+// SECTION: IMPORTS
+// ============================================================================
+
 import { randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
+import type { AgentMessage, AgentSession, AgentSessionState, AgentRepositoryBinding } from '@/lib/agent/session-types';
+import type { AgentMessageInput, CreateAgentSession } from '@/lib/validation';
 
-// --- Path Policy Guardrails ---
+// ============================================================================
+// SECTION: PATH POLICY GUARDRAILS (FILESYSTEM-LEVEL)
+// ============================================================================
+// NOTE: This is for filesystem path protection (data directory).
+// For repository path policy, see @/lib/security/path-policy.ts (RA-SAFE-004)
+
+/**
+ * Allowed data directories for file operations.
+ * Sessions file must be within these directories.
+ */
 const ALLOWED_DATA_DIRS = [
   path.join(process.cwd(), '.data'),
 ];
+
+/**
+ * Files that cannot be modified by the agent system.
+ * Protects critical configuration files.
+ */
 const DO_NOT_TOUCH_FILES = [
   path.join(process.cwd(), '.env'),
   path.join(process.cwd(), 'package.json'),
@@ -23,6 +102,12 @@ const DO_NOT_TOUCH_FILES = [
   path.join(process.cwd(), 'yarn.lock'),
 ];
 
+/**
+ * Check if a filesystem path is allowed for agent operations.
+ * 
+ * @param targetPath - Absolute filesystem path
+ * @returns true if path is allowed
+ */
 function isPathAllowed(targetPath: string): boolean {
   const normalized = path.resolve(targetPath);
   // Must be under an allowed data dir
@@ -31,21 +116,52 @@ function isPathAllowed(targetPath: string): boolean {
   const forbidden = DO_NOT_TOUCH_FILES.some((file) => normalized === file);
   return allowed && !forbidden;
 }
-import type { AgentMessage, AgentSession, AgentSessionState, AgentRepositoryBinding } from '@/lib/agent/session-types';
-import type { AgentMessageInput, CreateAgentSession } from '@/lib/validation';
 
+// ============================================================================
+// SECTION: TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * File structure for sessions storage.
+ */
 interface SessionsFile {
   sessions: AgentSession[];
 }
+
+// ============================================================================
+// SECTION: CONSTANTS
+// ============================================================================
 
 const DATA_DIR = path.join(process.cwd(), '.data');
 const SESSIONS_FILE = path.join(DATA_DIR, 'agent-sessions.json');
 const DEFAULT_MODEL = 'googleai/gemini-2.5-flash';
 const DEFAULT_STATE: AgentSessionState = 'created';
 
+// ============================================================================
+// SECTION: CACHE & QUEUE MANAGEMENT
+// ============================================================================
+
+/**
+ * In-memory cache for sessions data.
+ * Reduces file I/O for read operations.
+ */
 let cache: SessionsFile | null = null;
+
+/**
+ * Write queue to serialize concurrent write operations.
+ * Prevents file corruption from race conditions.
+ */
 let writeQueue: Promise<void> = Promise.resolve();
 
+// ============================================================================
+// SECTION: FILE OPERATIONS
+// ============================================================================
+
+/**
+ * Ensure the data file exists, creating it if necessary.
+ * 
+ * @throws Error if path policy violation or read-only mode
+ */
 async function ensureDataFile() {
   assertNotReadOnly();
   if (!isPathAllowed(SESSIONS_FILE)) {
@@ -60,6 +176,11 @@ async function ensureDataFile() {
   }
 }
 
+/**
+ * Load sessions from file, using cache if available.
+ * 
+ * @returns SessionsFile with all sessions
+ */
 async function loadSessions(): Promise<SessionsFile> {
   if (cache) {
     return cache;
@@ -80,6 +201,12 @@ async function loadSessions(): Promise<SessionsFile> {
   return cache;
 }
 
+/**
+ * Persist sessions to file with write queue serialization.
+ * 
+ * @param data - SessionsFile to persist
+ * @throws Error if path policy violation or read-only mode
+ */
 async function persistSessions(data: SessionsFile) {
   assertNotReadOnly();
   if (!isPathAllowed(SESSIONS_FILE)) {
@@ -90,6 +217,17 @@ async function persistSessions(data: SessionsFile) {
   await writeQueue;
 }
 
+// ============================================================================
+// SECTION: HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Compute the last message preview for a session.
+ * Used for session list display.
+ * 
+ * @param messages - Array of agent messages
+ * @returns Last message content (truncated to 100 chars) or undefined
+ */
 function computeLastMessage(messages: AgentMessage[]): string | undefined {
   const lastUserOrAssistant = [...messages]
     .reverse()
@@ -100,6 +238,13 @@ function computeLastMessage(messages: AgentMessage[]): string | undefined {
   return lastUserOrAssistant.content.slice(0, 100);
 }
 
+/**
+ * Normalize message inputs to AgentMessage format.
+ * Ensures timestamps are present.
+ * 
+ * @param messages - Array of message inputs
+ * @returns Array of normalized AgentMessage objects
+ */
 function normaliseMessages(messages: AgentMessageInput[]): AgentMessage[] {
   return messages.map((message) => ({
     role: message.role,
@@ -108,6 +253,18 @@ function normaliseMessages(messages: AgentMessageInput[]): AgentMessage[] {
   }));
 }
 
+// ============================================================================
+// SECTION: PUBLIC CRUD OPERATIONS
+// ============================================================================
+
+/**
+ * List all sessions for a user, sorted by most recently updated.
+ * 
+ * @param userId - User identifier (from auth session)
+ * @returns Array of user's sessions, sorted by updatedAt descending
+ * 
+ * @see AS-CORE-001 AS-02
+ */
 export async function listAgentSessions(userId: string): Promise<AgentSession[]> {
   const data = await loadSessions();
   return data.sessions
@@ -115,11 +272,35 @@ export async function listAgentSessions(userId: string): Promise<AgentSession[]>
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 }
 
+/**
+ * Get a specific session by ID, enforcing user isolation.
+ * 
+ * @param userId - User identifier (from auth session)
+ * @param sessionId - Session identifier
+ * @returns Session if found and belongs to user, null otherwise
+ * 
+ * @see AS-CORE-001 AS-02
+ */
 export async function getAgentSessionById(userId: string, sessionId: string): Promise<AgentSession | null> {
   const data = await loadSessions();
   return data.sessions.find((session) => session.userId === userId && session.id === sessionId) ?? null;
 }
 
+/**
+ * Create a new agent session.
+ * 
+ * Per AS-CORE-001:
+ * - Generates UUID if id not provided
+ * - Sets default state to 'created'
+ * - Requires goal field (from input.goal or input.initialPrompt)
+ * - Supports repo binding (primary) and repository string (deprecated)
+ * 
+ * @param userId - User identifier (from auth session)
+ * @param input - Session creation input
+ * @returns Created session (or existing if duplicate ID)
+ * 
+ * @see AS-CORE-001 AS-01, AS-02
+ */
 export async function createAgentSession(userId: string, input: CreateAgentSession): Promise<AgentSession> {
   const data = await loadSessions();
   const now = new Date().toISOString();
@@ -163,8 +344,15 @@ export async function createAgentSession(userId: string, input: CreateAgentSessi
   return session;
 }
 
+// ============================================================================
+// SECTION: UPDATE OPERATIONS & STATE MACHINE
+// ============================================================================
+
 import type { AgentSessionStep } from '@/lib/agent/session-types';
 
+/**
+ * Input type for session updates.
+ */
 interface UpdateAgentSessionInput {
   name?: string;
   model?: string;
@@ -177,6 +365,32 @@ interface UpdateAgentSessionInput {
   addStep?: AgentSessionStep;
 }
 
+/**
+ * Update an existing agent session.
+ * 
+ * Per AS-CORE-002:
+ * - Enforces state machine transitions (fail-closed)
+ * - Allows retry from failed state
+ * - Manages step timeline
+ * - Preserves unchanged fields
+ * 
+ * State Transitions:
+ * - created → planning, failed
+ * - planning → preview_ready, failed
+ * - preview_ready → awaiting_approval, planning (retry), failed
+ * - awaiting_approval → applying, preview_ready (revision), failed
+ * - applying → applied, failed
+ * - applied → (terminal, no transitions)
+ * - failed → planning (retry)
+ * 
+ * @param userId - User identifier (from auth session)
+ * @param sessionId - Session identifier
+ * @param updates - Fields to update
+ * @returns Updated session or null if not found
+ * @throws Error if invalid state transition
+ * 
+ * @see AS-CORE-002 AS-05, AS-06, AS-08
+ */
 export async function updateAgentSession(
   userId: string,
   sessionId: string,
@@ -193,15 +407,19 @@ export async function updateAgentSession(
   const nextMessages = updates.messages ? normaliseMessages(updates.messages) : current.messages;
   const updatedAt = new Date().toISOString();
 
-  // --- Session state transition enforcement ---
+  // ========================================================================
+  // STATE MACHINE TRANSITION ENFORCEMENT
+  // ========================================================================
   // Per AS-CORE-002: allow retry from failed state
+  // Fail-closed: reject invalid transitions with descriptive error
+  
   const allowedTransitions: Record<string, string[]> = {
     created: ['planning', 'failed'],
     planning: ['preview_ready', 'failed'],
     preview_ready: ['awaiting_approval', 'planning', 'failed'], // Allow returning to planning
     awaiting_approval: ['applying', 'preview_ready', 'failed'], // Allow returning to preview
     applying: ['applied', 'failed'],
-    applied: [],
+    applied: [], // Terminal state
     failed: ['planning'], // Allow retry per AS-CORE-002
   };
 
@@ -217,8 +435,11 @@ export async function updateAgentSession(
     nextState = updates.state;
   }
 
-
-  // Step timeline logic
+  // ========================================================================
+  // STEP TIMELINE MANAGEMENT
+  // ========================================================================
+  // Per AS-CORE-002 AS-06: persist steps with type, status, timestamps
+  
   let nextSteps = Array.isArray(current.steps) ? [...current.steps] : [];
   if (Array.isArray(updates.steps)) {
     nextSteps = updates.steps;
@@ -227,6 +448,10 @@ export async function updateAgentSession(
     nextSteps.push(updates.addStep);
   }
 
+  // ========================================================================
+  // BUILD UPDATED SESSION
+  // ========================================================================
+  
   const updated: AgentSession = {
     ...current,
     name: updates.name ?? current.name,
