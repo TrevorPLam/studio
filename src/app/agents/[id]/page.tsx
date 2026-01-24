@@ -254,7 +254,7 @@ export default function AgentSessionPage() {
           ) : (
             sortedMessages.map((message, index) => (
               <Card
-                key={`${message.timestamp}-${index}`}
+                key={index}
                 className={message.role === 'user' ? 'ml-auto max-w-[80%]' : 'mr-auto max-w-[80%]'}
               >
                 <CardContent className="p-4">
