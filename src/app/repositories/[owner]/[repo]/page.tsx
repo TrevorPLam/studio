@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
@@ -36,8 +36,8 @@ export default function RepositoryPage() {
   const params = useParams();
   const router = useRouter();
   const { data: session } = useSession();
-  const owner = params.owner as string;
-  const repo = params.repo as string;
+  const owner = params?.owner as string;
+  const repo = params?.repo as string;
 
   const [repository, setRepository] = useState<Repository | null>(null);
   const [commits, setCommits] = useState<Commit[]>([]);
@@ -45,14 +45,7 @@ export default function RepositoryPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('code');
 
-  useEffect(() => {
-    if (session?.accessToken) {
-      loadRepository();
-      loadCommits();
-    }
-  }, [session, owner, repo, loadRepository, loadCommits]);
-
-  const loadRepository = async () => {
+  const loadRepository = useCallback(async () => {
     if (!session?.accessToken) return;
 
     try {
@@ -73,9 +66,9 @@ export default function RepositoryPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [session?.accessToken, owner, repo]);
 
-  const loadCommits = async () => {
+  const loadCommits = useCallback(async () => {
     if (!session?.accessToken) return;
 
     try {
@@ -92,7 +85,14 @@ export default function RepositoryPage() {
     } catch (err) {
       console.error('Error loading commits:', err);
     }
-  };
+  }, [session?.accessToken, owner, repo]);
+
+  useEffect(() => {
+    if (session?.accessToken && owner && repo) {
+      loadRepository();
+      loadCommits();
+    }
+  }, [session?.accessToken, owner, repo, loadRepository, loadCommits]);
 
   if (isLoading) {
     return (

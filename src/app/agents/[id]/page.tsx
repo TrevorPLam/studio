@@ -20,7 +20,7 @@ export default function AgentSessionPage() {
   const params = useParams();
   const router = useRouter();
   const { data: session, status } = useSession();
-  const sessionId = params.id as string;
+  const sessionId = params?.id as string;
 
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [input, setInput] = useState('');

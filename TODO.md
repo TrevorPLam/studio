@@ -13,21 +13,21 @@
 - [x] Add API routes for creating, listing, fetching, and patching sessions.
 - [x] Persist chat responses to the server session store (regular + streaming endpoints).
 
+### AS-CORE-002 — Lifecycle + Step Timeline (P0)
+- [x] Define allowed session state transitions and enforce them fail-closed.
+- [x] Persist step timeline entries (started/succeeded/failed) per session.
+- [x] Expose session steps via `/api/sessions/[id]/steps`.
+
+### Security hardening (P0/P1)
+- [x] Implement path policy guardrails (allowlist + do-not-touch) for any mutative file operations.
+- [x] Add a kill switch / read-only mode guard for mutative agent endpoints.
+
 ### Tooling & Type Safety
 - [x] Configure ESLint explicitly via `.eslintrc.json` and compatible dev dependencies.
 - [x] Resolve TypeScript errors caused by outdated Genkit imports and NextAuth session typing.
 - [x] Validate the change set with `npm run typecheck`, `npm run lint`, and `npm run build`.
 
-## Open — Next highest-value tasks
-
-### AS-CORE-002 — Lifecycle + Step Timeline (P0)
-- [ ] Define allowed session state transitions and enforce them fail-closed.
-- [ ] Persist step timeline entries (started/succeeded/failed) per session.
-- [ ] Expose session steps via `/api/sessions/[id]/steps`.
-
-### Security hardening (P0/P1)
-- [ ] Implement path policy guardrails (allowlist + do-not-touch) for any mutative file operations.
-- [ ] Add a kill switch / read-only mode guard for mutative agent endpoints.
-
 ### Follow-ups
-- [ ] Address remaining ESLint warnings around custom fonts and hook dependency arrays.
+- [x] Address remaining ESLint warnings around custom fonts and hook dependency arrays.
+
+## Open — Next highest-value tasks

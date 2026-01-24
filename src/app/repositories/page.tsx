@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,13 +28,7 @@ export default function RepositoriesPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (session?.accessToken) {
-      loadRepositories();
-    }
-  }, [session, loadRepositories]);
-
-  const loadRepositories = async () => {
+  const loadRepositories = useCallback(async () => {
     if (!session?.accessToken) return;
     
     setIsLoading(true);
@@ -57,7 +51,13 @@ export default function RepositoriesPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [session?.accessToken]);
+
+  useEffect(() => {
+    if (session?.accessToken) {
+      loadRepositories();
+    }
+  }, [session?.accessToken, loadRepositories]);
 
   if (status === 'loading') {
     return (
