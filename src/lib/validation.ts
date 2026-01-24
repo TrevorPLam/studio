@@ -39,10 +39,13 @@ export const createAgentSessionSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, 'Session name is required').max(100, 'Session name too long'),
   model: z.string().optional(),
-  goal: z.string().min(1, 'Goal is required'), // Required per AS-CORE-001
+  goal: z.string().min(1, 'Goal is required').optional(), // Required per AS-CORE-001, but can be derived from initialPrompt
   repo: agentRepositoryBindingSchema.optional(), // Primary format
   repository: z.string().optional(), // Deprecated: kept for backward compatibility
-  initialPrompt: z.string().optional(),
+  initialPrompt: z.string().optional(), // Can be used as goal if goal not provided
+}).refine((data) => data.goal || data.initialPrompt, {
+  message: 'Either goal or initialPrompt must be provided',
+  path: ['goal'],
 });
 
 export type CreateAgentSession = z.infer<typeof createAgentSessionSchema>;

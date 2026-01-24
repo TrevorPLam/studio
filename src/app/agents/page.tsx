@@ -111,12 +111,18 @@ export default function AgentsPage() {
         }
 
         try {
+          // Extract goal from initial message or use session name as fallback
+          const goal = legacy.messages && legacy.messages.length > 0 
+            ? legacy.messages[0].content.slice(0, 200) // Use first message as goal
+            : legacy.name; // Fallback to session name
+          
           const createResponse = await fetch('/api/sessions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               id: legacy.id,
               name: legacy.name,
+              goal: goal, // Per AS-CORE-001: goal is required
               model: legacy.model,
               repository: legacy.repository,
             }),
@@ -179,7 +185,8 @@ export default function AgentsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: newSessionName.trim(),
-          initialPrompt: newSessionPrompt.trim() || undefined,
+          goal: newSessionPrompt.trim() || newSessionName.trim(), // Per AS-CORE-001: goal is required
+          initialPrompt: newSessionPrompt.trim() || undefined, // Keep for backward compatibility
         }),
       });
 
