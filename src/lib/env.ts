@@ -11,6 +11,10 @@ export const env = {
     clientId: process.env.GITHUB_CLIENT_ID || '',
     clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
     callbackUrl: process.env.GITHUB_OAUTH_CALLBACK_URL || 'http://localhost:9002/api/auth/callback/github',
+    // GitHub App configuration (GH-AUTH-001)
+    appId: process.env.GITHUB_APP_ID || '',
+    appPrivateKey: process.env.GITHUB_APP_PRIVATE_KEY || '',
+    appInstallationId: process.env.GITHUB_APP_INSTALLATION_ID || '',
   },
   nextAuth: {
     url: process.env.NEXTAUTH_URL || 'http://localhost:9002',
