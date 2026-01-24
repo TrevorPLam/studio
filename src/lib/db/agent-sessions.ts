@@ -194,14 +194,15 @@ export async function updateAgentSession(
   const updatedAt = new Date().toISOString();
 
   // --- Session state transition enforcement ---
+  // Per AS-CORE-002: allow retry from failed state
   const allowedTransitions: Record<string, string[]> = {
     created: ['planning', 'failed'],
     planning: ['preview_ready', 'failed'],
-    preview_ready: ['awaiting_approval', 'failed'],
-    awaiting_approval: ['applying', 'failed'],
+    preview_ready: ['awaiting_approval', 'planning', 'failed'], // Allow returning to planning
+    awaiting_approval: ['applying', 'preview_ready', 'failed'], // Allow returning to preview
     applying: ['applied', 'failed'],
     applied: [],
-    failed: [],
+    failed: ['planning'], // Allow retry per AS-CORE-002
   };
 
   let nextState = current.state;
