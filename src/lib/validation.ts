@@ -25,12 +25,23 @@ export const repositoryParamsSchema = z.object({
 
 export type RepositoryParams = z.infer<typeof repositoryParamsSchema>;
 
+// Repository Binding Schema (per AS-CORE-001)
+export const agentRepositoryBindingSchema = z.object({
+  owner: z.string().min(1, 'Repository owner is required'),
+  name: z.string().min(1, 'Repository name is required'),
+  baseBranch: z.string().min(1, 'Base branch is required'),
+});
+
+export type AgentRepositoryBinding = z.infer<typeof agentRepositoryBindingSchema>;
+
 // Agent Session Validation
 export const createAgentSessionSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, 'Session name is required').max(100, 'Session name too long'),
   model: z.string().optional(),
-  repository: z.string().optional(),
+  goal: z.string().min(1, 'Goal is required'), // Required per AS-CORE-001
+  repo: agentRepositoryBindingSchema.optional(), // Primary format
+  repository: z.string().optional(), // Deprecated: kept for backward compatibility
   initialPrompt: z.string().optional(),
 });
 

@@ -1,10 +1,18 @@
 export type AgentSessionStepStatus = 'started' | 'succeeded' | 'failed';
 
+export type AgentStepType = 'plan' | 'context' | 'model' | 'diff' | 'apply';
+
 export interface AgentSessionStep {
-  name: string;
+  id: string;
+  sessionId: string;
+  type: AgentStepType; // Per AS-CORE-002, should use type instead of name
+  name?: string; // Deprecated: kept for backward compatibility
   status: AgentSessionStepStatus;
   timestamp: string;
+  startedAt: string; // Per AS-CORE-002
+  endedAt?: string; // Per AS-CORE-002
   details?: string;
+  meta?: Record<string, unknown>; // Per AS-CORE-002
 }
 export type AgentSessionState =
   | 'created'
@@ -34,14 +42,15 @@ export interface AgentSession {
   userId: string;
   name: string;
   model: string;
-  goal?: string;
-  repo?: AgentRepositoryBinding;
-  repository?: string;
+  goal: string; // Required field per AS-CORE-001
+  repo?: AgentRepositoryBinding; // Primary format for repository binding
+  repository?: string; // Deprecated: kept for backward compatibility
   state: AgentSessionState;
   messages: AgentMessage[];
   steps?: AgentSessionStep[];
   previewId?: string;
   pr?: { number: number; url: string; head: string; base: string };
+  headBranch?: string; // Branch name for the session's work
   lastMessage?: string;
   createdAt: string;
   updatedAt: string;

@@ -10,7 +10,13 @@ import { ValidationError } from '@/lib/types';
 const updateAgentSessionSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   model: z.string().min(1).optional(),
-  repository: z.string().optional(),
+  goal: z.string().min(1).optional(), // Per AS-CORE-001
+  repo: z.object({
+    owner: z.string().min(1),
+    name: z.string().min(1),
+    baseBranch: z.string().min(1),
+  }).optional(), // Per AS-CORE-001
+  repository: z.string().optional(), // Deprecated
   messages: z.array(agentMessageSchema).optional(),
 });
 

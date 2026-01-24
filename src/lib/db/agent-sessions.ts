@@ -31,7 +31,7 @@ function isPathAllowed(targetPath: string): boolean {
   const forbidden = DO_NOT_TOUCH_FILES.some((file) => normalized === file);
   return allowed && !forbidden;
 }
-import type { AgentMessage, AgentSession, AgentSessionState } from '@/lib/agent/session-types';
+import type { AgentMessage, AgentSession, AgentSessionState, AgentRepositoryBinding } from '@/lib/agent/session-types';
 import type { AgentMessageInput, CreateAgentSession } from '@/lib/validation';
 
 interface SessionsFile {
@@ -145,7 +145,9 @@ export async function createAgentSession(userId: string, input: CreateAgentSessi
     userId,
     name: input.name,
     model: input.model || DEFAULT_MODEL,
-    repository: input.repository,
+    goal: input.goal || input.initialPrompt || '', // Required field per AS-CORE-001
+    repo: input.repo, // Primary format per AS-CORE-001
+    repository: input.repository, // Deprecated: kept for backward compatibility
     state: DEFAULT_STATE,
     messages,
     lastMessage: computeLastMessage(messages),
@@ -166,7 +168,9 @@ import type { AgentSessionStep } from '@/lib/agent/session-types';
 interface UpdateAgentSessionInput {
   name?: string;
   model?: string;
-  repository?: string;
+  goal?: string; // Per AS-CORE-001
+  repo?: AgentRepositoryBinding; // Per AS-CORE-001
+  repository?: string; // Deprecated
   state?: AgentSessionState;
   messages?: AgentMessageInput[];
   steps?: AgentSessionStep[];
@@ -224,7 +228,11 @@ export async function updateAgentSession(
 
   const updated: AgentSession = {
     ...current,
-    ...updates,
+    name: updates.name ?? current.name,
+    model: updates.model ?? current.model,
+    goal: updates.goal ?? current.goal, // Ensure goal is always present
+    repo: updates.repo ?? current.repo,
+    repository: updates.repository ?? current.repository,
     state: nextState,
     messages: nextMessages,
     steps: nextSteps,
