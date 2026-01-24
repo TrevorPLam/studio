@@ -35,6 +35,7 @@ import { authOptions } from '@/lib/auth/config';
 import { createAgentSession, listAgentSessions } from '@/lib/db/agent-sessions';
 import { createAgentSessionSchema, validateRequest } from '@/lib/validation';
 import { ValidationError } from '@/lib/types';
+import { setUserId, setSessionId } from '@/lib/observability/correlation';
 
 // ============================================================================
 // SECTION: HELPER FUNCTIONS
@@ -86,6 +87,9 @@ export async function GET() {
     return NextResponse.json({ error: 'User identity unavailable' }, { status: 400 });
   }
 
+  // Set user ID in correlation context
+  setUserId(userId);
+
   // ========================================================================
   // FETCH SESSIONS
   // ========================================================================
@@ -131,6 +135,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User identity unavailable' }, { status: 400 });
     }
 
+    // Set user ID in correlation context
+    setUserId(userId);
+
     // ========================================================================
     // REQUEST VALIDATION
     // ========================================================================
@@ -141,6 +148,9 @@ export async function POST(request: NextRequest) {
     // CREATE SESSION
     // ========================================================================
     const created = await createAgentSession(userId, input);
+
+    // Set session ID in correlation context
+    setSessionId(created.id);
 
     return NextResponse.json(created, { status: 201 });
   } catch (error) {

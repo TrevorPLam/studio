@@ -107,7 +107,8 @@ A task is Done only if:
 - [ ] **P0 OTel GenAI spans:** gen_ai.system, gen_ai.request.model, gen_ai.usage.\* on every LLM call
 - [~] **P0 Path policy:** allowlist + do-not-touch enforced (preview + apply)
   - **Status:** Path policy module complete in `src/lib/security/path-policy.ts`. Missing: enforcement at preview/apply endpoints (pending endpoint creation - RA-13).
-- [ ] **P0 Observability:** correlated logs by sessionId + requestId + (if webhook) deliveryId
+- [x] **P0 Observability:** correlated logs by sessionId + requestId + (if webhook) deliveryId ✅
+  - **Status:** ✅ Complete - Correlation IDs implemented with AsyncLocalStorage, middleware adds requestId, API routes set sessionId/userId, logger includes correlation IDs in output
 - [ ] **P0 Hallucination detection:** verify all paths exist before preview
 - [ ] **P0 Async webhook processing:** 202 response within 10s
 - [ ] **P0 IP allowlist:** restrict webhook endpoint to GitHub IPs

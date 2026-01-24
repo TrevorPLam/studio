@@ -36,6 +36,7 @@ import { authOptions } from '@/lib/auth/config';
 import { getAgentSessionById, updateAgentSession } from '@/lib/db/agent-sessions';
 import { agentMessageSchema, validateRequest } from '@/lib/validation';
 import { ValidationError } from '@/lib/types';
+import { setUserId, setSessionId } from '@/lib/observability/correlation';
 
 // ============================================================================
 // SECTION: VALIDATION SCHEMAS
@@ -126,10 +127,14 @@ export async function GET(_request: NextRequest, { params }: SessionParams) {
     return NextResponse.json({ error: 'User identity unavailable' }, { status: 400 });
   }
 
+  // Set user ID and session ID in correlation context
+  setUserId(userId);
+  const { id } = await params;
+  setSessionId(id);
+
   // ========================================================================
   // FETCH SESSION
   // ========================================================================
-  const { id } = await params;
   const agentSession = await getAgentSessionById(userId, id);
   if (!agentSession) {
     return NextResponse.json({ error: 'Session not found' }, { status: 404 });
@@ -183,6 +188,11 @@ export async function PATCH(request: NextRequest, { params }: SessionParams) {
       return NextResponse.json({ error: 'User identity unavailable' }, { status: 400 });
     }
 
+    // Set user ID and session ID in correlation context
+    setUserId(userId);
+    const { id } = await params;
+    setSessionId(id);
+
     // ========================================================================
     // REQUEST VALIDATION
     // ========================================================================
@@ -193,7 +203,6 @@ export async function PATCH(request: NextRequest, { params }: SessionParams) {
     // UPDATE SESSION
     // ========================================================================
     // updateAgentSession enforces state machine transitions
-    const { id } = await params;
     const updated = await updateAgentSession(userId, id, updates);
 
     if (!updated) {

@@ -55,6 +55,14 @@ interface LogEntry {
 
   /** Error object (for error logs) */
   error?: Error;
+
+  /** Correlation IDs (requestId, sessionId, deliveryId, userId) */
+  correlation?: {
+    requestId?: string;
+    sessionId?: string;
+    deliveryId?: string;
+    userId?: string;
+  };
 }
 
 // ============================================================================
@@ -83,7 +91,24 @@ class Logger {
   private formatMessage(entry: LogEntry): string {
     const contextStr = entry.context ? ` ${JSON.stringify(entry.context)}` : '';
     const errorStr = entry.error ? ` Error: ${entry.error.message}` : '';
-    return `[${entry.timestamp}] [${entry.level.toUpperCase()}] ${entry.message}${contextStr}${errorStr}`;
+    
+    // Add correlation IDs to log output
+    const correlationParts: string[] = [];
+    if (entry.correlation?.requestId) {
+      correlationParts.push(`reqId=${entry.correlation.requestId.slice(0, 8)}`);
+    }
+    if (entry.correlation?.sessionId) {
+      correlationParts.push(`sessionId=${entry.correlation.sessionId.slice(0, 8)}`);
+    }
+    if (entry.correlation?.deliveryId) {
+      correlationParts.push(`deliveryId=${entry.correlation.deliveryId.slice(0, 8)}`);
+    }
+    if (entry.correlation?.userId) {
+      correlationParts.push(`userId=${entry.correlation.userId.slice(0, 8)}`);
+    }
+    const correlationStr = correlationParts.length > 0 ? ` [${correlationParts.join(', ')}]` : '';
+    
+    return `[${entry.timestamp}] [${entry.level.toUpperCase()}]${correlationStr} ${entry.message}${contextStr}${errorStr}`;
   }
 
   /**
@@ -95,12 +120,33 @@ class Logger {
    * @param error - Optional error object
    */
   private log(level: LogLevel, message: string, context?: Record<string, unknown>, error?: Error) {
+    // Get correlation context (lazy import to avoid circular dependencies)
+    let correlation: LogEntry['correlation'];
+    try {
+      // Use dynamic import to avoid circular dependency issues
+      // This is safe because correlation module doesn't import logger
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+      const correlationModule = require('./observability/correlation');
+      const corrCtx = correlationModule.getCorrelationContext();
+      if (corrCtx) {
+        correlation = {
+          requestId: corrCtx.requestId,
+          sessionId: corrCtx.sessionId,
+          deliveryId: corrCtx.deliveryId,
+          userId: corrCtx.userId,
+        };
+      }
+    } catch {
+      // Correlation module not available, continue without it
+    }
+
     const entry: LogEntry = {
       level,
       message,
       timestamp: new Date().toISOString(),
       context,
       error,
+      correlation,
     };
 
     const formatted = this.formatMessage(entry);
