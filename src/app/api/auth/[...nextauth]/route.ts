@@ -1,9 +1,6 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import GithubProvider from 'next-auth/providers/github';
-import { JWT } from 'next-auth/jwt';
-import { Session } from 'next-auth';
 import { env } from '@/lib/env';
-import { ExtendedSession } from '@/lib/types';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -13,17 +10,17 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, account }: { token: JWT; account: any }): Promise<JWT> {
-      if (account) {
+    async jwt({ token, account }) {
+      if (account?.access_token) {
         token.accessToken = account.access_token;
       }
       return token;
     },
-    async session({ session, token }: { session: Session; token: JWT }): Promise<ExtendedSession> {
-      return {
-        ...session,
-        accessToken: token.accessToken as string | undefined,
-      };
+    async session({ session, token }) {
+      if (token.accessToken) {
+        session.accessToken = token.accessToken as string;
+      }
+      return session;
     },
   },
   pages: {

@@ -1,3 +1,4 @@
+// Legacy localStorage helpers retained as a cache/migration aid.
 interface AgentSession {
   id: string;
   name: string;
@@ -5,6 +6,7 @@ interface AgentSession {
   createdAt: string;
   messages?: Array<{ role: 'user' | 'assistant'; content: string }>;
   repository?: string;
+  lastMessage?: string;
 }
 
 export function getAgentSession(sessionId: string): AgentSession | null {
@@ -18,7 +20,10 @@ export function saveAgentSession(session: AgentSession) {
   localStorage.setItem(`agentSession_${session.id}`, JSON.stringify(session));
 }
 
-export function saveAgentMessage(sessionId: string, messages: Array<{ role: 'user' | 'assistant'; content: string }>) {
+export function saveAgentMessage(
+  sessionId: string,
+  messages: Array<{ role: 'user' | 'assistant'; content: string }>
+) {
   if (typeof window === 'undefined') return;
   const session = getAgentSession(sessionId);
   if (session) {

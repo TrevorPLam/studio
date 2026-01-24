@@ -1,45 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import type { Session } from 'next-auth';
+import { ai, defaultModel } from '@/ai/genkit';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { generate } from '@genkit-ai/ai/model';
-import { defaultModel } from '@/ai/genkit';
-import { validateRequest, agentChatRequestSchema } from '@/lib/validation';
+import { updateAgentSession } from '@/lib/db/agent-sessions';
+import type { AgentMessage } from '@/lib/agent/session-types';
+import { agentChatRequestSchema, validateRequest, type AgentMessageInput } from '@/lib/validation';
 import { AIAPIError, ValidationError } from '@/lib/types';
 import { logger } from '@/lib/logger';
 
+function getUserId(session: Session | null): string | null {
+  return session?.user?.email ?? session?.user?.name ?? null;
+}
+
+function ensureTimestamps(messages: AgentMessageInput[]): AgentMessage[] {
+  return messages.map((message) => ({
+    role: message.role,
+    content: message.content,
+    timestamp: message.timestamp || new Date().toISOString(),
+  }));
+}
+
 export async function POST(request: NextRequest) {
+  let body: unknown;
+
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { messages, model } = validateRequest(agentChatRequestSchema, body);
+    const userId = getUserId(session);
+    if (!userId) {
+      return NextResponse.json({ error: 'User identity unavailable' }, { status: 400 });
+    }
 
-    // Get the last user message
-    const lastUserMessage = messages
-      .filter((m) => m.role === 'user')
-      .slice(-1)[0]?.content || '';
+    body = await request.json();
+    const { messages, model, sessionId } = validateRequest(agentChatRequestSchema, body);
+
+    const lastUserMessage = messages.filter((message) => message.role === 'user').slice(-1)[0]?.content || '';
 
     if (!lastUserMessage) {
       return NextResponse.json({ error: 'No user message found' }, { status: 400 });
     }
 
-    // Use Genkit to generate response with timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     try {
-      const response = await generate({
+      const response = await ai.generate({
         model: model || defaultModel,
         prompt: lastUserMessage,
       });
 
       clearTimeout(timeoutId);
-      return NextResponse.json({
-        response: response.text || 'I apologize, but I could not generate a response.',
-      });
+
+      const responseText = response.text || 'I apologize, but I could not generate a response.';
+
+      if (sessionId) {
+        const persistedMessages = ensureTimestamps([
+          ...messages,
+          { role: 'assistant', content: responseText, timestamp: new Date().toISOString() },
+        ]);
+        const updated = await updateAgentSession(userId, sessionId, { messages: persistedMessages });
+        if (!updated) {
+          logger.warn('Session not found while persisting chat response', { sessionId });
+        }
+      }
+
+      return NextResponse.json({ response: responseText });
     } catch (genkitError) {
       clearTimeout(timeoutId);
       if (controller.signal.aborted) {
@@ -54,21 +83,19 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     if (error instanceof AIAPIError) {
-      return NextResponse.json(
-        { error: 'AI API error', message: error.message },
-        { status: error.statusCode }
-      );
+      return NextResponse.json({ error: 'AI API error', message: error.message }, { status: error.statusCode });
     }
 
     logger.error('Error in chat API', error instanceof Error ? error : new Error(String(error)), {
-      model: body?.model,
+      body,
     });
+
     return NextResponse.json(
-      { 
-        error: 'Internal server error', 
-        message: error instanceof Error ? error.message : 'Unknown error' 
+      {
+        error: 'Internal server error',
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

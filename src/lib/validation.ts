@@ -1,19 +1,21 @@
 import { z } from 'zod';
 import { ValidationError } from './types';
 
+export const agentMessageSchema = z.object({
+  role: z.enum(['user', 'assistant']),
+  content: z.string().min(1, 'Message content cannot be empty'),
+  timestamp: z.string().optional(),
+});
+
 // Agent Chat Validation
 export const agentChatRequestSchema = z.object({
-  messages: z.array(
-    z.object({
-      role: z.enum(['user', 'assistant']),
-      content: z.string().min(1, 'Message content cannot be empty'),
-    })
-  ).min(1, 'At least one message is required'),
+  messages: z.array(agentMessageSchema).min(1, 'At least one message is required'),
   model: z.string().optional(),
   sessionId: z.string().optional(),
 });
 
 export type AgentChatRequest = z.infer<typeof agentChatRequestSchema>;
+export type AgentMessageInput = z.infer<typeof agentMessageSchema>;
 
 // Repository Validation
 export const repositoryParamsSchema = z.object({
@@ -25,6 +27,7 @@ export type RepositoryParams = z.infer<typeof repositoryParamsSchema>;
 
 // Agent Session Validation
 export const createAgentSessionSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(1, 'Session name is required').max(100, 'Session name too long'),
   model: z.string().optional(),
   repository: z.string().optional(),

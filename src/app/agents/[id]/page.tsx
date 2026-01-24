@@ -1,54 +1,116 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import type { AgentMessage } from '@/lib/agent/session-types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Send } from 'lucide-react';
-import { getAgentSession, saveAgentMessage } from '@/lib/agents';
+
+function ensureTimestamps(messages: AgentMessage[]): AgentMessage[] {
+  return messages.map((message) => ({
+    ...message,
+    timestamp: message.timestamp || new Date().toISOString(),
+  }));
+}
 
 export default function AgentSessionPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
-  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
+  const { data: session, status } = useSession();
+  const sessionId = params.id as string;
+
+  const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingSession, setIsLoadingSession] = useState(true);
   const [sessionName, setSessionName] = useState('');
+  const [sessionError, setSessionError] = useState<string | null>(null);
+
+  const sortedMessages = useMemo(
+    () => [...messages].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()),
+    [messages]
+  );
 
   useEffect(() => {
-    const sessionId = params.id as string;
-    const stored = getAgentSession(sessionId);
-    if (stored) {
-      setSessionName(stored.name);
-      setMessages(stored.messages || []);
+    if (status !== 'authenticated') {
+      return;
     }
-  }, [params.id]);
+
+    const loadSession = async () => {
+      setIsLoadingSession(true);
+      setSessionError(null);
+
+      try {
+        const response = await fetch(`/api/sessions/${sessionId}`, { cache: 'no-store' });
+        if (response.status === 404) {
+          router.push('/agents');
+          return;
+        }
+        if (!response.ok) {
+          throw new Error('Failed to load session');
+        }
+
+        const data = (await response.json()) as { name: string; messages: AgentMessage[] };
+        setSessionName(data.name);
+        setMessages(ensureTimestamps(data.messages || []));
+      } catch (error) {
+        console.error('Error loading session', error);
+        setSessionError('Unable to load this session. Please go back and try again.');
+      } finally {
+        setIsLoadingSession(false);
+      }
+    };
+
+    void loadSession();
+  }, [router, sessionId, status]);
+
+  const persistMessages = async (nextMessages: AgentMessage[]) => {
+    try {
+      await fetch(`/api/sessions/${sessionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: ensureTimestamps(nextMessages) }),
+      });
+    } catch (error) {
+      console.error('Failed to persist messages', error);
+    }
+  };
 
   const sendMessage = async (useStreaming = false) => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading) {
+      return;
+    }
 
-    const userMessage = { role: 'user' as const, content: input };
+    const userMessage: AgentMessage = {
+      role: 'user',
+      content: input.trim(),
+      timestamp: new Date().toISOString(),
+    };
+
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput('');
     setIsLoading(true);
 
-    // Add placeholder for assistant response
-    const assistantPlaceholder = { role: 'assistant' as const, content: '' };
+    const assistantPlaceholder: AgentMessage = {
+      role: 'assistant',
+      content: '',
+      timestamp: new Date().toISOString(),
+    };
+
     const messagesWithPlaceholder = [...newMessages, assistantPlaceholder];
     setMessages(messagesWithPlaceholder);
 
     try {
       if (useStreaming) {
-        // Use streaming endpoint (2026 enhancement)
         const response = await fetch('/api/agents/chat-stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            sessionId: params.id,
+            sessionId,
             messages: newMessages,
           }),
         });
@@ -62,71 +124,108 @@ export default function AgentSessionPage() {
         let accumulatedText = '';
 
         if (reader) {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+          let done = false;
+          while (!done) {
+            const { done: streamDone, value } = await reader.read();
+            done = streamDone;
+            if (!value) {
+              continue;
+            }
 
             const chunk = decoder.decode(value);
             const lines = chunk.split('\n');
 
             for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                const data = line.slice(6);
-                if (data === '[DONE]') {
-                  break;
+              if (!line.startsWith('data: ')) {
+                continue;
+              }
+
+              const data = line.slice(6);
+              if (data === '[DONE]') {
+                done = true;
+                break;
+              }
+
+              try {
+                const parsed = JSON.parse(data) as { chunk?: string };
+                if (!parsed.chunk) {
+                  continue;
                 }
-                try {
-                  const parsed = JSON.parse(data);
-                  if (parsed.chunk) {
-                    accumulatedText += parsed.chunk;
-                    // Update the last message in real-time
-                    setMessages((prev) => {
-                      const updated = [...prev];
-                      updated[updated.length - 1] = {
-                        role: 'assistant',
-                        content: accumulatedText,
-                      };
-                      return updated;
-                    });
-                  }
-                } catch (e) {
-                  // Ignore parse errors
-                }
+
+                accumulatedText += parsed.chunk;
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  updated[updated.length - 1] = {
+                    role: 'assistant',
+                    content: accumulatedText,
+                    timestamp: new Date().toISOString(),
+                  };
+                  return updated;
+                });
+              } catch (error) {
+                console.error('Failed to parse streaming chunk', error);
               }
             }
           }
         }
 
-        saveAgentMessage(params.id as string, messagesWithPlaceholder.map((m, i) => 
-          i === messagesWithPlaceholder.length - 1 
-            ? { ...m, content: accumulatedText }
-            : m
-        ));
+        const finalMessages = messagesWithPlaceholder.map((message, index) =>
+          index === messagesWithPlaceholder.length - 1 ? { ...message, content: accumulatedText } : message
+        );
+        setMessages(finalMessages);
+        await persistMessages(finalMessages);
       } else {
-        // Use regular endpoint
         const response = await fetch('/api/agents/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            sessionId: params.id,
+            sessionId,
             messages: newMessages,
           }),
         });
 
-        const data = await response.json();
-        const assistantMessage = { role: 'assistant' as const, content: data.response };
+        if (!response.ok) {
+          throw new Error('Chat request failed');
+        }
+
+        const data = (await response.json()) as { response: string };
+        const assistantMessage: AgentMessage = {
+          role: 'assistant',
+          content: data.response,
+          timestamp: new Date().toISOString(),
+        };
+
         const updatedMessages = [...newMessages, assistantMessage];
         setMessages(updatedMessages);
-        saveAgentMessage(params.id as string, updatedMessages);
+        await persistMessages(updatedMessages);
       }
     } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage = { role: 'assistant' as const, content: 'Sorry, I encountered an error. Please try again.' };
-      setMessages([...newMessages, errorMessage]);
+      console.error('Error sending message', error);
+      const errorMessage: AgentMessage = {
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again.',
+        timestamp: new Date().toISOString(),
+      };
+      const fallbackMessages = [...newMessages, errorMessage];
+      setMessages(fallbackMessages);
+      await persistMessages(fallbackMessages);
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (status === 'loading' || isLoadingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-muted-foreground">Loading session...</div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    router.push('/');
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -141,17 +240,23 @@ export default function AgentSessionPage() {
 
       <div className="flex-1 overflow-y-auto p-4">
         <div className="max-w-4xl mx-auto space-y-4">
-          {messages.length === 0 ? (
+          {sessionError && (
+            <Card className="border-destructive/50">
+              <CardContent className="py-4 text-sm text-destructive">{sessionError}</CardContent>
+            </Card>
+          )}
+          {sortedMessages.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">
-                  Start a conversation with your AI agent
-                </p>
+                <p className="text-muted-foreground">Start a conversation with your AI agent</p>
               </CardContent>
             </Card>
           ) : (
-            messages.map((message, index) => (
-              <Card key={index} className={message.role === 'user' ? 'ml-auto max-w-[80%]' : 'mr-auto max-w-[80%]'}>
+            sortedMessages.map((message, index) => (
+              <Card
+                key={index}
+                className={message.role === 'user' ? 'ml-auto max-w-[80%]' : 'mr-auto max-w-[80%]'}
+              >
                 <CardContent className="p-4">
                   <div className="space-y-2">
                     <div className="text-xs font-medium text-muted-foreground">
@@ -177,12 +282,17 @@ export default function AgentSessionPage() {
         <div className="max-w-4xl mx-auto flex gap-2">
           <Input
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                void sendMessage();
+              }
+            }}
             placeholder="Type your message..."
             disabled={isLoading}
           />
-          <Button onClick={sendMessage} disabled={isLoading || !input.trim()}>
+          <Button onClick={() => void sendMessage()} disabled={isLoading || !input.trim()}>
             <Send className="h-4 w-4" />
           </Button>
         </div>
