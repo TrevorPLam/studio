@@ -118,7 +118,6 @@ import { GitHubRepository, AgentMessage, ExtendedSession } from '@/lib/types';
 - `src/lib/types.ts` - Type definitions
 - `src/lib/github-client.ts` - Enhanced GitHub client
 - `src/lib/validation.ts` - Validation schemas
-- `QA_REPORT.md` - Quality assurance report
 - `IMPROVEMENTS.md` - This file
 
 ### Modified Files
