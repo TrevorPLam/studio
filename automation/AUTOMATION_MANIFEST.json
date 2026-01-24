@@ -1,0 +1,503 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "name": "AIOS Automation & AI Infrastructure Manifest",
+  "description": "Complete manifest for injecting automation scripts and AI infrastructure into other repositories",
+  "last_updated": "2026-01-24",
+  "source_repo": "aios",
+
+  "overview": {
+    "total_automations": 67,
+    "intelligent_automations": 17,
+    "ultra_automations": 40,
+    "vibranium_automations": 10,
+    "ai_infrastructure": true,
+    "learning_system": true
+  },
+
+  "directory_structure": {
+    "scripts": {
+      "intelligent": {
+        "path": "scripts/intelligent",
+        "description": "Phase 1-2 intelligent automations (task management, code intelligence)",
+        "file_count": 17,
+        "files": [
+          "auto-build-dependency-graph.mjs",
+          "auto-convert-todos-to-tasks.mjs",
+          "auto-detect-performance-regressions.mjs",
+          "auto-detect-task-completion.mjs",
+          "auto-generate-boilerplate.mjs",
+          "auto-generate-pr-description.mjs",
+          "auto-generate-task-packet.mjs",
+          "auto-generate-test-cases.mjs",
+          "auto-resolve-task-dependencies.mjs",
+          "auto-update-documentation.mjs",
+          "intelligent-adr-generator.mjs",
+          "intelligent-breaking-change-detector.mjs",
+          "intelligent-bundle-optimizer.mjs",
+          "intelligent-code-cleanup.mjs",
+          "intelligent-code-similarity-detector.mjs",
+          "intelligent-doc-linking.mjs",
+          "intelligent-reviewer-assignment.mjs"
+        ]
+      },
+      "ultra": {
+        "path": "scripts/ultra",
+        "description": "Tier 1-9 ultra high-leverage automations (AI-powered, predictive, self-healing)",
+        "file_count": 43,
+        "core_files": [
+          "shared-infrastructure.mjs",
+          "orchestrator.mjs",
+          "README.md",
+          "IMPLEMENTATION_STATUS.md"
+        ],
+        "automation_files": [
+          "intelligent-auto-refactor.mjs",
+          "predictive-bug-detector.mjs",
+          "intelligent-migration-assistant.mjs",
+          "auto-api-contract-generator.mjs",
+          "intelligent-test-data-generator.mjs",
+          "auto-error-recovery.mjs",
+          "predictive-maintenance.mjs",
+          "intelligent-dependency-updater.mjs",
+          "semantic-code-search.mjs",
+          "auto-integration-test-generator.mjs",
+          "intelligent-code-review-bot.mjs",
+          "auto-architecture-evolution.mjs",
+          "intelligent-test-coverage-analyzer.mjs",
+          "auto-performance-profiling.mjs",
+          "intelligent-refactoring-suggestion.mjs",
+          "self-healing-codebase.mjs",
+          "autonomous-architecture-evolution.mjs",
+          "self-optimizing-performance.mjs",
+          "intelligent-dependency-ecosystem.mjs",
+          "self-documenting-codebase.mjs",
+          "autonomous-code-quality-guardian.mjs",
+          "predictive-technical-debt-manager.mjs",
+          "self-adapting-test-suite.mjs",
+          "intelligent-security-guardian.mjs",
+          "self-communicating-codebase.mjs",
+          "auto-generate-automation-scripts.mjs",
+          "self-improving-automation-engine.mjs",
+          "intelligent-workflow-orchestrator.mjs",
+          "predictive-feature-request-analyzer.mjs",
+          "intelligent-knowledge-graph-builder.mjs",
+          "ai-codebase-oracle.mjs",
+          "ai-pair-programmer.mjs",
+          "natural-language-to-code.mjs",
+          "ai-powered-refactoring-assistant.mjs",
+          "ai-test-generator-from-requirements.mjs",
+          "ai-code-explainer.mjs",
+          "ai-architecture-advisor.mjs",
+          "ai-bug-predictor-fixer.mjs",
+          "ai-documentation-generator.mjs",
+          "ai-codebase-pattern-learner.mjs"
+        ]
+      },
+      "vibranium": {
+        "path": "scripts/vibranium",
+        "description": "Tier 10 vibranium status automations (beyond reality, consciousness-level)",
+        "file_count": 10,
+        "files": [
+          "temporal-code-analysis.mjs",
+          "quantum-code-optimization.mjs",
+          "cross-repo-intelligence-network.mjs",
+          "autonomous-feature-development.mjs",
+          "multi-dimensional-code-analysis.mjs",
+          "self-replicating-automation.mjs",
+          "predictive-everything-engine.mjs",
+          "reality-bending-performance.mjs",
+          "meta-meta-automation-creator.mjs",
+          "consciousness-level-intelligence.mjs"
+        ]
+      }
+    },
+    "data_directories": {
+      "learning": {
+        "path": ".repo/automation/learning",
+        "description": "Learning system outcome tracking (JSONL files per automation)",
+        "auto_created": true
+      }
+    }
+  },
+
+  "ai_infrastructure": {
+    "shared_module": {
+      "file": "scripts/ultra/shared-infrastructure.mjs",
+      "description": "Core AI and automation infrastructure",
+      "exports": [
+        "AIEngine",
+        "LearningSystem",
+        "PatternLearner",
+        "CodeAnalyzer",
+        "GitUtils",
+        "SafetySystem",
+        "REPO_ROOT"
+      ],
+      "classes": {
+        "AIEngine": {
+          "description": "AI/LLM integration supporting OpenAI and Anthropic",
+          "methods": ["generate", "analyzeCode", "suggestRefactoring", "explainCode"],
+          "config": {
+            "provider": "AI_PROVIDER env var (openai/anthropic)",
+            "apiKey": "OPENAI_API_KEY or ANTHROPIC_API_KEY",
+            "model": "AI_MODEL env var (gpt-4/claude-3/etc)"
+          }
+        },
+        "LearningSystem": {
+          "description": "Tracks automation outcomes and success rates",
+          "data_path": ".repo/automation/learning",
+          "methods": ["recordOutcome", "getOutcomes", "getSuccessRate"]
+        },
+        "PatternLearner": {
+          "description": "Learns and matches codebase patterns",
+          "methods": ["learnPattern", "getPatterns", "findSimilarPatterns"]
+        },
+        "CodeAnalyzer": {
+          "description": "Static code analysis utilities",
+          "methods": ["getComplexity", "findCodeSmells", "findDuplicateLines"]
+        },
+        "GitUtils": {
+          "description": "Git operations for automation",
+          "methods": ["getChangedFiles", "getFileHistory", "getBugPatterns"]
+        },
+        "SafetySystem": {
+          "description": "Safety checks for dangerous operations",
+          "methods": ["checkSafety", "requestApproval"]
+        }
+      }
+    }
+  },
+
+  "package_json_integration": {
+    "script_prefixes": {
+      "intelligent": "intelligent:",
+      "ultra": "ultra:",
+      "vibranium": "vibranium:"
+    },
+    "total_scripts": 69,
+    "intelligent_scripts": 17,
+    "ultra_scripts": 40,
+    "vibranium_scripts": 10,
+    "orchestrator": "ultra:all",
+    "note": "All scripts use 'node scripts/{directory}/{script-name}.mjs' pattern"
+  },
+
+  "environment_variables": {
+    "required_for_ai": [
+      {
+        "name": "AI_PROVIDER",
+        "description": "AI provider to use",
+        "values": ["openai", "anthropic"],
+        "default": "openai",
+        "required": false
+      },
+      {
+        "name": "OPENAI_API_KEY",
+        "description": "OpenAI API key (if using OpenAI)",
+        "required": false,
+        "conditional": "Required if AI_PROVIDER=openai"
+      },
+      {
+        "name": "ANTHROPIC_API_KEY",
+        "description": "Anthropic API key (if using Anthropic)",
+        "required": false,
+        "conditional": "Required if AI_PROVIDER=anthropic"
+      },
+      {
+        "name": "AI_MODEL",
+        "description": "AI model to use",
+        "values": ["gpt-4", "gpt-3.5-turbo", "claude-3", "claude-3-opus"],
+        "default": "gpt-4",
+        "required": false
+      }
+    ],
+    "note": "Automations work without AI but are enhanced when configured"
+  },
+
+  "dependencies": {
+    "runtime": {
+      "node": ">=18.0.0",
+      "note": "Uses ES modules (import/export)"
+    },
+    "built_in_modules": ["child_process", "fs", "path", "url"],
+    "external_dependencies": [],
+    "note": "No external npm packages required - uses only Node.js built-ins"
+  },
+
+  "installation_steps": {
+    "order": [
+      {
+        "step": 1,
+        "action": "Copy directory structure",
+        "details": "Copy scripts/intelligent/, scripts/ultra/, scripts/vibranium/ directories",
+        "critical": true
+      },
+      {
+        "step": 2,
+        "action": "Copy shared infrastructure",
+        "details": "Ensure scripts/ultra/shared-infrastructure.mjs is present",
+        "critical": true
+      },
+      {
+        "step": 3,
+        "action": "Add package.json scripts",
+        "details": "Add all intelligent:, ultra:, vibranium: scripts to package.json",
+        "critical": true,
+        "merge_strategy": "append",
+        "warning": "Check for existing script name conflicts"
+      },
+      {
+        "step": 4,
+        "action": "Create data directories",
+        "details": "Create .repo/automation/learning/ directory (or let LearningSystem create it)",
+        "critical": false,
+        "auto_created": true
+      },
+      {
+        "step": 5,
+        "action": "Configure environment variables",
+        "details": "Set AI_PROVIDER, API keys, AI_MODEL if using AI features",
+        "critical": false
+      },
+      {
+        "step": 6,
+        "action": "Test installation",
+        "details": "Run 'npm run ultra:orchestrate -- --tier=1' to test",
+        "critical": true
+      }
+    ]
+  },
+
+  "safety_considerations": {
+    "git_operations": {
+      "risk": "low",
+      "description": "Read-only git operations (diff, log)",
+      "safe": true
+    },
+    "file_operations": {
+      "risk": "medium",
+      "description": "Reads files, writes to .repo/automation/learning/ only",
+      "safe": true,
+      "note": "No destructive file operations by default"
+    },
+    "ai_operations": {
+      "risk": "low",
+      "description": "AI calls are read-only analysis",
+      "safe": true,
+      "cost_warning": "API calls may incur costs"
+    },
+    "safety_system": {
+      "enabled": true,
+      "description": "SafetySystem class prevents dangerous operations",
+      "checks": ["destructive", "modifiesProduction", "requiresApproval"]
+    }
+  },
+
+  "integration_points": {
+    "constitution": {
+      "file": ".repo/policy/constitution.json",
+      "reference": "automation.commands_file",
+      "value": ".repo/policy/automation-commands.json",
+      "note": "Automation commands are referenced in constitution"
+    },
+    "learning_system": {
+      "data_path": ".repo/automation/learning",
+      "format": "JSONL (one file per automation)",
+      "auto_created": true
+    },
+    "git_integration": {
+      "operations": ["getChangedFiles", "getFileHistory", "getBugPatterns"],
+      "read_only": true
+    }
+  },
+
+  "script_categories": {
+    "intelligent": {
+      "task_management": [
+        "auto-detect-task-completion.mjs",
+        "auto-resolve-task-dependencies.mjs",
+        "auto-generate-task-packet.mjs"
+      ],
+      "code_intelligence": [
+        "intelligent-adr-generator.mjs",
+        "auto-generate-test-cases.mjs",
+        "intelligent-code-cleanup.mjs",
+        "intelligent-code-similarity-detector.mjs",
+        "intelligent-breaking-change-detector.mjs"
+      ],
+      "documentation": [
+        "auto-update-documentation.mjs",
+        "intelligent-doc-linking.mjs",
+        "auto-generate-pr-description.mjs"
+      ],
+      "optimization": [
+        "intelligent-bundle-optimizer.mjs",
+        "auto-detect-performance-regressions.mjs"
+      ],
+      "utilities": [
+        "auto-build-dependency-graph.mjs",
+        "auto-convert-todos-to-tasks.mjs",
+        "auto-generate-boilerplate.mjs",
+        "intelligent-reviewer-assignment.mjs"
+      ]
+    },
+    "ultra": {
+      "tier_1_ai_powered": [
+        "intelligent-auto-refactor.mjs",
+        "predictive-bug-detector.mjs",
+        "intelligent-migration-assistant.mjs",
+        "auto-api-contract-generator.mjs",
+        "intelligent-test-data-generator.mjs"
+      ],
+      "tier_2_predictive": [
+        "auto-error-recovery.mjs",
+        "predictive-maintenance.mjs",
+        "intelligent-dependency-updater.mjs"
+      ],
+      "tier_3_discovery": [
+        "semantic-code-search.mjs",
+        "auto-integration-test-generator.mjs",
+        "intelligent-code-review-bot.mjs",
+        "auto-architecture-evolution.mjs"
+      ],
+      "tier_4_utilities": [
+        "intelligent-test-coverage-analyzer.mjs",
+        "auto-performance-profiling.mjs",
+        "intelligent-refactoring-suggestion.mjs"
+      ],
+      "tier_5_living_codebase": [
+        "self-healing-codebase.mjs",
+        "autonomous-architecture-evolution.mjs",
+        "self-optimizing-performance.mjs",
+        "intelligent-dependency-ecosystem.mjs",
+        "self-documenting-codebase.mjs"
+      ],
+      "tier_6_autonomous": [
+        "autonomous-code-quality-guardian.mjs",
+        "predictive-technical-debt-manager.mjs",
+        "self-adapting-test-suite.mjs",
+        "intelligent-security-guardian.mjs",
+        "self-communicating-codebase.mjs"
+      ],
+      "tier_7_meta": [
+        "auto-generate-automation-scripts.mjs",
+        "self-improving-automation-engine.mjs",
+        "intelligent-workflow-orchestrator.mjs"
+      ],
+      "tier_8_ecosystem": [
+        "predictive-feature-request-analyzer.mjs",
+        "intelligent-knowledge-graph-builder.mjs"
+      ],
+      "tier_9_ai_superintelligence": [
+        "ai-codebase-oracle.mjs",
+        "ai-pair-programmer.mjs",
+        "natural-language-to-code.mjs",
+        "ai-powered-refactoring-assistant.mjs",
+        "ai-test-generator-from-requirements.mjs",
+        "ai-code-explainer.mjs",
+        "ai-architecture-advisor.mjs",
+        "ai-bug-predictor-fixer.mjs",
+        "ai-documentation-generator.mjs",
+        "ai-codebase-pattern-learner.mjs"
+      ]
+    },
+    "vibranium": {
+      "tier_10_beyond_reality": [
+        "temporal-code-analysis.mjs",
+        "quantum-code-optimization.mjs",
+        "cross-repo-intelligence-network.mjs",
+        "autonomous-feature-development.mjs",
+        "multi-dimensional-code-analysis.mjs",
+        "self-replicating-automation.mjs",
+        "predictive-everything-engine.mjs",
+        "reality-bending-performance.mjs",
+        "meta-meta-automation-creator.mjs",
+        "consciousness-level-intelligence.mjs"
+      ]
+    }
+  },
+
+  "common_issues": {
+    "script_name_conflicts": {
+      "description": "Package.json scripts may conflict with existing scripts",
+      "solution": "Check for existing script names before adding",
+      "prevention": "Use prefixes (intelligent:, ultra:, vibranium:)"
+    },
+    "missing_shared_infrastructure": {
+      "description": "Scripts fail if shared-infrastructure.mjs is missing",
+      "solution": "Ensure scripts/ultra/shared-infrastructure.mjs exists",
+      "prevention": "Copy entire scripts/ultra/ directory"
+    },
+    "path_issues": {
+      "description": "REPO_ROOT calculation may fail in different repo structures",
+      "solution": "shared-infrastructure.mjs uses path.resolve(__dirname, '../..')",
+      "note": "Assumes scripts are in scripts/{directory}/ structure"
+    },
+    "ai_not_configured": {
+      "description": "AI features show warnings but continue without AI",
+      "solution": "Set environment variables or ignore warnings",
+      "note": "Automations work without AI, just with reduced capabilities"
+    }
+  },
+
+  "verification_checklist": {
+    "after_installation": [
+      "All script directories exist (intelligent/, ultra/, vibranium/)",
+      "shared-infrastructure.mjs exists in scripts/ultra/",
+      "All package.json scripts added",
+      "No script name conflicts",
+      "Test: npm run intelligent:task-completion (should run)",
+      "Test: npm run ultra:refactor -- --file=test.ts (should run)",
+      "Test: npm run ultra:orchestrate -- --tier=1 (should run)",
+      ".repo/automation/learning/ directory created (or will be auto-created)"
+    ]
+  },
+
+  "usage_examples": {
+    "basic": [
+      "npm run intelligent:task-completion",
+      "npm run ultra:bug-predict -- --prevent-commit",
+      "npm run ultra:refactor -- --file=path/to/file.ts"
+    ],
+    "orchestration": [
+      "npm run ultra:orchestrate -- --tier=1",
+      "npm run ultra:orchestrate -- --all",
+      "npm run ultra:all"
+    ],
+    "ai_enhanced": ["npm run ultra:ai-oracle", "npm run ultra:ai-pair", "npm run ultra:nl-to-code"]
+  },
+
+  "documentation": {
+    "intelligent": "See scripts/intelligent/ for individual script docs",
+    "ultra": "See scripts/ultra/README.md for complete documentation",
+    "vibranium": "See scripts/vibranium/ for individual script docs",
+    "full_docs": "docs/automation/ULTRA_HIGH_LEVERAGE_AUTOMATION.md",
+    "implementation_status": "scripts/ultra/IMPLEMENTATION_STATUS.md"
+  },
+
+  "version_compatibility": {
+    "node_version": ">=18.0.0",
+    "es_modules": true,
+    "package_type": "module (or use .mjs extension)",
+    "note": "All scripts use ES modules (import/export syntax)"
+  },
+
+  "migration_notes": {
+    "from_other_repos": {
+      "step_1": "Review this manifest to understand structure",
+      "step_2": "Copy directories in order specified in installation_steps",
+      "step_3": "Merge package.json scripts carefully (check for conflicts)",
+      "step_4": "Test each tier incrementally",
+      "step_5": "Configure AI if desired (optional)"
+    },
+    "rollback": {
+      "description": "To remove automations",
+      "steps": [
+        "Remove script directories (intelligent/, ultra/, vibranium/)",
+        "Remove package.json scripts (intelligent:, ultra:, vibranium: prefixes)",
+        "Remove .repo/automation/learning/ if desired"
+      ]
+    }
+  }
+}

@@ -37,6 +37,7 @@ import { authOptions } from '@/lib/auth/config';
 import { getAgentSessionById, updateAgentSession } from '@/lib/db/agent-sessions';
 import type { AgentSessionStep } from '@/lib/agent/session-types';
 import { ValidationError } from '@/lib/types';
+import { KillSwitchActiveError } from '@/lib/ops/killswitch';
 
 // ============================================================================
 // SECTION: VALIDATION SCHEMAS
@@ -218,6 +219,12 @@ export async function POST(request: NextRequest, { params }: SessionParams) {
     // ========================================================================
     // ERROR HANDLING
     // ========================================================================
+    if (error instanceof KillSwitchActiveError) {
+      return NextResponse.json(
+        { error: 'Service unavailable', message: error.message },
+        { status: 503 }
+      );
+    }
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {

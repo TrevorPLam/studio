@@ -37,6 +37,7 @@ import { getAgentSessionById, updateAgentSession } from '@/lib/db/agent-sessions
 import { agentMessageSchema, validateRequest } from '@/lib/validation';
 import { ValidationError } from '@/lib/types';
 import { setUserId, setSessionId } from '@/lib/observability/correlation';
+import { KillSwitchActiveError } from '@/lib/ops/killswitch';
 
 // ============================================================================
 // SECTION: VALIDATION SCHEMAS
@@ -214,6 +215,12 @@ export async function PATCH(request: NextRequest, { params }: SessionParams) {
     // ========================================================================
     // ERROR HANDLING
     // ========================================================================
+    if (error instanceof KillSwitchActiveError) {
+      return NextResponse.json(
+        { error: 'Service unavailable', message: error.message },
+        { status: 503 }
+      );
+    }
     if (error instanceof ValidationError) {
       return NextResponse.json(
         { error: 'Validation error', message: error.message, field: error.field },

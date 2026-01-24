@@ -39,32 +39,26 @@
 // SECTION: KILL SWITCH / READ-ONLY MODE
 // ============================================================================
 // Per P0 Kill-switch: feature-flag disables all mutative actions globally ≤ 5s
-// TODO: Centralize kill-switch, add Redis-based feature flag, admin API endpoint
+// Now using centralized kill-switch module
 
-let AGENT_READ_ONLY_MODE = false;
+import { assertNotKilled, setKillSwitch } from '@/lib/ops/killswitch';
 
 /**
- * Enable/disable read-only mode (kill-switch).
- * When enabled, all write operations are blocked.
- *
- * @param enabled - true to enable read-only mode, false to disable
- *
- * @see TODO.md P0 Kill-switch for full implementation requirements
+ * @deprecated Use setKillSwitch from @/lib/ops/killswitch instead
+ * Kept for backward compatibility during migration
  */
 export function setAgentReadOnlyMode(enabled: boolean) {
-  AGENT_READ_ONLY_MODE = enabled;
+  setKillSwitch(enabled);
 }
 
 /**
- * Assert that the system is not in read-only mode.
- * Throws error if kill-switch is enabled.
+ * Assert that kill-switch is not active.
+ * Delegates to centralized kill-switch module.
  *
- * @throws Error if read-only mode is enabled
+ * @throws KillSwitchActiveError if kill-switch is enabled
  */
 function assertNotReadOnly() {
-  if (AGENT_READ_ONLY_MODE) {
-    throw new Error('Agent endpoints are in read-only mode');
-  }
+  assertNotKilled();
 }
 
 // ============================================================================
@@ -315,6 +309,9 @@ export async function createAgentSession(
   userId: string,
   input: CreateAgentSession
 ): Promise<AgentSession> {
+  // Per P0 Kill-switch: block mutative operations when kill-switch is active
+  assertNotKilled();
+
   const data = await loadSessions();
   const now = new Date().toISOString();
 
@@ -411,6 +408,9 @@ export async function updateAgentSession(
   sessionId: string,
   updates: UpdateAgentSessionInput
 ): Promise<AgentSession | null> {
+  // Per P0 Kill-switch: block mutative operations when kill-switch is active
+  assertNotKilled();
+
   const data = await loadSessions();
   const index = data.sessions.findIndex(
     (session) => session.userId === userId && session.id === sessionId

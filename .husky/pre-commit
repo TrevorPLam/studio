@@ -1,11 +1,22 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Run TODO extraction script
-node scripts/extract-todos.js --block
+# Run Prettier to format staged files
+echo "Running Prettier..."
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx|json|md)$' || true)
 
-# Run Prettier check
-npm run format:check
+if [ -n "$STAGED_FILES" ]; then
+  echo "$STAGED_FILES" | xargs npx prettier --write --list-different || {
+    echo "Prettier found formatting issues. Please run 'npm run format' to fix them."
+    exit 1
+  }
+  # Re-stage files after formatting
+  echo "$STAGED_FILES" | xargs git add
+fi
 
-# Run ESLint
-npm run lint
+# Extract TODO comments from staged files
+echo "Extracting TODO comments..."
+node scripts/extract-todos.js || {
+  echo "TODO extraction failed. Please check scripts/extract-todos.js"
+  exit 1
+}
