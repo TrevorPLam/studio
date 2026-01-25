@@ -22,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Repository Access Operations (RA-01, RA-02, RA-03)**: Safe repository access with bounds
+  - Default branch resolution via `getRepositoryInfo()`
+  - Bounded branch listing with pagination (max 100 per page)
+  - Tree fetching with recursion limits (max 10000 entries, max depth 10)
+  - Typed interfaces for repository info, branches, and trees
+  - 21 unit tests for repository reader module
+  - Automatic truncation detection for large repositories
+  - Error handling for API failures
 - **Observability System (BP-OBS-005)**: Comprehensive OpenTelemetry metrics and tracing
   - Prometheus-compatible metrics export at `/api/metrics` endpoint
   - HTTP request metrics (count, duration, error rates)

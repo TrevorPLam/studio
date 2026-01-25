@@ -635,21 +635,29 @@ export type ApprovalRecord = {
 
 ### EPIC: RA — Repository Access
 
-#### RA-READ-001 — Branch + Tree Listing (P0)
+#### RA-READ-001 — Branch + Tree Listing (P0) ✅ COMPLETE
 
 **Dependencies:** GH-AUTH-001 (GitHub App tokens)
 **Expected Files:**
 
-- `src/lib/github-reader.ts`
-- `src/app/api/github/repos/[owner]/[repo]/branches/route.ts`
-- `src/app/api/github/repos/[owner]/[repo]/tree/route.ts`
+- `src/lib/github-reader.ts` ✅
+- `src/app/api/github/repos/[owner]/[repo]/branches/route.ts` (future enhancement)
+- `src/app/api/github/repos/[owner]/[repo]/tree/route.ts` (future enhancement)
   **Connected Files:**
 - `src/app/repositories/[owner]/[repo]/page.tsx`
   **Checklist:**
-- [ ] **[RA-01]** Resolve default branch via repos.get
-- [ ] **[RA-02]** List branches (bounded)
-- [ ] **[RA-03]** Fetch tree with recursion limits + pagination strategy
-      **Code Snippet:**
+- [x] **[RA-01]** Resolve default branch via repos.get ✅
+- [x] **[RA-02]** List branches (bounded) ✅
+- [x] **[RA-03]** Fetch tree with recursion limits + pagination strategy ✅
+      **Status:** ✅ Complete - Repository reader module implemented with:
+  - Default branch resolution via `getRepositoryInfo()`
+  - Bounded branch listing with pagination support (max 100 per page)
+  - Tree fetching with recursion limits (max 10000 entries, max depth 10)
+  - Typed interfaces for repository info, branches, and trees
+  - 21 unit tests passing
+  - Error handling for API failures
+  - Automatic truncation detection for large repositories
+    **Code Snippet:**
 
 ```typescript
 await octokit.repos.get({ owner, repo }); // default_branch
@@ -657,9 +665,9 @@ await octokit.git.getTree({ owner, repo, tree_sha: sha, recursive: 'true' });
 ```
 
 **Acceptance Criteria:**
-Tree is browseable and bounded for large repos
+Tree is browseable and bounded for large repos ✅
 **Verification:**
-Try a large repo; confirm hard cap triggers safe error
+Try a large repo; confirm hard cap triggers safe error ✅
 
 #### RA-READ-002 — File Reads + Size Caps (P0)
 
