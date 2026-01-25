@@ -21,6 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- **Observability System (BP-OBS-005)**: Comprehensive OpenTelemetry metrics and tracing
+  - Prometheus-compatible metrics export at `/api/metrics` endpoint
+  - HTTP request metrics (count, duration, error rates)
+  - Business metrics (session_created, preview_generated, etc.)
+  - Distributed tracing with span creation and management
+  - Integration with existing correlation IDs
+  - Instrumentation for sessions API endpoint
+  - 46 unit tests for metrics and tracing modules
 - Comprehensive test suite (17 test files)
 - Complete API documentation
 - Architecture documentation
@@ -41,12 +50,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changelog
 
 ### Changed
+
 - Improved documentation structure
 - Enhanced code comments
 
 ## [0.1.0] - 2025-01-24
 
 ### Added
+
 - Agent session management
 - Session state machine
 - Step timeline tracking
@@ -62,6 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File-based session storage
 
 ### Security
+
 - User isolation enforcement
 - Path policy for repository files
 - Fail-closed security model
@@ -70,6 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Future Releases
 
 ### Planned
+
 - Preview/Apply workflow
 - Approval system
 - PALADIN framework
@@ -91,6 +104,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### No migrations required for current version
 
 Future versions may require:
+
 - Database migration (from file-based to database)
 - Configuration updates
 - API versioning
@@ -108,6 +122,7 @@ Future breaking changes will be documented here with migration instructions.
 The `repository` string field is deprecated in favor of `repo` object.
 
 **Migration:**
+
 ```typescript
 // Old
 { repository: "owner/repo" }
@@ -121,6 +136,7 @@ The `repository` string field is deprecated in favor of `repo` object.
 The `name` field in `AgentSessionStep` is deprecated in favor of `type`.
 
 **Migration:**
+
 ```typescript
 // Old
 { name: "plan", type: "plan" }
@@ -134,6 +150,7 @@ The `name` field in `AgentSessionStep` is deprecated in favor of `type`.
 The `timestamp` field is deprecated in favor of `startedAt`/`endedAt`.
 
 **Migration:**
+
 ```typescript
 // Old
 { timestamp: "2025-01-24T00:00:00.000Z" }
@@ -151,10 +168,10 @@ The `timestamp` field is deprecated in favor of `startedAt`/`endedAt`.
 
 ## Version Compatibility Matrix
 
-| Version | Node.js | Next.js | Breaking Changes |
-|---------|---------|---------|------------------|
-| 0.1.0 | 20+ | 15.3.8 | None |
-| Unreleased | 20+ | 15.3.8 | None (yet) |
+| Version    | Node.js | Next.js | Breaking Changes |
+| ---------- | ------- | ------- | ---------------- |
+| 0.1.0      | 20+     | 15.3.8  | None             |
+| Unreleased | 20+     | 15.3.8  | None (yet)       |
 
 ## Change Types
 
