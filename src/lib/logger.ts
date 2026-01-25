@@ -91,7 +91,7 @@ class Logger {
   private formatMessage(entry: LogEntry): string {
     const contextStr = entry.context ? ` ${JSON.stringify(entry.context)}` : '';
     const errorStr = entry.error ? ` Error: ${entry.error.message}` : '';
-    
+
     // Add correlation IDs to log output
     const correlationParts: string[] = [];
     if (entry.correlation?.requestId) {
@@ -107,7 +107,7 @@ class Logger {
       correlationParts.push(`userId=${entry.correlation.userId.slice(0, 8)}`);
     }
     const correlationStr = correlationParts.length > 0 ? ` [${correlationParts.join(', ')}]` : '';
-    
+
     return `[${entry.timestamp}] [${entry.level.toUpperCase()}]${correlationStr} ${entry.message}${contextStr}${errorStr}`;
   }
 
@@ -166,7 +166,7 @@ class Logger {
         break;
       case 'error':
         console.error(formatted, error?.stack);
-        // TODO: In production, send to error tracking service (Sentry, etc.)
+        // Future: In production, send to error tracking service (Sentry, etc.)
         break;
     }
   }
