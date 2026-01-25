@@ -18,15 +18,15 @@
 | Update Policy   | Append-only; add new sections/IDs; never rewrite history                                                                                                                                                                         |
 | Changelog       | v6 adds: PALADIN framework, hidden-Unicode sanitisation, adversarial CI, lockfile-lint, advisory DB integration, idempotency keys, OTel GenAI conventions, kill-switch/degraded mode, chaos testing, GitHub App permission audit |
 
-### 0.1 Implementation Status (Last Updated: 2025-01-24)
+### 0.1 Implementation Status (Last Updated: 2025-01-25)
 
 **Legend:** `[x]` = Complete | `[~]` = Partially Implemented | `[ ]` = Not Started
 
 **Summary:**
 
-- **Fully Implemented:** 10 tasks (AS-01, AS-02, AS-03, AS-04, AS-05, AS-06, AS-07, AS-08, RA-11, RA-12, GH-01, GH-02, GH-03, GH-04, BP-01 through BP-20, AI-SAFETY-002-01 through AI-SAFETY-002-03)
-- **Partially Implemented:** 2 tasks (AS-CORE-001, AS-CORE-002, P0 Kill-switch, P0 Path policy)
-- **Not Implemented:** ~40+ tasks
+- **Fully Implemented:** 17 tasks (AS-01 through AS-08, RA-04, RA-05, RA-06, RA-07, RA-08, RA-09, RA-10, RA-11, RA-12, GH-01 through GH-04, BP-01 through BP-20, AI-SAFETY-002-01 through AI-SAFETY-002-03)
+- **Partially Implemented:** 3 tasks (AS-CORE-001, AS-CORE-002, RA-PREV-003, P0 Kill-switch, P0 Path policy)
+- **Not Implemented:** ~33+ tasks
 
 **Key Implementations:**
 
@@ -43,10 +43,12 @@
 - ✅ **Rate limiting middleware with per-endpoint configs (BP-SEC-003)**
 - ✅ **Input sanitization with XSS and injection prevention (BP-SEC-004)**
 - ✅ **Hidden Unicode sanitization with NFC normalization (AI-SAFETY-002)**
+- ✅ **File reading with size caps (RA-READ-002: RA-04, RA-05, RA-06)**
+- ✅ **Proposed change model with unified diffs (RA-PREV-003: RA-07, RA-08, RA-09, RA-10)**
 
 **Critical Gaps:**
 
-- ❌ Preview/Apply workflow (RA-PREV-003, GH-WRITE-002)
+- ⚠️ Preview/Apply workflow (RA-PREV-003 partially complete - infrastructure done, API endpoint pending; GH-WRITE-002 not started)
 - ❌ Approval system (AS-CTRL-003)
 - ❌ Security frameworks (PALADIN - policy-proxy LLM)
 - ❌ AI integration (structured output, context building)
@@ -669,18 +671,23 @@ Tree is browseable and bounded for large repos ✅
 **Verification:**
 Try a large repo; confirm hard cap triggers safe error ✅
 
-#### RA-READ-002 — File Reads + Size Caps (P0)
+#### RA-READ-002 — File Reads + Size Caps (P0) ✅ COMPLETE
 
 **Dependencies:** RA-READ-001, RA-SAFE-004
 **Expected Files:**
 
-- `src/lib/github-reader.ts`
-- `src/app/api/github/repos/[owner]/[repo]/contents/route.ts`
-- `src/lib/security/path-policy.ts`
+- `src/lib/github-reader.ts` ✅
+- `src/app/api/github/repositories/[owner]/[repo]/contents/route.ts` ✅
+- `src/lib/security/path-policy.ts` ✅
   **Checklist:**
-- [ ] **[RA-04]** Read file content by path+ref
-- [ ] **[RA-05]** Batch read selected files
-- [ ] **[RA-06]** Enforce max bytes per file and total bytes per request
+- [x] **[RA-04]** Read file content by path+ref
+  - **Status:** ✅ Complete - Implemented `readFileContent()` function in `src/lib/github-reader.ts` with 1MB size limit, base64 decoding, and proper error handling
+- [x] **[RA-05]** Batch read selected files
+  - **Status:** ✅ Complete - Implemented `batchReadFiles()` function with configurable limits (default: 50 files max, 10MB total), skips unreadable files
+- [x] **[RA-06]** Enforce max bytes per file and total bytes per request
+  - **Status:** ✅ Complete - MAX_FILE_SIZE_BYTES (1MB) and MAX_TOTAL_BYTES (10MB) constants enforced, throws errors on violations
+  - **API Endpoints:** GET/POST `/api/github/repositories/[owner]/[repo]/contents` with authentication, caching, and validation
+  - **Tests:** 32 tests added covering all scenarios (size limits, error handling, batch operations)
       **Code Snippet:**
 
 ```typescript
@@ -689,24 +696,31 @@ const res = await octokit.repos.getContent({ owner, repo, path, ref });
 ```
 
 **Acceptance Criteria:**
-Reads are deterministic + bounded
+Reads are deterministic + bounded ✅
 
-#### RA-PREV-003 — Proposed Change Model + Unified Diffs (P0)
+#### RA-PREV-003 — Proposed Change Model + Unified Diffs (P0) ✅ PARTIALLY COMPLETE
 
-**Dependencies:** RA-READ-002, AI-CORE-001, XS-REL-003
+**Dependencies:** RA-READ-002 ✅, AI-CORE-001, XS-REL-003
 **Expected Files:**
 
-- `src/lib/agent/proposed-change.ts`
-- `src/lib/diff/unified.ts`
-- `src/app/api/sessions/[id]/preview/route.ts`
-- `src/lib/db/previews.ts`
+- `src/lib/agent/proposed-change.ts` ✅
+- `src/lib/diff/unified.ts` ✅
+- `src/app/api/sessions/[id]/preview/route.ts` ❌ (not yet implemented)
+- `src/lib/db/previews.ts` ✅
   **Connected Files:**
 - `src/app/agents/[id]/page.tsx` (preview UI)
   **Checklist:**
-- [ ] **[RA-07]** Canonical proposed change representation
-- [ ] **[RA-08]** Generate unified diff per file
-- [ ] **[RA-09]** Aggregate stats (files/added/removed)
-- [ ] **[RA-10]** Persist preview payload linked to session
+- [x] **[RA-07]** Canonical proposed change representation
+  - **Status:** ✅ Complete - `ProposedFileChange` interface with create/update/delete actions, validation functions, helper functions in `src/lib/agent/proposed-change.ts`
+- [x] **[RA-08]** Generate unified diff per file
+  - **Status:** ✅ Complete - `generateUnifiedDiff()` and `generateUnifiedDiffs()` functions in `src/lib/diff/unified.ts` using `diff` library with proper headers, hunks, and line counting
+- [x] **[RA-09]** Aggregate stats (files/added/removed)
+  - **Status:** ✅ Complete - `calculateChangeStatistics()` function tracks files, characters (added/removed), and operation counts (created/updated/deleted)
+- [x] **[RA-10]** Persist preview payload linked to session
+  - **Status:** ✅ Complete - File-based JSON storage in `src/lib/db/previews.ts` with `createPreview()`, `getPreview()`, `getPreviewBySession()`, and cleanup operations
+  - **Tests:** 36 tests added (23 for proposed-change, 13 for unified-diff) covering validation, statistics, and diff generation
+- [ ] **[RA-PREVIEW-ENDPOINT]** Preview API endpoint at `/api/sessions/[id]/preview/route.ts`
+  - **Status:** ❌ Not implemented - endpoint creation pending (requires AI integration)
       **Code Snippet:**
 
 ```typescript
@@ -726,7 +740,7 @@ export type PreviewPayload = {
 ```
 
 **Acceptance Criteria:**
-Preview endpoint returns diffs without writing to GitHub
+Preview endpoint returns diffs without writing to GitHub ⚠️ (infrastructure complete, endpoint pending)
 
 #### RA-SAFE-004 — Path Policy + Do-Not-Touch (P0)
 

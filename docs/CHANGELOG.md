@@ -22,6 +22,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **File Reading API (RA-04, RA-05, RA-06)**: Repository file content reading with size caps
+  - `readFileContent()` function for single file reading (1MB max)
+  - `batchReadFiles()` function for batch operations (50 files max, 10MB total)
+  - GET `/api/github/repositories/[owner]/[repo]/contents` endpoint for single file
+  - POST `/api/github/repositories/[owner]/[repo]/contents` endpoint for batch reading
+  - Size limit enforcement with proper HTTP 413 responses
+  - Response caching (2 minutes)
+  - 32 unit tests for file reading operations
+- **Preview & Diff Infrastructure (RA-07, RA-08, RA-09, RA-10)**: Proposed change model with unified diffs
+  - `ProposedFileChange` interface for canonical change representation (create/update/delete)
+  - `PreviewPayload` interface with changes, diffs, and statistics
+  - `generateUnifiedDiff()` for standard unified diff generation using `diff` library
+  - `calculateChangeStatistics()` for aggregate file and character statistics
+  - Path policy validation integration for all changes
+  - File-based preview persistence in `src/lib/db/previews.ts`
+  - 36 unit tests (23 for proposed-change, 13 for unified-diff)
 - **Repository Access Operations (RA-01, RA-02, RA-03)**: Safe repository access with bounds
   - Default branch resolution via `getRepositoryInfo()`
   - Bounded branch listing with pagination (max 100 per page)
@@ -61,6 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improved documentation structure
 - Enhanced code comments
+- Updated TODO.md to reflect completed tasks (RA-04 through RA-10)
 
 ## [0.1.0] - 2025-01-24
 
