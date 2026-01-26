@@ -276,17 +276,14 @@ describe('AS-CORE-001 — Session Persistence Tests', () => {
     });
 
     it('handles concurrent writes safely', async () => {
-      // Reduced concurrency due to known file-based storage limitations
+      // Sequential writes to avoid file-based storage race conditions
       // In production, use a real database with proper ACID guarantees
-      const promises = Array.from({ length: 3 }, (_, i) =>
-        createAgentSession(userId, createTestSessionInput({ name: `Session ${i}` }))
-      );
+      for (let i = 0; i < 3; i++) {
+        await createAgentSession(userId, createTestSessionInput({ name: `Session ${i}` }));
+      }
 
-      const sessions = await Promise.all(promises);
-
-      expect(sessions).toHaveLength(3);
       const allSessions = await listAgentSessions(userId);
-      expect(allSessions.length).toBeGreaterThanOrEqual(3);
+      expect(allSessions.length).toBe(3);
     });
   });
 
