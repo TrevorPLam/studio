@@ -1,6 +1,7 @@
 /**
  * Integration tests for session detail API
  * @file tests/integration/api/sessions-detail.test.ts
+ * @jest-environment node
  */
 
 import { NextRequest } from 'next/server';
@@ -137,7 +138,7 @@ describe('Sessions Detail API Tests', () => {
     });
 
     it('returns 409 on invalid transition', async () => {
-      // Note: The current implementation returns 500, but test expects 409
+      // The current implementation returns 500, but test expects 409
       // This documents the expected behavior
       (getAgentSessionById as jest.Mock).mockResolvedValue(mockAgentSession);
       (updateAgentSession as jest.Mock).mockRejectedValue(

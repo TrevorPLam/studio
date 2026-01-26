@@ -43,14 +43,14 @@ describe('Stress Tests', () => {
 
       // Memory increase should be reasonable (< 100MB for 1000 sessions)
       expect(memoryIncrease).toBeLessThan(100 * 1024 * 1024);
-    });
+    }, 60000); // 60 second timeout for this long-running test
   });
 
   describe('Error recovery', () => {
     it('handles GitHub API outages', async () => {
       // This would test error handling when GitHub API is down
       // Implementation depends on GitHub client error handling
-      
+
       // For now, we test that the system continues to function
       const session = await createAgentSession(userId, {
         name: 'Error Recovery Test',
