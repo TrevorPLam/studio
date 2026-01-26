@@ -32,9 +32,12 @@ import {
   fetchTree,
   getDefaultBranch,
   branchExists,
+  readFileContent,
+  batchReadFiles,
   type RepositoryInfo,
   type BranchInfo,
   type TreeResult,
+  type FileContent,
 } from '@/lib/github-reader';
 import { GitHubClient } from '@/lib/github-client';
 import { GitHubAPIError } from '@/lib/types';
@@ -452,6 +455,308 @@ describe('GitHub Reader Module', () => {
         expect(error).toBeInstanceOf(GitHubAPIError);
         expect((error as GitHubAPIError).statusCode).toBe(403);
       }
+    });
+  });
+
+  // ==========================================================================
+  // SECTION: RA-04 - FILE CONTENT READING
+  // ==========================================================================
+
+  describe('RA-04: readFileContent', () => {
+    beforeEach(() => {
+      // Mock default branch resolution
+      mockClient.getRepository = jest.fn().mockResolvedValue({
+        owner: { login: 'test-owner' },
+        name: 'test-repo',
+        default_branch: 'main',
+        full_name: 'test-owner/test-repo',
+        description: 'Test repository',
+        private: false,
+        html_url: 'https://github.com/test-owner/test-repo',
+      });
+    });
+
+    it('reads file content successfully', async () => {
+      const mockContent = Buffer.from('Hello, World!').toString('base64');
+      mockClient.octokit = {
+        repos: {
+          getContent: jest.fn().mockResolvedValue({
+            data: {
+              type: 'file',
+              path: 'README.md',
+              content: mockContent,
+              size: 13,
+              sha: 'abc123',
+            },
+          }),
+        },
+      } as any;
+
+      const result = await readFileContent(mockClient, 'test-owner', 'test-repo', 'README.md');
+
+      expect(result).toEqual({
+        path: 'README.md',
+        content: 'Hello, World!',
+        encoding: 'utf-8',
+        size: 13,
+        sha: 'abc123',
+      });
+    });
+
+    it('uses specified ref', async () => {
+      const mockContent = Buffer.from('Test content').toString('base64');
+      const getContentMock = jest.fn().mockResolvedValue({
+        data: {
+          type: 'file',
+          path: 'test.txt',
+          content: mockContent,
+          size: 12,
+          sha: 'def456',
+        },
+      });
+      mockClient.octokit = {
+        repos: {
+          getContent: getContentMock,
+        },
+      } as any;
+
+      await readFileContent(mockClient, 'test-owner', 'test-repo', 'test.txt', {
+        ref: 'develop',
+      });
+
+      expect(getContentMock).toHaveBeenCalledWith({
+        owner: 'test-owner',
+        repo: 'test-repo',
+        path: 'test.txt',
+        ref: 'develop',
+      });
+    });
+
+    it('throws error for directories', async () => {
+      mockClient.octokit = {
+        repos: {
+          getContent: jest.fn().mockResolvedValue({
+            data: [
+              { type: 'file', name: 'file1.txt' },
+              { type: 'file', name: 'file2.txt' },
+            ],
+          }),
+        },
+      } as any;
+
+      await expect(
+        readFileContent(mockClient, 'test-owner', 'test-repo', 'some-dir')
+      ).rejects.toThrow('Path points to a directory');
+    });
+
+    it('throws error for non-file types', async () => {
+      mockClient.octokit = {
+        repos: {
+          getContent: jest.fn().mockResolvedValue({
+            data: {
+              type: 'symlink',
+              path: 'link.txt',
+            },
+          }),
+        },
+      } as any;
+
+      await expect(
+        readFileContent(mockClient, 'test-owner', 'test-repo', 'link.txt')
+      ).rejects.toThrow('Path type is symlink, expected file');
+    });
+
+    it('enforces file size limits', async () => {
+      const largeSize = 2 * 1024 * 1024; // 2MB (exceeds 1MB limit)
+      mockClient.octokit = {
+        repos: {
+          getContent: jest.fn().mockResolvedValue({
+            data: {
+              type: 'file',
+              path: 'large.txt',
+              content: Buffer.from('x'.repeat(1000)).toString('base64'),
+              size: largeSize,
+              sha: 'ghi789',
+            },
+          }),
+        },
+      } as any;
+
+      await expect(
+        readFileContent(mockClient, 'test-owner', 'test-repo', 'large.txt')
+      ).rejects.toThrow('exceeds maximum allowed');
+    });
+
+    it('handles API errors', async () => {
+      mockClient.octokit = {
+        repos: {
+          getContent: jest.fn().mockRejectedValue(new Error('Not found')),
+        },
+      } as any;
+
+      await expect(
+        readFileContent(mockClient, 'test-owner', 'test-repo', 'nonexistent.txt')
+      ).rejects.toThrow(GitHubAPIError);
+    });
+  });
+
+  // ==========================================================================
+  // SECTION: RA-05 & RA-06 - BATCH FILE READING WITH SIZE LIMITS
+  // ==========================================================================
+
+  describe('RA-05 & RA-06: batchReadFiles', () => {
+    beforeEach(() => {
+      // Mock default branch resolution
+      mockClient.getRepository = jest.fn().mockResolvedValue({
+        owner: { login: 'test-owner' },
+        name: 'test-repo',
+        default_branch: 'main',
+        full_name: 'test-owner/test-repo',
+        description: 'Test repository',
+        private: false,
+        html_url: 'https://github.com/test-owner/test-repo',
+      });
+    });
+
+    it('reads multiple files successfully', async () => {
+      const files = ['file1.txt', 'file2.txt', 'file3.txt'];
+      let callCount = 0;
+      mockClient.octokit = {
+        repos: {
+          getContent: jest.fn().mockImplementation(({ path }) => {
+            callCount++;
+            const content = `Content of ${path}`;
+            return Promise.resolve({
+              data: {
+                type: 'file',
+                path,
+                content: Buffer.from(content).toString('base64'),
+                size: content.length,
+                sha: `sha${callCount}`,
+              },
+            });
+          }),
+        },
+      } as any;
+
+      const result = await batchReadFiles(mockClient, 'test-owner', 'test-repo', files);
+
+      expect(result).toHaveLength(3);
+      expect(result[0].path).toBe('file1.txt');
+      expect(result[0].content).toBe('Content of file1.txt');
+      expect(result[1].path).toBe('file2.txt');
+      expect(result[2].path).toBe('file3.txt');
+    });
+
+    it('enforces per-file size limit', async () => {
+      const smallLimit = 10; // 10 bytes
+      mockClient.octokit = {
+        repos: {
+          getContent: jest.fn().mockResolvedValue({
+            data: {
+              type: 'file',
+              path: 'file.txt',
+              content: Buffer.from('This is a longer content').toString('base64'),
+              size: 24,
+              sha: 'sha1',
+            },
+          }),
+        },
+      } as any;
+
+      await expect(
+        batchReadFiles(mockClient, 'test-owner', 'test-repo', ['file.txt'], {
+          maxBytesPerFile: smallLimit,
+        })
+      ).rejects.toThrow('exceeds per-file limit');
+    });
+
+    it('enforces total size limit', async () => {
+      let callCount = 0;
+      mockClient.octokit = {
+        repos: {
+          getContent: jest.fn().mockImplementation(({ path }) => {
+            callCount++;
+            const content = 'x'.repeat(600); // 600 bytes each
+            return Promise.resolve({
+              data: {
+                type: 'file',
+                path,
+                content: Buffer.from(content).toString('base64'),
+                size: content.length,
+                sha: `sha${callCount}`,
+              },
+            });
+          }),
+        },
+      } as any;
+
+      await expect(
+        batchReadFiles(mockClient, 'test-owner', 'test-repo', ['f1.txt', 'f2.txt'], {
+          maxTotalBytes: 1000, // Only 1000 bytes total
+        })
+      ).rejects.toThrow('Total size would exceed maximum');
+    });
+
+    it('skips files that cannot be read', async () => {
+      mockClient.octokit = {
+        repos: {
+          getContent: jest.fn().mockImplementation(({ path }) => {
+            if (path === 'error.txt') {
+              return Promise.reject(new Error('Not found'));
+            }
+            const content = `Content of ${path}`;
+            return Promise.resolve({
+              data: {
+                type: 'file',
+                path,
+                content: Buffer.from(content).toString('base64'),
+                size: content.length,
+                sha: 'sha1',
+              },
+            });
+          }),
+        },
+      } as any;
+
+      const result = await batchReadFiles(mockClient, 'test-owner', 'test-repo', [
+        'good1.txt',
+        'error.txt',
+        'good2.txt',
+      ]);
+
+      // Should return only the successful reads
+      expect(result).toHaveLength(2);
+      expect(result[0].path).toBe('good1.txt');
+      expect(result[1].path).toBe('good2.txt');
+    });
+
+    it('uses specified ref for all files', async () => {
+      const getContentMock = jest.fn().mockResolvedValue({
+        data: {
+          type: 'file',
+          path: 'test.txt',
+          content: Buffer.from('test').toString('base64'),
+          size: 4,
+          sha: 'sha1',
+        },
+      });
+      mockClient.octokit = {
+        repos: {
+          getContent: getContentMock,
+        },
+      } as any;
+
+      await batchReadFiles(mockClient, 'test-owner', 'test-repo', ['file1.txt', 'file2.txt'], {
+        ref: 'feature-branch',
+      });
+
+      expect(getContentMock).toHaveBeenCalledTimes(2);
+      expect(getContentMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ref: 'feature-branch',
+        })
+      );
     });
   });
 });

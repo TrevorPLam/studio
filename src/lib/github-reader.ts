@@ -121,6 +121,42 @@ export interface FetchTreeOptions {
   maxDepth?: number;
 }
 
+/**
+ * File content result.
+ */
+export interface FileContent {
+  /** File path */
+  path: string;
+  /** File content (decoded from base64) */
+  content: string;
+  /** Content encoding */
+  encoding: 'utf-8' | 'base64';
+  /** File size in bytes */
+  size: number;
+  /** File SHA */
+  sha: string;
+}
+
+/**
+ * Options for reading file content.
+ */
+export interface ReadFileOptions {
+  /** Git ref (branch, tag, or commit SHA) to read from (default: repository default branch) */
+  ref?: string;
+}
+
+/**
+ * Options for batch reading files.
+ */
+export interface BatchReadFilesOptions {
+  /** Git ref (branch, tag, or commit SHA) to read from (default: repository default branch) */
+  ref?: string;
+  /** Maximum bytes per file (default: 1MB) */
+  maxBytesPerFile?: number;
+  /** Maximum total bytes for all files (default: 10MB) */
+  maxTotalBytes?: number;
+}
+
 // ============================================================================
 // SECTION: CONSTANTS
 // ============================================================================
@@ -139,6 +175,18 @@ const MAX_TREE_DEPTH = 10;
  * Maximum number of tree entries to process.
  */
 const MAX_TREE_ENTRIES = 10000;
+
+/**
+ * Maximum file size in bytes (1MB).
+ * Implements RA-06: Enforce max bytes per file
+ */
+const MAX_FILE_SIZE_BYTES = 1024 * 1024; // 1MB
+
+/**
+ * Maximum total bytes for batch read operations (10MB).
+ * Implements RA-06: Enforce max total bytes per request
+ */
+const MAX_TOTAL_BYTES = 10 * 1024 * 1024; // 10MB
 
 // ============================================================================
 // SECTION: RA-01 - DEFAULT BRANCH RESOLUTION
@@ -218,6 +266,7 @@ export async function listBranches(
   try {
     // Access the internal octokit instance for branch listing
     // Using raw Octokit API since GitHubClient doesn't expose listBranches
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await (client as any).octokit.repos.listBranches({
       owner,
       repo,
@@ -225,6 +274,7 @@ export async function listBranches(
       page,
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return response.data.map((branch: any) => ({
       name: branch.name,
       sha: branch.commit.sha,
@@ -274,6 +324,7 @@ export async function fetchTree(
 
   try {
     // Access the internal octokit instance for tree fetching
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await (client as any).octokit.git.getTree({
       owner,
       repo,
@@ -281,6 +332,7 @@ export async function fetchTree(
       recursive: recursive ? 1 : undefined,
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const entries: TreeEntry[] = response.data.tree.map((entry: any) => ({
       path: entry.path,
       mode: entry.mode,
@@ -318,6 +370,167 @@ export async function fetchTree(
       error instanceof GitHubAPIError ? error.statusCode : 500
     );
   }
+}
+
+// ============================================================================
+// SECTION: RA-04 - FILE CONTENT READING
+// ============================================================================
+
+/**
+ * Read file content from a repository.
+ * Implements RA-04: Read file content by path+ref
+ *
+ * @param client - GitHub client instance
+ * @param owner - Repository owner
+ * @param repo - Repository name
+ * @param path - File path within the repository
+ * @param options - Read options (ref, size limits)
+ * @returns File content with metadata
+ * @throws GitHubAPIError on API errors
+ * @throws Error if file size exceeds maximum
+ *
+ * @example
+ * ```typescript
+ * const file = await readFileContent(client, 'owner', 'repo', 'README.md');
+ * console.log(file.content); // File content as string
+ * console.log(file.size); // Size in bytes
+ * ```
+ */
+export async function readFileContent(
+  client: GitHubClient,
+  owner: string,
+  repo: string,
+  path: string,
+  options: ReadFileOptions = {}
+): Promise<FileContent> {
+  try {
+    // Use default branch if ref not specified
+    const ref = options.ref || (await getDefaultBranch(client, owner, repo));
+
+    // Access the internal octokit instance for file content
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = await (client as any).octokit.repos.getContent({
+      owner,
+      repo,
+      path,
+      ref,
+    });
+
+    // Handle directory response
+    if (Array.isArray(response.data)) {
+      throw new GitHubAPIError('Path points to a directory, not a file', 400);
+    }
+
+    // Handle non-file types
+    if (response.data.type !== 'file') {
+      throw new GitHubAPIError(`Path type is ${response.data.type}, expected file`, 400);
+    }
+
+    const fileData = response.data;
+
+    // Check file size limit
+    if (fileData.size > MAX_FILE_SIZE_BYTES) {
+      throw new Error(
+        `File size (${fileData.size} bytes) exceeds maximum allowed (${MAX_FILE_SIZE_BYTES} bytes)`
+      );
+    }
+
+    // Decode base64 content
+    const content = Buffer.from(fileData.content, 'base64').toString('utf-8');
+
+    return {
+      path: fileData.path,
+      content,
+      encoding: 'utf-8',
+      size: fileData.size,
+      sha: fileData.sha,
+    };
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('exceeds maximum')) {
+      throw error;
+    }
+    throw new GitHubAPIError(
+      `Failed to read file content: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      error instanceof GitHubAPIError ? error.statusCode : 500
+    );
+  }
+}
+
+// ============================================================================
+// SECTION: RA-05 - BATCH FILE READING
+// ============================================================================
+
+/**
+ * Batch read multiple files from a repository.
+ * Implements RA-05: Batch read selected files
+ * Implements RA-06: Enforce max bytes per file and total bytes per request
+ *
+ * @param client - GitHub client instance
+ * @param owner - Repository owner
+ * @param repo - Repository name
+ * @param paths - Array of file paths to read
+ * @param options - Batch read options (ref, size limits)
+ * @returns Array of file contents (may be partial on size limit)
+ * @throws GitHubAPIError on API errors
+ *
+ * @example
+ * ```typescript
+ * const files = await batchReadFiles(client, 'owner', 'repo', ['README.md', 'package.json']);
+ * files.forEach(file => console.log(file.path, file.size));
+ * ```
+ */
+export async function batchReadFiles(
+  client: GitHubClient,
+  owner: string,
+  repo: string,
+  paths: string[],
+  options: BatchReadFilesOptions = {}
+): Promise<FileContent[]> {
+  const maxBytesPerFile = options.maxBytesPerFile || MAX_FILE_SIZE_BYTES;
+  const maxTotalBytes = options.maxTotalBytes || MAX_TOTAL_BYTES;
+
+  const results: FileContent[] = [];
+  let totalBytes = 0;
+
+  for (const path of paths) {
+    try {
+      const fileContent = await readFileContent(client, owner, repo, path, {
+        ref: options.ref,
+      });
+
+      // Check per-file size limit
+      if (fileContent.size > maxBytesPerFile) {
+        throw new Error(
+          `File ${path} size (${fileContent.size} bytes) exceeds per-file limit (${maxBytesPerFile} bytes)`
+        );
+      }
+
+      // Check total size limit
+      if (totalBytes + fileContent.size > maxTotalBytes) {
+        throw new Error(
+          `Total size would exceed maximum (${maxTotalBytes} bytes). Processed ${results.length} of ${paths.length} files.`
+        );
+      }
+
+      totalBytes += fileContent.size;
+      results.push(fileContent);
+    } catch (error) {
+      // Continue processing other files, but log the error
+      // For production, consider collecting errors and returning them with results
+      if (
+        error instanceof Error &&
+        (error.message.includes('exceed') || error.message.includes('limit'))
+      ) {
+        // Stop processing if size limits exceeded
+        throw error;
+      }
+      // Skip files that can't be read (e.g., not found, not a file)
+      // Could optionally collect these errors and return them
+      continue;
+    }
+  }
+
+  return results;
 }
 
 // ============================================================================
