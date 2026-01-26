@@ -124,6 +124,8 @@ export async function GET(request: NextRequest) {
   return new NextResponse(html, {
     headers: {
       'Content-Type': 'text/html',
+      'Content-Security-Policy':
+        "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https:; font-src 'self' data: https://unpkg.com; connect-src 'self' https:; frame-ancestors 'self';",
     },
   });
 }
