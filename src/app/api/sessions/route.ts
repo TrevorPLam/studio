@@ -72,6 +72,40 @@ function getUserId(session: Session | null): string | null {
  * @returns 400 if user identity unavailable
  *
  * @see AS-CORE-001 AS-04
+ * 
+ * @openapi
+ * /api/sessions:
+ *   get:
+ *     tags:
+ *       - Sessions
+ *     summary: List agent sessions
+ *     description: Returns all agent sessions for the authenticated user
+ *     security:
+ *       - nextAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved sessions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sessions:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/AgentSession'
+ *       401:
+ *         description: Unauthorized - authentication required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       400:
+ *         description: Bad request - user identity unavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 export async function GET() {
   const startTime = Date.now();
@@ -138,6 +172,47 @@ export async function GET() {
  * @returns 500 if server error
  *
  * @see AS-CORE-001 AS-04
+ * 
+ * @openapi
+ * /api/sessions:
+ *   post:
+ *     tags:
+ *       - Sessions
+ *     summary: Create agent session
+ *     description: Creates a new agent session with the provided configuration
+ *     security:
+ *       - nextAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateAgentSession'
+ *     responses:
+ *       201:
+ *         description: Session successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AgentSession'
+ *       400:
+ *         description: Bad request - validation failed or user identity unavailable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized - authentication required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       503:
+ *         description: Service unavailable - kill-switch is active
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
