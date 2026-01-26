@@ -1,6 +1,7 @@
 /**
  * Integration tests for sessions API
  * @file tests/integration/api/sessions.test.ts
+ * @jest-environment node
  */
 
 import { NextRequest } from 'next/server';
@@ -36,7 +37,7 @@ describe('Sessions API Tests', () => {
   });
 
   describe('GET /api/sessions', () => {
-    it('returns user\'s sessions', async () => {
+    it("returns user's sessions", async () => {
       const mockSessions = [
         {
           id: 'session-1',
@@ -110,7 +111,10 @@ describe('Sessions API Tests', () => {
 
       expect(response.status).toBe(201);
       expect(data.id).toBe('new-session-id');
-      expect(createAgentSession).toHaveBeenCalledWith(mockUserId, expect.objectContaining(requestBody));
+      expect(createAgentSession).toHaveBeenCalledWith(
+        mockUserId,
+        expect.objectContaining(requestBody)
+      );
     });
 
     it('requires authentication', async () => {

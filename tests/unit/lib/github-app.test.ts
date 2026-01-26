@@ -4,6 +4,11 @@
  * @epic GH-AUTH-001
  */
 
+// Mock @octokit/auth-app before importing github-app
+jest.mock('@octokit/auth-app', () => ({
+  createAppAuth: jest.fn(() => jest.fn()),
+}));
+
 import nock from 'nock';
 import {
   getInstallationToken,
@@ -121,9 +126,9 @@ MIIEpAIBAAKCAQEA1234567890abcdefghijklmnopqrstuvwxyz
         });
 
       await getInstallationToken(mockInstallationId);
-      
+
       // Wait for token to expire (with buffer)
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const token2 = await getInstallationToken(mockInstallationId);
       expect(token2).toBe('new-token');
@@ -190,9 +195,7 @@ MIIEpAIBAAKCAQEA1234567890abcdefghijklmnopqrstuvwxyz
 
   describe('getInstallationIdForRepo()', () => {
     it('finds installation for repo', async () => {
-      nock('https://api.github.com')
-        .get('/app')
-        .reply(200, { id: mockAppId });
+      nock('https://api.github.com').get('/app').reply(200, { id: mockAppId });
 
       nock('https://api.github.com')
         .get('/repos/test-owner/test-repo/installation')
@@ -204,17 +207,13 @@ MIIEpAIBAAKCAQEA1234567890abcdefghijklmnopqrstuvwxyz
     });
 
     it('handles repo not installed', async () => {
-      nock('https://api.github.com')
-        .get('/app')
-        .reply(200, { id: mockAppId });
+      nock('https://api.github.com').get('/app').reply(200, { id: mockAppId });
 
       nock('https://api.github.com')
         .get('/repos/test-owner/test-repo/installation')
         .reply(404, { message: 'Not Found' });
 
-      await expect(
-        getInstallationIdForRepo('test-owner', 'test-repo')
-      ).rejects.toThrow();
+      await expect(getInstallationIdForRepo('test-owner', 'test-repo')).rejects.toThrow();
     });
   });
 

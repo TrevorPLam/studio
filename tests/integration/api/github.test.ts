@@ -1,6 +1,7 @@
 /**
  * Integration tests for GitHub API
  * @file tests/integration/api/github.test.ts
+ * @jest-environment node
  */
 
 import { NextRequest } from 'next/server';
@@ -105,7 +106,7 @@ describe('GitHub API Tests', () => {
         forks_count: 1,
       };
 
-      // Note: This would need the actual route file to test
+      // This would need the actual route file to test
       // For now, we test the mocked function
       (getRepository as jest.Mock).mockResolvedValue(mockRepo);
 
