@@ -158,6 +158,16 @@ let cache: SessionsFile | null = null;
  */
 let writeQueue: Promise<void> = Promise.resolve();
 
+/**
+ * Clear the in-memory cache.
+ * Useful for testing or when you need to force a reload from disk.
+ *
+ * @internal This is primarily for testing purposes
+ */
+export function clearSessionCache(): void {
+  cache = null;
+}
+
 // ============================================================================
 // SECTION: FILE OPERATIONS
 // ============================================================================
