@@ -1,0 +1,210 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "type": "agent_entry_point",
+  "role": "AI coding agent operating in a governed repository. Complete tasks safely, following all rules and workflows.",
+
+  "command_routing": {
+    "Start": "follow_workflow",
+    "Work": "follow_workflow",
+    "Task": "follow_workflow",
+    "Review": "skip_to_pr_section",
+    "Security": ["read_security_baseline", "then_follow_workflow"],
+    "Help": "show_help_section"
+  },
+
+  "required_reading": {
+    "order": [
+      ".repo/tasks/TODO.md",
+      ".repo/repo.manifest.yaml",
+      ".repo/policy/constitution.json"
+    ],
+    "alternatives": {
+      "rules": ".repo/agents/QUICK_REFERENCE.md"
+    }
+  },
+
+  "context_determination": {
+    "security": {
+      "triggers": ["auth", "money", "external_systems", "payment_flows"],
+      "action": [
+        "read",
+        ".repo/policy/constitution.json (security section)",
+        "create_hitl",
+        "stop_work"
+      ]
+    },
+    "boundaries": {
+      "triggers": ["cross_module_imports"],
+      "action": [
+        "read",
+        ".repo/policy/constitution.json (boundaries section)",
+        "create_adr"
+      ]
+    },
+    "backend_frontend": {
+      "triggers": ["backend_code", "frontend_code"],
+      "action": [
+        "read",
+        ".repo/policy/constitution.json (best_practices section)",
+        "read_folder_guide",
+        "read_agent_context_json"
+      ]
+    },
+    "folder_entry": {
+      "triggers": ["entering_folder"],
+      "action": ["read", ".agent-context.json", "read", ".AGENT.md"]
+    },
+    "unknown": {
+      "triggers": ["not_in_docs", "not_in_manifest", "not_in_code"],
+      "action": [
+        "mark_unknown",
+        "read",
+        ".repo/policy/procedures.json (hitl section)",
+        "create_hitl",
+        "stop_work"
+      ]
+    }
+  },
+
+  "workflow": {
+    "three_pass": {
+      "pass0_context": {
+        "name": "Context",
+        "steps": [
+          "read_folder_context_files",
+          "read_agent_context_json_when_entering_folder"
+        ],
+        "description": "Read folder-level context files (.agent-context.json, .AGENT.md) when entering a folder"
+      },
+      "pass1_plan": {
+        "steps": [
+          "determine_change_type",
+          "list_all_actions",
+          "identify_risks",
+          "list_all_files_to_modify",
+          "mark_unknown_items",
+          "check_hitl_needed",
+          "create_task_packet_if_required"
+        ],
+        "output": "plan_with_actions_risks_files_unknowns_hitl",
+        "blockers": {
+          "hitl": ["create_hitl", "stop_work", "wait_completion"],
+          "adr": ["create_adr", "document_decision"]
+        }
+      },
+      "pass2_change": {
+        "steps": [
+          "apply_edits_from_plan",
+          "follow_existing_patterns",
+          "include_filepaths_global_rule",
+          "respect_boundaries"
+        ],
+        "output": "code_changes_with_filepaths",
+        "do_not_proceed_if": [
+          "pass1_blockers_exist",
+          "unknown_items_unresolved",
+          "security_risky_without_hitl_approval"
+        ]
+      },
+      "pass3_verify": {
+        "steps": [
+          "run_tests_from_manifest",
+          "provide_evidence",
+          "update_logs",
+          "check_quality_gates",
+          "document_in_pr"
+        ],
+        "output": "evidence_updated_logs_passing_tests"
+      }
+    }
+  },
+
+  "task_completion": {
+    "steps": [
+      "mark_acceptance_criteria_complete",
+      "add_completion_date",
+      "move_to_archive",
+      "promote_next_task"
+    ],
+    "files": {
+      "todo": ".repo/tasks/TODO.md",
+      "archive": ".repo/tasks/ARCHIVE.md",
+      "backlog": ".repo/tasks/BACKLOG.md"
+    }
+  },
+
+  "pr_creation": {
+    "required_reading": [
+      ".repo/agents/pr-review.md",
+      ".repo/templates/PR_TEMPLATE.md",
+      ".repo/policy/constitution.json (quality_gates section)",
+      ".repo/policy/procedures.json (hitl section)"
+    ],
+    "required_sections": [
+      "what_changed",
+      "why_changed",
+      "filepaths_all_files",
+      "verification_evidence",
+      "risks_if_any",
+      "rollback_if_risky"
+    ]
+  },
+
+  "rules": {
+    "always": [
+      "include_filepaths_in_all_changes",
+      "link_changes_to_task_in_todo",
+      "mark_unknown_create_hitl",
+      "show_verification_evidence"
+    ],
+    "never": [
+      "guess_commands_use_manifest_or_hitl",
+      "skip_filepaths_required_everywhere",
+      "commit_secrets_or_env_files",
+      "cross_boundaries_without_adr",
+      "proceed_with_unknown_items",
+      "make_risky_changes_without_hitl"
+    ]
+  },
+
+  "decision_trees": {
+    "hitl_needed": {
+      "risky": {
+        "triggers": ["security", "money", "production", "external"],
+        "action": "create_hitl_stop"
+      },
+      "unknown": {
+        "triggers": ["not_in_docs", "not_in_manifest", "not_in_code"],
+        "action": "mark_unknown_create_hitl_stop"
+      },
+      "cross_boundaries": {
+        "triggers": true,
+        "action": "requires_adr"
+      }
+    }
+  },
+
+  "troubleshooting": {
+    "todo_empty": ["check_backlog", "promote_highest_priority_task"],
+    "manifest_missing": ["mark_unknown", "create_hitl", "stop_work"],
+    "constitution_json_missing": ["read_procedures_json", "or_check_archive"]
+  },
+
+  "next_steps": {
+    "after_reading_this": [
+      "read_agents_tasks_todo_md",
+      "read_repo_manifest_yaml",
+      "read_policy_constitution_json",
+      "follow_three_pass_workflow"
+    ]
+  },
+  "token_optimization": {
+    "note": "Use `read_file` with `offset` and `limit` parameters for large files",
+    "parallel_reads": "Read multiple files in parallel when possible",
+    "file_finding": "Use `glob_file_search` for file finding instead of broad searches",
+    "index_usage": "Use INDEX.json files to find major functions/classes/relevant sections",
+    "targeted_searches": "Specify `target_directories` parameter in searches to limit scope",
+    "section_finding": "Use grep to find relevant sections before reading entire files"
+  }
+}

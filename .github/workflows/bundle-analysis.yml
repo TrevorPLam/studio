@@ -1,0 +1,65 @@
+# ============================================================================
+# BUNDLE SIZE ANALYSIS WORKFLOW
+# ============================================================================
+
+name: Bundle Size Analysis
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  analyze:
+    name: Analyze Bundle Size
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Analyze bundle size
+        run: |
+          if npm run | grep -q "analyze"; then
+            ANALYZE=true npm run build
+          else
+            echo "⚠️  Bundle analyzer not configured. Add @next/bundle-analyzer to enable."
+          fi
+        continue-on-error: true
+
+      - name: Check bundle size limits
+        run: |
+          if npm run | grep -q "check:bundle-size"; then
+            npm run check:bundle-size
+          elif npm run | grep -q "check:bundle-budget"; then
+            npm run check:bundle-budget
+          else
+            echo "⚠️  Bundle size check script not found"
+          fi
+        continue-on-error: true
+
+      - name: Upload bundle analysis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis
+          path: |
+            .next/analyze/
+            dist/
+            build/
+          retention-days: 7

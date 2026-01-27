@@ -11,18 +11,15 @@ This directory contains the manifest and guide for injecting automation scripts 
 ## Quick Reference
 
 ### Total Automations: 67
-
 - **Intelligent**: 17 (task management, code intelligence)
 - **Ultra**: 40 (AI-powered, predictive, self-healing)
 - **Vibranium**: 10 (beyond reality, consciousness-level)
 
 ### Core Infrastructure
-
 - **shared-infrastructure.mjs** - AI engine, learning system, utilities
 - **orchestrator.mjs** - Workflow orchestration
 
 ### Installation
-
 1. Copy `scripts/intelligent/`, `scripts/ultra/`, `scripts/vibranium/`
 2. Add package.json scripts (see manifest)
 3. Test with `npm run ultra:orchestrate -- --tier=1`

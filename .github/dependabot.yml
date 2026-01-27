@@ -1,96 +1,37 @@
-# ============================================================================
-# DEPENDABOT CONFIGURATION
-# ============================================================================
-#
-# @file .github/dependabot.yml
-# @epic BP-DEP-008
-#
-# PURPOSE:
-# Automated dependency update management via GitHub Dependabot.
-# Creates pull requests for dependency updates automatically.
-#
-# CONFIGURATION:
-# - Checks npm dependencies daily
-# - Groups updates by dependency type
-# - Auto-merges patch updates (configurable)
-#
-# SECURITY:
-# - Security updates are prioritized
-# - Critical vulnerabilities trigger immediate PRs
-#
-# RELATED FILES:
-# - .github/workflows/security.yml (security scanning)
-# - package.json (dependency definitions)
-#
-# @see TODO.md BP-DEP-008
-#
-# ============================================================================
-
 version: 2
 updates:
-  # ============================================================================
-  # NPM DEPENDENCY UPDATES
-  # ============================================================================
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "daily"
-      time: "04:00"
-      timezone: "UTC"
-    
-    # Open pull requests for version updates
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
     open-pull-requests-limit: 10
-    
-    # Group updates by dependency type
-    groups:
-      production-dependencies:
-        dependency-type: "production"
-        patterns:
-          - "*"
-      development-dependencies:
-        dependency-type: "development"
-        patterns:
-          - "*"
-    
-    # Commit message configuration
-    commit-message:
-      prefix: "chore"
-      prefix-development: "chore"
-      include: "scope"
-    
-    # Labels for PRs
     labels:
       - "dependencies"
       - "automated"
-    
-    # Ignore specific dependencies (if needed)
-    # ignore:
-    #   - dependency-name: "package-name"
-    #     update-types: ["version-update:semver-major"]
-    
-    # Allow list for auto-merge (optional)
-    # Automatically merge patch updates for trusted dependencies
-    # auto-merge:
-    #   - dependency-name: "package-name"
-    #     update-types: ["version-update:semver-patch"]
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
 
-  # ============================================================================
-  # GITHUB ACTIONS UPDATES
-  # ============================================================================
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "04:00"
-      timezone: "UTC"
-    
+      time: "09:00"
     open-pull-requests-limit: 5
-    
-    commit-message:
-      prefix: "ci"
-      include: "scope"
-    
     labels:
       - "github-actions"
       - "automated"

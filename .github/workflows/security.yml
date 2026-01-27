@@ -134,3 +134,100 @@ jobs:
         run: |
           echo "⚠️  Review license-report.json for any non-approved licenses"
           echo "Approved licenses: MIT, Apache-2.0, ISC, BSD-2-Clause, BSD-3-Clause, 0BSD, Unlicense, CC0-1.0"
+
+  # ============================================================================
+  # JOB: LOCKFILE SECURITY VALIDATION
+  # ============================================================================
+  lockfile-lint:
+    name: Lockfile Security Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install lockfile-lint
+        run: npm install -g lockfile-lint
+
+      - name: Validate package-lock.json
+        run: |
+          if [ -f "package-lock.json" ]; then
+            echo "Validating package-lock.json security..."
+            lockfile-lint \
+              --path package-lock.json \
+              --type npm \
+              --allowed-hosts npm \
+              --allowed-hosts registry.npmjs.org \
+              --allowed-hosts registry.yarnpkg.com \
+              --allowed-schemes https: \
+              --validate-https || exit 1
+            echo "✅ package-lock.json passed security validation"
+          else
+            echo "⚠️  No package-lock.json found, skipping validation"
+          fi
+
+      - name: Validate yarn.lock (if present)
+        run: |
+          if [ -f "yarn.lock" ]; then
+            echo "Validating yarn.lock security..."
+            lockfile-lint \
+              --path yarn.lock \
+              --type yarn \
+              --allowed-hosts npm \
+              --allowed-hosts registry.npmjs.org \
+              --allowed-hosts registry.yarnpkg.com \
+              --allowed-schemes https: \
+              --validate-https || exit 1
+            echo "✅ yarn.lock passed security validation"
+          else
+            echo "ℹ️  No yarn.lock found, skipping validation"
+          fi
+
+      - name: Validate pnpm-lock.yaml (if present)
+        run: |
+          if [ -f "pnpm-lock.yaml" ]; then
+            echo "Validating pnpm-lock.yaml security..."
+            lockfile-lint \
+              --path pnpm-lock.yaml \
+              --type npm \
+              --allowed-hosts npm \
+              --allowed-hosts registry.npmjs.org \
+              --allowed-hosts registry.yarnpkg.com \
+              --allowed-schemes https: \
+              --validate-https || exit 1
+            echo "✅ pnpm-lock.yaml passed security validation"
+          else
+            echo "ℹ️  No pnpm-lock.yaml found, skipping validation"
+          fi
+
+  # ============================================================================
+  # SECRET DETECTION (GITLEAKS)
+  # ============================================================================
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for secret scanning
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload findings
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: .gitleaks-report.json
+          retention-days: 30

@@ -1,0 +1,571 @@
+{
+  "file": "INDEX.json",
+  "folder": "scripts",
+  "purpose": "Automation and utility scripts",
+  "generated_at": "2026-01-24T16:59:13.331Z",
+  "files": [
+    {
+      "path": ".copilot-instructions.md",
+      "type": "md",
+      "key_classes": [],
+      "line_count": 231,
+      "size_bytes": 6209,
+      "description": "Scripts Directory Instructions"
+    },
+    {
+      "path": "add-governance-comments.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 308,
+      "size_bytes": 8982,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "agent-logger.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 286,
+      "size_bytes": 8133,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "AGENT.md",
+      "type": "md",
+      "key_classes": [],
+      "line_count": 84,
+      "size_bytes": 3062,
+      "description": "AGENT.md (Folder-Level Guide)"
+    },
+    {
+      "path": "archive-hitl-items.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 161,
+      "size_bytes": 5160,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "archive-task.py",
+      "type": "py",
+      "key_classes": [],
+      "line_count": 243,
+      "size_bytes": 8730,
+      "description": "!/usr/bin/env python3"
+    },
+    {
+      "path": "build.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 562,
+      "size_bytes": 14889
+    },
+    {
+      "path": "check-artifacts-by-change-type.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 344,
+      "size_bytes": 10893,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "check-boundaries.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 107,
+      "size_bytes": 3107,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "check-bundle-budget.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 107,
+      "size_bytes": 2769,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "check-changelog-and-logs.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 347,
+      "size_bytes": 8697,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "check-coverage-ratchet.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 131,
+      "size_bytes": 3357,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "check-expired-waivers.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 84,
+      "size_bytes": 2614,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "check-expo-config.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 81,
+      "size_bytes": 2558,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "check-framework-compliance.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 369,
+      "size_bytes": 10216,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "check-security-patterns.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 200,
+      "size_bytes": 5019,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "check-stale-context.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 135,
+      "size_bytes": 3820,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "check-startup-blockers.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 377,
+      "size_bytes": 10252,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "check-todo-format.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 130,
+      "size_bytes": 3817,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "check-worklets-version.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 125,
+      "size_bytes": 4425,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "create-adr-from-trigger.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 161,
+      "size_bytes": 3658,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "create-agent-log.py",
+      "type": "py",
+      "key_classes": [],
+      "line_count": 225,
+      "size_bytes": 7410,
+      "description": "!/usr/bin/env python3"
+    },
+    {
+      "path": "create-hitl-item.py",
+      "type": "py",
+      "key_classes": [],
+      "line_count": 228,
+      "size_bytes": 7213,
+      "description": "!/usr/bin/env python3"
+    },
+    {
+      "path": "create-hitl-item.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 142,
+      "size_bytes": 3813,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "create-trace-log.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 152,
+      "size_bytes": 4366,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "create-waiver.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 175,
+      "size_bytes": 4220,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "deep-dependency-check.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 467,
+      "size_bytes": 13326,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "detect-adr-triggers.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 111,
+      "size_bytes": 3637,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "extract-pr-template-data.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 334,
+      "size_bytes": 10718,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "framework-metrics.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 299,
+      "size_bytes": 7622,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "generate-agent-context.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 59,
+      "size_bytes": 1480,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "generate-agent-log.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 82,
+      "size_bytes": 2187,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "generate-dashboard.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 339,
+      "size_bytes": 11813,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "generate-index-json.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 141,
+      "size_bytes": 3771,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "generate-index-json.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 350,
+      "size_bytes": 9874,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "generate-index-md.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 362,
+      "size_bytes": 11493,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "generate-metrics.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 186,
+      "size_bytes": 4846,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "generate-missing-agent-contexts.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 183,
+      "size_bytes": 5012,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "generate-trace-log.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 72,
+      "size_bytes": 2022,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "get-next-task-number.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 31,
+      "size_bytes": 821,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "governance-verify.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 583,
+      "size_bytes": 15875,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "governance-verify.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 309,
+      "size_bytes": 11738,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "inject-pr-data-to-logs.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 291,
+      "size_bytes": 8496,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "manage-waivers.py",
+      "type": "py",
+      "key_classes": [],
+      "line_count": 247,
+      "size_bytes": 8058,
+      "description": "!/usr/bin/env python3"
+    },
+    {
+      "path": "migrate.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 100,
+      "size_bytes": 2750,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "package.json",
+      "type": "json",
+      "key_classes": [],
+      "line_count": 20,
+      "size_bytes": 546
+    },
+    {
+      "path": "pattern-verification.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 123,
+      "size_bytes": 3291,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "post-install-check.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 135,
+      "size_bytes": 4393,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "promote-task.py",
+      "type": "py",
+      "key_classes": [],
+      "line_count": 187,
+      "size_bytes": 6687,
+      "description": "!/usr/bin/env python3"
+    },
+    {
+      "path": "promote-task.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 125,
+      "size_bytes": 3799,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "README.md",
+      "type": "md",
+      "key_classes": [],
+      "line_count": 409,
+      "size_bytes": 11008,
+      "description": "Automation Scripts"
+    },
+    {
+      "path": "SCRIPTS.md",
+      "type": "md",
+      "key_classes": [],
+      "line_count": 35,
+      "size_bytes": 1196,
+      "description": "SCRIPTS.md (Folder-Level Guide)"
+    },
+    {
+      "path": "setup-agent-logs.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 64,
+      "size_bytes": 1477,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "setup-migrations.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 76,
+      "size_bytes": 2296,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "suggest-waiver.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 97,
+      "size_bytes": 2851,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "sync-hitl-to-pr.py",
+      "type": "py",
+      "key_classes": [],
+      "line_count": 251,
+      "size_bytes": 8618,
+      "description": "!/usr/bin/env python3"
+    },
+    {
+      "path": "update-context-verified.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 104,
+      "size_bytes": 2570,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "update-documentation-metrics.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 243,
+      "size_bytes": 6918
+    },
+    {
+      "path": "validate-agent-context.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 171,
+      "size_bytes": 5223,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "validate-agent-trace.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 119,
+      "size_bytes": 2961,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "validate-evidence.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 93,
+      "size_bytes": 2403,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "validate-manifest-commands.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 148,
+      "size_bytes": 4603,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "validate-manifest.js",
+      "type": "js",
+      "key_classes": [],
+      "line_count": 212,
+      "size_bytes": 5572,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "validate-pr-body.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 97,
+      "size_bytes": 3047,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "validate-task-format.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 115,
+      "size_bytes": 3839,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "validate-trace-log.sh",
+      "type": "sh",
+      "key_classes": [],
+      "line_count": 119,
+      "size_bytes": 3864,
+      "description": "!/bin/bash"
+    },
+    {
+      "path": "watch-constitution.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 86,
+      "size_bytes": 2369,
+      "description": "!/usr/bin/env node"
+    },
+    {
+      "path": "watch-indexes.mjs",
+      "type": "mjs",
+      "key_classes": [],
+      "line_count": 151,
+      "size_bytes": 4048,
+      "description": "!/usr/bin/env node"
+    }
+  ],
+  "subfolders": [
+    {
+      "path": "intelligent",
+      "purpose": "Directory"
+    },
+    {
+      "path": "tools",
+      "purpose": "Directory"
+    },
+    {
+      "path": "ultra",
+      "purpose": "Directory"
+    },
+    {
+      "path": "vibranium",
+      "purpose": "Directory"
+    }
+  ],
+  "dependencies": {
+    "imports": [],
+    "imported_by": []
+  }
+}

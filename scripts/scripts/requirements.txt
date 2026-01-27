@@ -1,0 +1,4 @@
+# Python dependencies for governance automation scripts
+
+# HTTP library for GitHub API integration
+requests>=2.31.0
