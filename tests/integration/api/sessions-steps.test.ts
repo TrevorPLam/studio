@@ -1,6 +1,7 @@
 /**
  * Integration tests for session steps API
  * @file tests/integration/api/sessions-steps.test.ts
+ * @jest-environment node
  */
 
 import { NextRequest } from 'next/server';

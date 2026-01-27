@@ -100,33 +100,58 @@ export function assertPathAllowed(
   filePath: string,
   options: PathPolicyOptions = {}
 ): PathPolicyResult {
+  // Security: Block paths with traversal attempts (.. or ..)
+  if (filePath.includes('..')) {
+    return {
+      allowed: false,
+      reason: `Path "${filePath}" contains path traversal sequence (..) which is not allowed`,
+    };
+  }
+
   // Normalize path: remove leading/trailing slashes, handle Windows paths
-  const normalized = filePath.replace(/^\/+|\/+$/g, '').replace(/\\/g, '/');
+  let normalized = filePath.replace(/^\/+|\/+$/g, '').replace(/\\/g, '/');
 
-  // Check forbidden list first (unless override)
-  if (!options.allowForbidden) {
-    const isForbidden = FORBIDDEN_PREFIXES.some((prefix) => {
-      // Exact match
-      if (normalized === prefix) {
-        return true;
-      }
-      // Prefix match
-      if (normalized.startsWith(prefix)) {
-        return true;
-      }
-      // For exact filenames, check if path ends with the forbidden name
-      if (!prefix.includes('/') && normalized.endsWith(`/${prefix}`)) {
-        return true;
-      }
-      return false;
-    });
-
-    if (isForbidden) {
-      return {
-        allowed: false,
-        reason: `Path "${filePath}" is in the forbidden list and cannot be modified without explicit override`,
-      };
+  // Resolve path traversal (.) to clean up the path
+  const parts = normalized.split('/');
+  const resolved: string[] = [];
+  for (const part of parts) {
+    if (part === '.' || part === '') {
+      // Skip current directory references and empty parts
+      continue;
+    } else {
+      resolved.push(part);
     }
+  }
+  normalized = resolved.join('/');
+
+  // Check if path is in forbidden list
+  const isForbidden = FORBIDDEN_PREFIXES.some((prefix) => {
+    // Exact match
+    if (normalized === prefix) {
+      return true;
+    }
+    // Prefix match
+    if (normalized.startsWith(prefix)) {
+      return true;
+    }
+    // For exact filenames, check if path ends with the forbidden name
+    if (!prefix.includes('/') && normalized.endsWith(`/${prefix}`)) {
+      return true;
+    }
+    return false;
+  });
+
+  // If path is forbidden and override is not set, reject
+  if (isForbidden && !options.allowForbidden) {
+    return {
+      allowed: false,
+      reason: `Path "${filePath}" is in the forbidden list and cannot be modified without explicit override`,
+    };
+  }
+
+  // If path is forbidden but override is set, allow it (skip allowlist check)
+  if (isForbidden && options.allowForbidden) {
+    return { allowed: true };
   }
 
   // Check allowlist (unless override)
