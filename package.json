@@ -93,7 +93,7 @@
     "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.3.8",
-    "genkit-cli": "^1.20.0",
+    "genkit-cli": "^1.28.0",
     "husky": "^9.1.7",
     "jest": "^29.0.0",
     "jest-environment-jsdom": "^29.0.0",
