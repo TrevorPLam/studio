@@ -1,3 +1,0 @@
-// Skipped: These tests require proper mocking of @octokit/auth-app which uses ES modules
-// that Jest cannot properly transform. The GitHub App authentication is tested via
-// integration tests instead.
