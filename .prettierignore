@@ -35,7 +35,6 @@ lerna-debug.log*
 .env
 .env.local
 .env*.local
-!.env.example
 
 # IDE
 .vscode/
@@ -47,9 +46,6 @@ lerna-debug.log*
 # OS
 .DS_Store
 Thumbs.db
-
-# Vercel
-.vercel
 
 # Temporary files
 *.tmp
