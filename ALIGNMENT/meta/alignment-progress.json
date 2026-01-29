@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ALIGNMENT Progress Tracker",
+  "description": "Track progress through ALIGNMENT repository standards",
+  "type": "object",
+  "properties": {
+    "repository": {
+      "type": "string",
+      "description": "Repository name or identifier"
+    },
+    "started": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when ALIGNMENT process started (YYYY-MM-DD)"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp (ISO 8601)"
+    },
+    "decision_points": {
+      "type": "object",
+      "description": "Answers to Section 0 decision points",
+      "properties": {
+        "is_versioned_project": {
+          "type": "boolean",
+          "description": "Is this a versioned project?"
+        },
+        "project_type": {
+          "type": "string",
+          "enum": ["library", "application", "cli", "api", "infrastructure", "monorepo", "documentation"],
+          "description": "Project type from Section 0"
+        },
+        "primary_language": {
+          "type": "string",
+          "description": "Primary programming language/framework"
+        },
+        "cicd_platform": {
+          "type": "string",
+          "enum": ["github", "gitlab", "jenkins", "circleci", "azure-devops", "other", "none"],
+          "description": "CI/CD platform choice"
+        },
+        "is_public_repo": {
+          "type": "boolean",
+          "description": "Is this a public repository?"
+        }
+      }
+    },
+    "sections": {
+      "type": "object",
+      "description": "Progress for each section",
+      "patternProperties": {
+        "^[0-9]+$": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["not_started", "in_progress", "completed", "skipped"],
+              "description": "Current status of this section"
+            },
+            "tasks_complete": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of tasks completed"
+            },
+            "tasks_total": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total number of tasks in this section"
+            },
+            "completed_tasks": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of completed task descriptions"
+            },
+            "pending_tasks": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of pending task descriptions"
+            },
+            "notes": {
+              "type": "string",
+              "description": "Additional notes about this section"
+            }
+          }
+        }
+      }
+    },
+    "next_section": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 13,
+      "description": "Next section to work on"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of blockers preventing progress"
+    },
+    "overall_progress": {
+      "type": "object",
+      "properties": {
+        "p0_complete": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of P0 sections completed"
+        },
+        "p0_total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of P0 sections"
+        },
+        "p1_complete": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of P1 sections completed"
+        },
+        "p1_total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of P1 sections"
+        },
+        "health_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Overall repository health score (0-100)"
+        }
+      }
+    }
+  },
+  "required": ["repository", "started"],
+  "examples": [
+    {
+      "repository": "my-awesome-project",
+      "started": "2026-01-28",
+      "last_updated": "2026-01-28T10:00:00Z",
+      "decision_points": {
+        "is_versioned_project": true,
+        "project_type": "library",
+        "primary_language": "TypeScript",
+        "cicd_platform": "github",
+        "is_public_repo": true
+      },
+      "sections": {
+        "0": {
+          "status": "completed",
+          "tasks_complete": 5,
+          "tasks_total": 5,
+          "completed_tasks": [
+            "Git repository initialized",
+            "Package manager chosen (npm)",
+            "Decision points answered",
+            "Key concepts understood"
+          ],
+          "pending_tasks": []
+        },
+        "1": {
+          "status": "in_progress",
+          "tasks_complete": 6,
+          "tasks_total": 10,
+          "completed_tasks": [
+            "README.md created",
+            ".gitignore configured",
+            "Root directory cleaned up"
+          ],
+          "pending_tasks": [
+            "LICENSE file",
+            "CHANGELOG.md formatting"
+          ]
+        }
+      },
+      "next_section": 1,
+      "blockers": [],
+      "overall_progress": {
+        "p0_complete": 1,
+        "p0_total": 13,
+        "p1_complete": 0,
+        "p1_total": 13,
+        "health_score": 15
+      }
+    }
+  ]
+}

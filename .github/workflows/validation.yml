@@ -1,0 +1,257 @@
+name: ALIGNMENT Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  validate-structure:
+    name: Validate Repository Structure
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Check required root files
+        run: |
+          echo "::group::Checking required root files"
+          
+          # Required files
+          REQUIRED_FILES=("README.md" "LICENSE" "CONTRIBUTING.md" ".gitignore" ".editorconfig")
+          MISSING_FILES=()
+          
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing: $file"
+              MISSING_FILES+=("$file")
+            else
+              echo "✅ Found: $file"
+            fi
+          done
+          
+          if [ ${#MISSING_FILES[@]} -ne 0 ]; then
+            echo "::error::Missing required files: ${MISSING_FILES[*]}"
+            exit 1
+          fi
+          
+          echo "::endgroup::"
+      
+      - name: Check ALIGNMENT structure
+        run: |
+          echo "::group::Checking ALIGNMENT directory structure"
+          
+          # Required directories
+          REQUIRED_DIRS=(
+            "ALIGNMENT"
+            "ALIGNMENT/standards"
+            "ALIGNMENT/principles"
+            "ALIGNMENT/getting-started"
+            "ALIGNMENT/reference"
+            "ALIGNMENT/supporting"
+            "ALIGNMENT/tools"
+            "ALIGNMENT/research"
+            "ALIGNMENT/meta"
+          )
+          
+          MISSING_DIRS=()
+          
+          for dir in "${REQUIRED_DIRS[@]}"; do
+            if [ ! -d "$dir" ]; then
+              echo "❌ Missing: $dir"
+              MISSING_DIRS+=("$dir")
+            else
+              echo "✅ Found: $dir"
+            fi
+          done
+          
+          if [ ${#MISSING_DIRS[@]} -ne 0 ]; then
+            echo "::error::Missing required directories: ${MISSING_DIRS[*]}"
+            exit 1
+          fi
+          
+          echo "::endgroup::"
+      
+      - name: Verify all 14 standards exist
+        run: |
+          echo "::group::Checking all 14 standards"
+          
+          MISSING_STANDARDS=()
+          
+          for i in $(seq -f "%02g" 0 13); do
+            STANDARD_FILE="ALIGNMENT/standards/${i}-*.md"
+            if ! ls $STANDARD_FILE 1> /dev/null 2>&1; then
+              echo "❌ Missing: Standard $i"
+              MISSING_STANDARDS+=("$i")
+            else
+              FILE=$(ls $STANDARD_FILE)
+              echo "✅ Found: $FILE"
+            fi
+          done
+          
+          if [ ${#MISSING_STANDARDS[@]} -ne 0 ]; then
+            echo "::error::Missing standards: ${MISSING_STANDARDS[*]}"
+            exit 1
+          fi
+          
+          echo "::endgroup::"
+
+  validate-links:
+    name: Validate Markdown Links
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Check for broken internal links
+        run: |
+          echo "::group::Checking internal markdown links"
+          
+          BROKEN_LINKS=0
+          
+          # Find all markdown files
+          while IFS= read -r -d '' file; do
+            echo "Checking: $file"
+            
+            # Extract markdown links [text](path)
+            grep -oP '\[([^\]]+)\]\(([^)]+)\)' "$file" | while read -r link; do
+              # Extract the path part
+              path=$(echo "$link" | sed -n 's/.*(\([^)]*\)).*/\1/p')
+              
+              # Skip external links (http/https), anchors, and mailto
+              if [[ "$path" =~ ^https?:// ]] || [[ "$path" =~ ^# ]] || [[ "$path" =~ ^mailto: ]]; then
+                continue
+              fi
+              
+              # Remove anchor from path
+              clean_path="${path%#*}"
+              
+              # Skip empty paths
+              if [ -z "$clean_path" ]; then
+                continue
+              fi
+              
+              # Get directory of current file
+              dir=$(dirname "$file")
+              
+              # Resolve relative path
+              target="$dir/$clean_path"
+              
+              # Check if target exists
+              if [ ! -f "$target" ] && [ ! -d "$target" ]; then
+                echo "::warning file=$file::Broken link: $path"
+                BROKEN_LINKS=$((BROKEN_LINKS + 1))
+              fi
+            done
+          done < <(find . -name "*.md" -type f -print0)
+          
+          echo "::endgroup::"
+          
+          if [ $BROKEN_LINKS -gt 0 ]; then
+            echo "::warning::Found $BROKEN_LINKS potentially broken links"
+          else
+            echo "✅ No broken links found"
+          fi
+
+  validate-shell-scripts:
+    name: Validate Shell Scripts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install shellcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+      
+      - name: Run shellcheck on validation scripts
+        run: |
+          echo "::group::Running shellcheck"
+          
+          ERRORS=0
+          
+          while IFS= read -r -d '' script; do
+            echo "Checking: $script"
+            if ! shellcheck -x "$script"; then
+              ERRORS=$((ERRORS + 1))
+              echo "::error file=$script::Shellcheck failed"
+            fi
+          done < <(find ALIGNMENT/tools/scripts -name "*.sh" -type f -print0)
+          
+          echo "::endgroup::"
+          
+          if [ $ERRORS -gt 0 ]; then
+            echo "::error::$ERRORS script(s) failed shellcheck"
+            exit 1
+          fi
+          
+          echo "✅ All scripts passed shellcheck"
+
+  validate-json-schemas:
+    name: Validate JSON Schemas
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Validate JSON files
+        run: |
+          echo "::group::Validating JSON files"
+          
+          ERRORS=0
+          
+          while IFS= read -r -d '' json_file; do
+            echo "Validating: $json_file"
+            if ! python3 -m json.tool "$json_file" > /dev/null 2>&1; then
+              echo "::error file=$json_file::Invalid JSON"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "✅ Valid: $json_file"
+            fi
+          done < <(find ALIGNMENT/meta -name "*.json" -type f -print0)
+          
+          echo "::endgroup::"
+          
+          if [ $ERRORS -gt 0 ]; then
+            echo "::error::$ERRORS JSON file(s) failed validation"
+            exit 1
+          fi
+          
+          echo "✅ All JSON files valid"
+
+  markdown-lint:
+    name: Markdown Linting
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install markdownlint-cli
+        run: npm install -g markdownlint-cli
+      
+      - name: Run markdownlint
+        run: |
+          # Create basic config if not exists
+          if [ ! -f .markdownlint.json ]; then
+            echo '{
+              "default": true,
+              "MD013": { "line_length": 120, "code_blocks": false, "tables": false },
+              "MD033": false,
+              "MD041": false
+            }' > .markdownlint.json
+          fi
+          
+          markdownlint '**/*.md' --ignore node_modules || echo "::warning::Markdown linting found issues"

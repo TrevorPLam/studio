@@ -1,88 +1,124 @@
-# Contributing
+# Contributing to ALIGNMENT
 
-Thank you for your interest in contributing to Studio! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to the ALIGNMENT Repository Standard! This document provides guidelines for contributing to this project.
 
-## Getting Started
+## Quick Links
 
-1. **Fork the repository** (if you don't have direct access)
-2. **Clone your fork** or the main repository
-3. **Create a feature branch** from `main`:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+- [Detailed Contribution Guidelines](ALIGNMENT/CONTRIBUTING.md) - Comprehensive guide for ALIGNMENT contributions
+- [Principles Workflow](ALIGNMENT/principles/PRINCIPLES-WORKFLOW.md) - Process for proposing new principles
 
-## Development Setup
+## How to Contribute
 
-1. **Install dependencies:**
-   ```bash
-   pnpm install
-   ```
+### 1. Types of Contributions
 
-2. **Run the development server:**
-   ```bash
-   pnpm dev
-   ```
+We welcome contributions in several areas:
 
-3. **Build all packages:**
-   ```bash
-   pnpm build
-   ```
+- **Standards improvements** - Enhancements to existing standards in `ALIGNMENT/standards/`
+- **New principles** - Proposals for new principle documents (see [PRINCIPLES-CANDIDATES.md](ALIGNMENT/principles/PRINCIPLES-CANDIDATES.md))
+- **Documentation fixes** - Typos, clarifications, or improvements
+- **Tooling enhancements** - Improvements to validation scripts or new tools
+- **Research additions** - New research findings or updates to `ALIGNMENT/research/`
+- **Reference materials** - Language/platform quick starts, templates, examples
 
-## Making Changes
+### 2. Contribution Process
 
-### Code Style
+#### For Small Changes (typos, small fixes)
 
-- Follow the existing code style and patterns
-- Run the linter before committing:
-  ```bash
-  pnpm lint
-  ```
-- Ensure TypeScript types are correct:
-  ```bash
-  pnpm type-check
-   ```
+1. Fork the repository
+2. Create a branch: `git checkout -b fix/your-fix-name`
+3. Make your changes
+4. Commit with clear message: `git commit -m "Fix typo in Section 3"`
+5. Push and create a Pull Request
 
-### Project Structure
+#### For Larger Changes (new standards, principles, major updates)
 
-- **Apps** (`apps/`) - Next.js web application with AI features
-- **Packages** (`packages/`) - Shared UI components and utilities
-- **Infrastructure** (`infrastructure/`) - Deployment and infrastructure configs
+1. **Open an issue first** to discuss the proposal
+2. Wait for feedback and approval
+3. Fork and create a feature branch
+4. Implement changes following the guidelines below
+5. Test your changes (run validation scripts if applicable)
+6. Submit a Pull Request with detailed description
 
-## Pull Request Process
+### 3. Standards for Contributions
 
-1. **Ensure your code builds:**
-   ```bash
-   pnpm build
-   pnpm lint
-   pnpm type-check
-   ```
+#### Documentation Standards
 
-2. **Update documentation** if you've changed functionality
+- **Markdown format** - Use proper Markdown syntax
+- **Consistent formatting** - Follow existing patterns in similar documents
+- **Clear headings** - Use hierarchical heading structure (# → ## → ###)
+- **Priority tiers** - Use P0/P1/P2 consistently
+- **Cross-references** - Use relative links for internal references
 
-3. **Create a pull request** with:
-   - Clear description of changes
-   - Reference to related issues
-   - Screenshots (if UI changes)
+#### Principle Document Standards
 
-4. **Get approval** from code owners (see CODEOWNERS file)
+See [PRINCIPLES-WORKFLOW.md](ALIGNMENT/principles/PRINCIPLES-WORKFLOW.md) for detailed requirements:
 
-5. **Ensure CI checks pass** before requesting review
+- Must have clear "Core Principle" statement
+- Include "Key Concepts" section
+- List "Golden Rules"
+- Reference external standards
+- Define integration points with standards
 
-## Reporting Issues
+#### Code/Script Standards
 
-- Use GitHub Issues to report bugs or request features
-- Include:
-  - Clear description of the issue
-  - Steps to reproduce
-  - Expected vs actual behavior
-  - Environment details (OS, Node version, etc.)
+- **Shell scripts** - Follow bash best practices, include error handling
+- **Documentation** - Include usage comments and examples
+- **Testing** - Test scripts on multiple scenarios before submitting
 
-## Code of Conduct
+### 4. Pull Request Guidelines
 
-- Be respectful and inclusive
-- Focus on constructive feedback
-- Help others learn and grow
+**PR Title Format:**
+```
+[Type] Brief description
 
-## Questions?
+Types: Fix, Feature, Docs, Refactor, Test, Tool
+Examples:
+- [Fix] Correct typo in Section 6
+- [Feature] Add Testing Principles document
+- [Docs] Improve Migration Guide clarity
+- [Tool] Enhance validation script for Section 10
+```
 
-If you have questions, please open an issue or contact the maintainers listed in CODEOWNERS.
+**PR Description Should Include:**
+- **What changed** - Summary of changes
+- **Why** - Rationale for the change
+- **Testing** - How you tested the changes
+- **Related issues** - Link to any related issues
+- **Breaking changes** - Call out any breaking changes
+
+### 5. Review Process
+
+1. **Automated checks** - PRs will be validated by CI/CD
+2. **Maintainer review** - A maintainer will review your PR
+3. **Feedback** - Address any feedback or requested changes
+4. **Approval** - Once approved, your PR will be merged
+5. **Release** - Changes will be included in the next version release
+
+### 6. Community Guidelines
+
+- **Be respectful** - Treat all contributors with respect
+- **Be constructive** - Provide actionable feedback
+- **Be patient** - Maintainers are volunteers
+- **Be open** - Consider alternative viewpoints
+- **Follow CoC** - Adhere to the Code of Conduct (if added)
+
+### 7. Getting Help
+
+- **Questions** - Open a GitHub Discussion or Issue
+- **Clarifications** - Ask in your PR or Issue
+- **Documentation** - Check [FAQ](ALIGNMENT/supporting/FAQ.md) first
+
+## Recognition
+
+Contributors will be recognized in:
+- Release notes for significant contributions
+- CHANGELOG.md for all merged PRs
+- GitHub contributors page
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the MIT License.
+
+---
+
+**Ready to contribute?** Check out our [Issues](../../issues) for good first issues tagged with `good-first-issue` or `help-wanted`.

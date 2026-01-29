@@ -1,0 +1,21 @@
+{
+  "default": true,
+  "MD031": {
+    "code_blocks": false
+  },
+  "MD040": {
+    "code_blocks": false
+  },
+  "MD022": {
+    "code_blocks": false
+  },
+  "MD025": {
+    "code_blocks": false
+  },
+  "MD004": {
+    "code_blocks": false
+  },
+  "MD032": {
+    "code_blocks": false
+  }
+}

@@ -1,56 +1,50 @@
-# Dependencies
-node_modules/
-/.pnp
-.pnp.js
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
 
-# Build outputs
-dist/
-build/
-.next/
-out/
-coverage/
-
-# Generated files
-*.tsbuildinfo
-
-# Lock files
-pnpm-lock.yaml
-package-lock.json
-yarn.lock
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# Environment files
-.env
-.env.local
-.env*.local
-!.env.example
-
-# IDE
+# Editor directories and files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Vercel
-.vercel
+.project
+.classpath
+.settings/
 
 # Temporary files
 *.tmp
-*.temp
+*.log
+*.cache
+*.bak
+
+# Node modules (if any)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+*.sublime-project
+*.sublime-workspace
