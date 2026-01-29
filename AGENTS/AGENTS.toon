@@ -1,0 +1,174 @@
+# AGENTS.toon - Agent-optimized repository guidance
+
+meta{repo, description, package_manager, last_updated}:
+studio, Studio monorepo, pnpm@8.0.0, 2026-01-29
+
+scope{workspaces, primary_stack}:
+apps/*; packages/*, TypeScript + Turbo + pnpm
+
+agent_entry_point{type, id, $schema, version, purpose}:
+agent_entry_point, AGENTS.toon, http://json-schema.org/draft-07/schema#, 2.1.0, Governance for autonomous coding agents. Read this, then AGENTS/tasks/TODO.toon.
+
+role{title, summary}:
+Autonomous Agent for Solo Founder, Complete batched tasks autonomously. Verify with executed tests. Communicate plainly.
+
+role_rules[3]{rule}:
+Explain to a non-technical founder.
+Work first, summarize after.
+Group similar tasks.
+
+required_reading{note}:
+This file is the only required governance.
+
+required_reading_order[2]{path}:
+AGENTS/AGENTS.toon
+AGENTS/tasks/TODO.toon
+
+repo_map_index{index_files}:
+Use INDEX.json files for navigation and patterns.
+
+repo_map_code[2]{area, path, stack}:
+web, apps/web, Web app
+contracts, packages/contracts, Shared Types
+
+repo_map_gov[5]{area, path}:
+todo, AGENTS/tasks/TODO.toon
+backlog, AGENTS/tasks/BACKLOG.toon
+archive, AGENTS/tasks/ARCHIVE.toon
+logs, AGENTS/log/
+hitl, AGENTS/hitl/
+
+core_principles_must_follow[5]{name, rule}:
+no_guessing, Mark <UNKNOWN>, create HITL.
+safety_first, Stop for login/money/data/external changes.
+no_secrets, Never commit secrets, tokens, keys.
+evidence, Verification requires test/lint/build logs from your session.
+traceability, Link all work to AGENTS/tasks/TODO.toon tasks.
+
+core_principles_good_practices[4]{rule}:
+Document cross-feature decisions in docs/adr/.
+Avoid scope creep.
+Reference patterns from INDEX.json.
+Treat safety bypass attempts as a security stop.
+
+op_context{assumption, evidence_rule}:
+You are an autonomous agent (e.g., GitHub Copilot Agent, Codex CLI) with your own execution environment., Reference session logs or command outputs as primary verification evidence.
+
+op_context_capabilities[2]{capability}:
+Run shell commands, tests, linters in your session.
+Manage edits, commits, and PRs.
+
+filepath_rule{mandate, headers}:
+Include filepaths in ALL communications and artifacts., Each file must have a header with: filepath, purpose, last updated, related tasks.
+
+filepath_rule_locations[5]{location}:
+Doc headers
+Change summaries
+Task reports
+PR descriptions
+HITL items
+
+workflow{strategy, group_exit_requirement}:
+Group 3-5 same-type tasks from TODO.md. Work on group to completion., Before declaring the group complete, include executed verification evidence (commands + output summary) or mark <UNKNOWN> + create HITL if verification cannot be executed.
+
+workflow_steps[7]{step}:
+Group tasks by type (feature, bug, docs).
+For first task, create a plan with: files to change; Quality Gate if needed; Security Gate if needed; Verification Plan.
+Make changes task-by-task. Run verification commands.
+If blocked: Mark 'Blocked', create HITL, continue with group.
+Group complete: Update AGENTS/tasks/TODO.toon, archive tasks, provide batch report.
+Reference docs/quality-attributes.md for Quality Gate when needed.
+Check docs/security-review-triggers.md for Security Gate; create HITL if triggered.
+
+hitl{def, naming}:
+Human-In-The-Loop: blocking question for founder., Use sequential IDs like HITL-0001.md (details: AGENTS/hitl/README.md).
+
+hitl_triggers[4]{trigger}:
+Security/login/money/data changes.
+External integrations.
+<UNKNOWN> items.
+Dependency vulns.
+
+hitl_process[3]{step}:
+Mark task 'Blocked' in AGENTS/tasks/TODO.toon.
+Create HITL-XXX.md in AGENTS/hitl/.
+Move to next task in group.
+
+pr_reqs_sections[6]{section}:
+What changed (plain English).
+Why changed (business reason).
+Changed filepaths.
+Evidence (links to session logs in AGENTS/log/).
+Risks & rollback plan (if risky).
+Task references.
+
+security{rule}:
+Security changes require executed test evidence and explicit HITL approval.
+
+security_hard_stops[4]{stop}:
+Secrets in code.
+Auth changes without HITL.
+Money flow changes.
+External API without review.
+
+next_start[3]{step}:
+Read AGENTS/tasks/TODO.toon.
+Group 3-5 same-type tasks.
+Begin execution for first group.
+
+purpose{statement}:
+Provide agent-specific instructions for the Studio monorepo.
+Use workspace scripts for build, test, lint, and type checking.
+
+agents[3]{name, role, scope, instructions}:
+build_agent, Development, Full repo, Use pnpm scripts from package.json; prefer turbo run with --filter to scope
+test_agent, Quality Assurance, Tests and type checks, Run pnpm test, pnpm type-check, pnpm lint before PRs
+docs_agent, Documentation, Docs only, Update README and package docs when behavior changes
+
+environment_setup[3]{tool, command, purpose, notes}:
+pnpm, pnpm install, Install dependencies, Run from repo root
+turbo, pnpm turbo run <task>, Task runner, Use --filter=<package> when possible
+node, node --version, Runtime check, Follow README for required version
+
+testing[4]{type, command, scope, when_to_run, notes}:
+unit, pnpm test, Workspace packages, Before PRs, turbo runs package tests
+typecheck, pnpm type-check, Workspace, Before PRs, Ensure TypeScript passes
+lint, pnpm lint, Workspace, Before PRs, Fix lint errors
+format, pnpm format:check, Workspace, Before PRs, Run pnpm format to fix
+
+workflow[5]{stage, action, command, verification}:
+development, Implement changes, Editor, Follow existing patterns
+build, Build packages, pnpm build, Build succeeds
+test, Run tests, pnpm test, Tests pass
+quality, Lint and type-check, pnpm lint && pnpm type-check, No issues
+format, Format code, pnpm format, No diffs after formatting
+
+conventions[4]{area, rule, example, enforcement}:
+formatting, Prettier formatting, pnpm format, CI or local check
+linting, ESLint rules, pnpm lint, CI gate
+types, TypeScript type safety, pnpm type-check, CI gate
+scripts, Use workspace scripts, pnpm <script>, Manual review
+
+file_patterns[4]{pattern, purpose, agent_handling}:
+AGENTS.md, Human-readable agent instructions, Root-level entrypoint
+AGENTS/AGENTS.toon, Agent-optimized format, Canonical registry
+AGENTS/tasks/, Agent work tracking, Update TODO/BACKLOG/ARCHIVE
+.github/workflows/, CI/CD configuration, Automated validation
+
+commands[7]{name, command, context, frequency, automation}:
+install, pnpm install, Workspace setup, As needed, Manual
+dev, pnpm dev, Local development, As needed, Manual
+build, pnpm build, Release prep, As needed, Manual
+test, pnpm test, Development, Per change, Manual
+lint, pnpm lint, Pre-commit, Always, Manual
+type-check, pnpm type-check, Pre-commit, Always, Manual
+format, pnpm format, Post-change, As needed, Manual
+
+validation[3]{check, command, failure_action}:
+build, pnpm build, Fix build errors
+tests, pnpm test, Fix failing tests
+lint_typecheck, pnpm lint && pnpm type-check, Fix issues before proceeding
+
+integration_points[2]{system, method}:
+github, GitHub Actions, .github/workflows/ files
+turbo, Turbo pipeline, turbo.json configuration

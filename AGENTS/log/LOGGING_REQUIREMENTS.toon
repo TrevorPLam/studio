@@ -1,0 +1,26 @@
+# Logging Requirements (Ephemeral Sessions)
+
+meta{repo, scope, last_updated}:
+studio, ephemeral_session, 2026-01-29
+
+capture[7]{field, description, required}:
+session_id, Unique session identifier, Yes
+start_time, Session start timestamp, Yes
+end_time, Session end timestamp, Yes
+agent_id, Agent name or role identifier, Yes
+model_id, Model name/version if available, Yes
+actions_summary, High-level summary of actions taken, Yes
+commands_run, List of commands executed, Yes
+
+changes[3]{field, description, required}:
+files_touched, List of files read/edited/created, Yes
+tests_run, Tests executed with outcomes, Yes
+errors, Errors encountered (summarized), Yes
+
+privacy[2]{rule, description}:
+no_secrets, Do not log secrets/tokens/credentials
+no_pii, Do not log personal data
+
+format[2]{rule, description}:
+append_only, Write entries as append-only records
+text_safe, Use plain text with no binary payloads

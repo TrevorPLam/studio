@@ -1,0 +1,15 @@
+# INDEX.toon
+
+meta{root, generated_at}:
+AGENTS, 2026-01-29T08:08:01Z
+
+entries[9]{path, type}:
+AGENTS.toon, file
+TOON.toon, file
+hitl, dir
+log, dir
+log/LOGGING_REQUIREMENTS.toon, file
+tasks, dir
+tasks/ARCHIVE.toon, file
+tasks/BACKLOG.toon, file
+tasks/TODO.toon, file

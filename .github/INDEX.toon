@@ -1,0 +1,11 @@
+# INDEX.toon
+
+meta{root, generated_at}:
+.github, 2026-01-29T08:08:01Z
+
+entries[5]{path, type}:
+AGENTS.md, file
+CODEOWNERS, file
+workflows, dir
+workflows/ci.yml, file
+workflows/validation.yml, file

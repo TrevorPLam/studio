@@ -1,0 +1,8 @@
+# INDEX.toon
+
+meta{root, generated_at}:
+.githooks, 2026-01-29T08:08:01Z
+
+entries[2]{path, type}:
+post-checkout, file
+post-merge, file

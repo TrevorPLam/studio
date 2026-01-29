@@ -1,0 +1,8 @@
+# INDEX.toon
+
+meta{root, generated_at}:
+scripts, 2026-01-29T08:08:01Z
+
+entries[2]{path, type}:
+generate-index-toon.py, file
+refresh-indexes.sh, file
