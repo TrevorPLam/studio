@@ -1,0 +1,55 @@
+# TOON (Token-Oriented Object Notation)
+
+purpose{statement}:
++Define a compact, agent-optimized data format that reduces token overhead compared to JSON while remaining fully convertible.
++
++core_problem{summary}:
++JSON carries repeated syntax and key names that inflate token usage for LLMs (quotes, braces, commas, repeated keys).
++
++solution{summary}:
++TOON declares a schema once and represents uniform arrays as tables with rows inheriting that schema.
++
++principles[5]{name, description}:
++Declare Schema Once, Header defines columns for all rows
++Tabular Data Representation, Uniform arrays become tables
++Minimal Syntax, No quotes/braces; commas only separate values
++Explicit Counts, [N] declares expected row count
++Indentation for Hierarchy, Nested structures use indentation
++
++example[1]{format, content}:
++JSON, {"files":[{"path":"README.md","type":"md","line_count":526},{"path":"index.js","type":"js","line_count":42}]}
++
++example_toon[1]{format, content}:
++TOON, files[2]{path,type,line_count}:
++README.md, md, 526
++index.js, js, 42
++
++impact[3]{metric, json, toon, savings}:
++Estimated Tokens, ~2800, ~1200, ~57%
++Lines of Code, 100+, ~50, ~50%
++Agent Parse Time, Full JSON parse, Direct table scan, ~70%
++
++agent_usage[4]{step, description}:
++Pattern Recognition, Header reveals table schema and row count
++Efficient Querying, Scan a column for a value
++Memory Efficiency, Fewer tokens means more task context
++Predictable Structure, Count + schema prevents malformed data
++
++json_relation{statement}:
++TOON and JSON are isomorphic: convert between them without data loss.
++
++tradeoffs[2]{format, best_when}:
++TOON, Uniform arrays and AI-first consumption
++JSON, Human editing or complex, irregular nesting
++
++implementation_path[4]{source, view, example_json, example_toon}:
++JSON, TOON, INDEX.json, INDEX.toon
++JSON, TOON, AGENTS.json, AGENTS.toon
++Markdown, TOON, TODO.md, TODO.toon
++Markdown, TOON, BACKLOG.md, BACKLOG.toon
+
++why_it_matters[4]{benefit, detail}:
++More Context, Token savings free space for reasoning
++Faster Navigation, Agents scan tables quickly
++Lower Costs, Fewer tokens per session
++Clear Interfaces, Separate human vs agent formats

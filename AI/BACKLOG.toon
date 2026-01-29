@@ -1,0 +1,13 @@
+# AI Work Backlog (TOON Template)
+
+meta{status, owner, last_updated}:
+[Draft|Active], [Team or Individual], [YYYY-MM-DD]
+
+intake_rules[3]{rule}:
+Only uncommitted ideas and future work
+Must have clear problem statement
+Must include expected outcome
+
+backlog[1]{id, title, priority, owner, requested_by, target_window, problem_statement, proposed_outcome, dependencies, notes}:
+[BACKLOG-001], [Title], [P0|P1|P2], [Name/Team], [Name], [Date or Quarter], [What problem are we solving?], [What does success look like?], [Links or IDs], [Optional]
+

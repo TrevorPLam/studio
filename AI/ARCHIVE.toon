@@ -1,0 +1,8 @@
+# AI Work Archive (TOON Template)
+
+meta{status, owner, last_updated}:
+[Archived], [Team or Individual], [YYYY-MM-DD]
+
+archived[1]{id, title, final_status, owner, closed_on, summary, outcome, related_items, artifacts}:
+[ARCHIVE-001], [Title], [Completed|Dropped|Superseded], [Name/Team], [YYYY-MM-DD], [What was done or why it was closed], [Result or impact], [TASK-xxx|BACKLOG-xxx], [Links or paths]
+

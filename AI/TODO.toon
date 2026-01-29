@@ -1,0 +1,8 @@
+# AI Work TODO (TOON Template)
+
+meta{status, owner, last_updated}:
+[Active], [Team or Individual], [YYYY-MM-DD]
+
+active_work[1]{id, title, status, priority, owner, due, description, acceptance_criteria, dependencies, notes}:
+[TASK-001], [Title], [Not Started|In Progress|Blocked|Done], [P0|P1|P2], [Name/Team], [YYYY-MM-DD], [What needs to be done], [Criterion 1; Criterion 2], [Links or IDs], [Optional]
+
