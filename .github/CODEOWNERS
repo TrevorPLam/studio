@@ -1,0 +1,18 @@
+# Global owners - all changes require approval
+* @TrevorPLam
+
+# Application code
+/apps/ @TrevorPLam
+/packages/ @TrevorPLam
+
+# Infrastructure and deployment
+/infrastructure/ @TrevorPLam
+
+# Documentation
+/docs/ @TrevorPLam
+
+# Configuration files
+/.github/ @TrevorPLam
+/turbo.json @TrevorPLam
+/package.json @TrevorPLam
+/pnpm-workspace.yaml @TrevorPLam
