@@ -7,7 +7,7 @@ scope{workspaces, primary_stack}:
 apps/*; packages/*, TypeScript + Turbo + pnpm
 
 agent_entry_point{type, id, $schema, version, purpose}:
-agent_entry_point, AGENTS.toon, http://json-schema.org/draft-07/schema#, 2.1.0, Governance for autonomous coding agents. Read this, then AGENTS/tasks/TODO.toon.
+agent_entry_point, AGENTS.toon, http://json-schema.org/draft-07/schema#, 2.1.0, Governance for autonomous coding agents. Read this, then .agents/tasks/TODO.toon.
 
 role{title, summary}:
 Autonomous Agent for Solo Founder, Complete batched tasks autonomously. Verify with executed tests. Communicate plainly.
@@ -21,8 +21,8 @@ required_reading{note}:
 This file is the only required governance.
 
 required_reading_order[2]{path}:
-AGENTS/AGENTS.toon
-AGENTS/tasks/TODO.toon
+.agents/AGENTS.toon
+.agents/tasks/TODO.toon
 
 repo_map_index{index_files}:
 Use INDEX.json files for navigation and patterns.
@@ -32,18 +32,18 @@ web, apps/web, Web app
 contracts, packages/contracts, Shared Types
 
 repo_map_gov[5]{area, path}:
-todo, AGENTS/tasks/TODO.toon
-backlog, AGENTS/tasks/BACKLOG.toon
-archive, AGENTS/tasks/ARCHIVE.toon
-logs, AGENTS/log/
-hitl, AGENTS/hitl/
+todo, .agents/tasks/TODO.toon
+backlog, .agents/tasks/BACKLOG.toon
+archive, .agents/tasks/ARCHIVE.toon
+logs, .agents/log/
+hitl, .agents/hitl/
 
 core_principles_must_follow[5]{name, rule}:
 no_guessing, Mark <UNKNOWN>, create HITL.
 safety_first, Stop for login/money/data/external changes.
 no_secrets, Never commit secrets, tokens, keys.
 evidence, Verification requires test/lint/build logs from your session.
-traceability, Link all work to AGENTS/tasks/TODO.toon tasks.
+traceability, Link all work to .agents/tasks/TODO.toon tasks.
 
 core_principles_good_practices[4]{rule}:
 Document cross-feature decisions in docs/adr/.
@@ -76,12 +76,12 @@ Group tasks by type (feature, bug, docs).
 For first task, create a plan with: files to change; Quality Gate if needed; Security Gate if needed; Verification Plan.
 Make changes task-by-task. Run verification commands.
 If blocked: Mark 'Blocked', create HITL, continue with group.
-Group complete: Update AGENTS/tasks/TODO.toon, archive tasks, provide batch report.
+Group complete: Update .agents/tasks/TODO.toon, archive tasks, provide batch report.
 Reference docs/quality-attributes.md for Quality Gate when needed.
 Check docs/security-review-triggers.md for Security Gate; create HITL if triggered.
 
 hitl{def, naming}:
-Human-In-The-Loop: blocking question for founder., Use sequential IDs like HITL-0001.md (details: AGENTS/hitl/README.md).
+Human-In-The-Loop: blocking question for founder., Use sequential IDs like HITL-0001.md (details: .agents/hitl/README.md).
 
 hitl_triggers[4]{trigger}:
 Security/login/money/data changes.
@@ -90,15 +90,15 @@ External integrations.
 Dependency vulns.
 
 hitl_process[3]{step}:
-Mark task 'Blocked' in AGENTS/tasks/TODO.toon.
-Create HITL-XXX.md in AGENTS/hitl/.
+Mark task 'Blocked' in .agents/tasks/TODO.toon.
+Create HITL-XXX.md in .agents/hitl/.
 Move to next task in group.
 
 pr_reqs_sections[6]{section}:
 What changed (plain English).
 Why changed (business reason).
 Changed filepaths.
-Evidence (links to session logs in AGENTS/log/).
+Evidence (links to session logs in .agents/log/).
 Risks & rollback plan (if risky).
 Task references.
 
@@ -112,7 +112,7 @@ Money flow changes.
 External API without review.
 
 next_start[3]{step}:
-Read AGENTS/tasks/TODO.toon.
+Read .agents/tasks/TODO.toon.
 Group 3-5 same-type tasks.
 Begin execution for first group.
 
@@ -151,8 +151,8 @@ scripts, Use workspace scripts, pnpm <script>, Manual review
 
 file_patterns[4]{pattern, purpose, agent_handling}:
 AGENTS.md, Human-readable agent instructions, Root-level entrypoint
-AGENTS/AGENTS.toon, Agent-optimized format, Canonical registry
-AGENTS/tasks/, Agent work tracking, Update TODO/BACKLOG/ARCHIVE
+.agents/AGENTS.toon, Agent-optimized format, Canonical registry
+.agents/tasks/, Agent work tracking, Update TODO/BACKLOG/ARCHIVE
 .github/workflows/, CI/CD configuration, Automated validation
 
 commands[7]{name, command, context, frequency, automation}:

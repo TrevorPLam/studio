@@ -4,8 +4,8 @@ Thank you for your interest in contributing to the ALIGNMENT Repository Standard
 
 ## Quick Links
 
-- [Detailed Contribution Guidelines](ALIGNMENT/CONTRIBUTING.md) - Comprehensive guide for ALIGNMENT contributions
-- [Principles Workflow](ALIGNMENT/principles/PRINCIPLES-WORKFLOW.md) - Process for proposing new principles
+- [Detailed Contribution Guidelines](.alignment/CONTRIBUTING.md) - Comprehensive guide for ALIGNMENT contributions
+- [Principles Workflow](.alignment/principles/PRINCIPLES-WORKFLOW.md) - Process for proposing new principles
 
 ## How to Contribute
 
@@ -13,11 +13,11 @@ Thank you for your interest in contributing to the ALIGNMENT Repository Standard
 
 We welcome contributions in several areas:
 
-- **Standards improvements** - Enhancements to existing standards in `ALIGNMENT/standards/`
-- **New principles** - Proposals for new principle documents (see [PRINCIPLES-CANDIDATES.md](ALIGNMENT/principles/PRINCIPLES-CANDIDATES.md))
+- **Standards improvements** - Enhancements to existing standards in `.alignment/standards/`
+- **New principles** - Proposals for new principle documents (see [PRINCIPLES-CANDIDATES.md](.alignment/principles/PRINCIPLES-CANDIDATES.md))
 - **Documentation fixes** - Typos, clarifications, or improvements
 - **Tooling enhancements** - Improvements to validation scripts or new tools
-- **Research additions** - New research findings or updates to `ALIGNMENT/research/`
+- **Research additions** - New research findings or updates to `.alignment/research/`
 - **Reference materials** - Language/platform quick starts, templates, examples
 
 ### 2. Contribution Process
@@ -51,7 +51,7 @@ We welcome contributions in several areas:
 
 #### Principle Document Standards
 
-See [PRINCIPLES-WORKFLOW.md](ALIGNMENT/principles/PRINCIPLES-WORKFLOW.md) for detailed requirements:
+See [PRINCIPLES-WORKFLOW.md](.alignment/principles/PRINCIPLES-WORKFLOW.md) for detailed requirements:
 
 - Must have clear "Core Principle" statement
 - Include "Key Concepts" section
@@ -106,7 +106,7 @@ Examples:
 
 - **Questions** - Open a GitHub Discussion or Issue
 - **Clarifications** - Ask in your PR or Issue
-- **Documentation** - Check [FAQ](ALIGNMENT/supporting/FAQ.md) first
+- **Documentation** - Check [FAQ](.alignment/supporting/FAQ.md) first
 
 ## Recognition
 

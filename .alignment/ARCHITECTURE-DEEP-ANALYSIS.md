@@ -71,7 +71,7 @@ ALIGNMENT uses a **7-layer information architecture**:
 
 **Current Structure:**
 ```
-ALIGNMENT/
+.alignment/
 ├── Root Files (4)
 │   ├── README.md (entry point)
 │   ├── CHANGELOG.md (versioning)

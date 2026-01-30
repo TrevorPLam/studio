@@ -430,7 +430,7 @@ Before proceeding, answer these questions:
 ./scripts/validate-section-3.sh
 
 # Or if scripts are in ALIGNMENT directory
-../ALIGNMENT/scripts/validate-section-3.sh .
+../.alignment/scripts/validate-section-3.sh .
 ```
 
 **Note:** See [scripts/README.md](../scripts/README.md) for validation script usage.

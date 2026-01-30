@@ -56,7 +56,7 @@ When you work on software projects, especially in teams, having a consistent str
 The ALIGNMENT workspace is organized into **8 main folders** plus root-level documentation files. This structure follows a **7-layer information architecture** that separates different types of content:
 
 ```
-ALIGNMENT/
+.alignment/
 ├── 📄 Root Files (Entry Points)
 │   ├── README.md - Main starting point
 │   ├── CHANGELOG.md - Version history

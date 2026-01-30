@@ -5,7 +5,7 @@ This document describes the reorganized folder structure for the ALIGNMENT repos
 ## Folder Organization
 
 ```
-ALIGNMENT/
+.alignment/
 ├── README.md                    # Main entry point
 ├── CHANGELOG.md                 # Version history
 ├── CONTRIBUTING.md              # Contribution guidelines
@@ -59,7 +59,8 @@ ALIGNMENT/
 │       └── validate-section-*.sh
 │
 └── meta/                        # Metadata and configuration
-    ├── alignment-progress.json
+    ├── alignment-progress.json   # Live progress instance (repo-specific)
+    ├── alignment-progress.schema.json  # Schema for alignment-progress.json
     ├── optimization-tracker.json
     └── .markdownlint.json
 ```

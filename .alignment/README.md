@@ -14,6 +14,7 @@ This standard defines how every repository should be organized, documented, and 
 - [Quick Start Checklist](getting-started/Quick-Start-Checklist.md) - Start here for new repos
 - [Minimum Viable Alignment (MVA)](getting-started/Minimum-Viable-Alignment.md) - **Quick start** (~90 minutes)
 - [Migration Guide](getting-started/Migration-Guide.md) - **For existing repositories** - Incremental adoption strategies
+- [Implementation Status](getting-started/Implementation-Status.md) - How .alignment is implemented and next steps
 
 ### Core Standards
 - [Reference Guide](#reference-guide) - Detailed standards by category (see below)
@@ -54,9 +55,8 @@ This standard defines how every repository should be organized, documented, and 
 - [Progress Calculator](tools/progress-calculator.html) - Track alignment progress
 - [Compliance Score Calculator](tools/compliance-score-calculator.html) - Calculate repository health score
 
-### Research & Learning
-- [Research Documentation](research/README.md) - Comprehensive research on all topics
-- [Master Research Summary](research/MASTER-RESEARCH-SUMMARY.md) - High-level research overview
+### Research & Learning (optional)
+- If present: `research/README.md` and `research/MASTER-RESEARCH-SUMMARY.md` provide evidence and best-practice summaries. Not required for alignment.
 
 ### Architecture & Structure
 - [Structure Overview](STRUCTURE.md) - Folder organization and rationale

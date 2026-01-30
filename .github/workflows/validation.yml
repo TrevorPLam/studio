@@ -40,21 +40,20 @@ jobs:
           
           echo "::endgroup::"
       
-      - name: Check ALIGNMENT structure
+      - name: Check .alignment structure
         run: |
-          echo "::group::Checking ALIGNMENT directory structure"
+          echo "::group::Checking .alignment directory structure"
           
-          # Required directories
+          # Required directories (dot-prefix .alignment; research/ is optional)
           REQUIRED_DIRS=(
-            "ALIGNMENT"
-            "ALIGNMENT/standards"
-            "ALIGNMENT/principles"
-            "ALIGNMENT/getting-started"
-            "ALIGNMENT/reference"
-            "ALIGNMENT/supporting"
-            "ALIGNMENT/tools"
-            "ALIGNMENT/research"
-            "ALIGNMENT/meta"
+            ".alignment"
+            ".alignment/standards"
+            ".alignment/principles"
+            ".alignment/getting-started"
+            ".alignment/reference"
+            ".alignment/supporting"
+            ".alignment/tools"
+            ".alignment/meta"
           )
           
           MISSING_DIRS=()
@@ -82,7 +81,7 @@ jobs:
           MISSING_STANDARDS=()
           
           for i in $(seq -f "%02g" 0 13); do
-            STANDARD_FILE="ALIGNMENT/standards/${i}-*.md"
+            STANDARD_FILE=".alignment/standards/${i}-*.md"
             if ! ls $STANDARD_FILE 1> /dev/null 2>&1; then
               echo "❌ Missing: Standard $i"
               MISSING_STANDARDS+=("$i")
@@ -182,7 +181,7 @@ jobs:
               ERRORS=$((ERRORS + 1))
               echo "::error file=$script::Shellcheck failed"
             fi
-          done < <(find ALIGNMENT/tools/scripts -name "*.sh" -type f -print0)
+          done < <(find .alignment/tools/scripts -name "*.sh" -type f -print0)
           
           echo "::endgroup::"
           
@@ -215,7 +214,7 @@ jobs:
             else
               echo "✅ Valid: $json_file"
             fi
-          done < <(find ALIGNMENT/meta -name "*.json" -type f -print0)
+          done < <(find .alignment/meta -name "*.json" -type f -print0)
           
           echo "::endgroup::"
           
@@ -255,3 +254,19 @@ jobs:
           fi
           
           markdownlint '**/*.md' --ignore node_modules || echo "::warning::Markdown linting found issues"
+
+  alignment-standards:
+    name: ALIGNMENT Standards Compliance
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run section validators
+        run: |
+          if [ -x .alignment/tools/scripts/validate-all.sh ]; then
+            .alignment/tools/scripts/validate-all.sh . || true
+          else
+            bash .alignment/tools/scripts/validate-all.sh . || true
+          fi
+        working-directory: .

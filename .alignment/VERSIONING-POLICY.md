@@ -28,7 +28,7 @@ ALIGNMENT follows [Semantic Versioning 2.0.0](https://semver.org/):
 
 Versions apply to the **entire ALIGNMENT standard**, not individual sections.
 
-**Current Version:** 1.2.0 (as declared in [ALIGNMENT/README.md](ALIGNMENT/README.md))
+**Current Version:** 1.2.0 (as declared in [.alignment/README.md](.alignment/README.md))
 
 ---
 
@@ -110,14 +110,14 @@ Add deprecation notice at the top of the document:
 When deprecating content:
 - Update all links pointing to deprecated content
 - Add migration notes in related documents
-- Update [CHANGELOG.md](ALIGNMENT/CHANGELOG.md)
+- Update [CHANGELOG.md](.alignment/CHANGELOG.md)
 
 #### 4. Archive Deprecated Content
 
-Before removal, move deprecated content to `ALIGNMENT/deprecated/`:
+Before removal, move deprecated content to `.alignment/deprecated/`:
 
 ```
-ALIGNMENT/
+.alignment/
 └── deprecated/
     ├── README.md (explanation of deprecated content)
     └── v1/
@@ -152,7 +152,7 @@ ALIGNMENT/
 ### 4. Archived
 
 - **Status:** Removed from main standards
-- **Location:** `ALIGNMENT/deprecated/`
+- **Location:** `.alignment/deprecated/`
 - **Stability:** Read-only
 - **Usage:** Historical reference only
 
@@ -173,7 +173,7 @@ Within the same MAJOR version:
 
 When breaking compatibility:
 - **Increment MAJOR version**
-- **Document migration path** in [Migration Guide](ALIGNMENT/getting-started/Migration-Guide.md)
+- **Document migration path** in [Migration Guide](.alignment/getting-started/Migration-Guide.md)
 - **Provide upgrade tools** if possible
 - **Give advance notice** (at least one MINOR version before MAJOR bump)
 
@@ -183,7 +183,7 @@ When breaking compatibility:
 
 ### CHANGELOG.md
 
-Every release must update [CHANGELOG.md](ALIGNMENT/CHANGELOG.md):
+Every release must update [CHANGELOG.md](.alignment/CHANGELOG.md):
 
 ```markdown
 ## [1.3.0] - 2026-02-15
@@ -206,7 +206,7 @@ Every release must update [CHANGELOG.md](ALIGNMENT/CHANGELOG.md):
 
 ### Version Tag in README
 
-[ALIGNMENT/README.md](ALIGNMENT/README.md) must include version:
+[.alignment/README.md](.alignment/README.md) must include version:
 
 ```markdown
 **Version:** 1.2.0  
@@ -236,7 +236,7 @@ Individual standards (Section 1, Section 2, etc.) **do not have separate version
 
 ### Tracking Standard Changes
 
-Use [CHANGELOG.md](ALIGNMENT/CHANGELOG.md) to track which standards changed in each release:
+Use [CHANGELOG.md](.alignment/CHANGELOG.md) to track which standards changed in each release:
 
 ```markdown
 ## [1.3.0] - 2026-02-15
@@ -284,12 +284,12 @@ This repository follows ALIGNMENT v1.2.0.
 
 ### Upgrading Between Versions
 
-See [Migration Guide](ALIGNMENT/getting-started/Migration-Guide.md) for upgrade paths between ALIGNMENT versions.
+See [Migration Guide](.alignment/getting-started/Migration-Guide.md) for upgrade paths between ALIGNMENT versions.
 
 ---
 
 ## Questions?
 
-- **Version clarification** - See [FAQ](ALIGNMENT/supporting/FAQ.md)
+- **Version clarification** - See [FAQ](.alignment/supporting/FAQ.md)
 - **Deprecation questions** - Open a GitHub Issue
-- **Migration help** - See [Migration Guide](ALIGNMENT/getting-started/Migration-Guide.md)
+- **Migration help** - See [Migration Guide](.alignment/getting-started/Migration-Guide.md)

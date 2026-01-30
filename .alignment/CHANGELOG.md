@@ -155,4 +155,4 @@ Planned for future versions:
 
 ---
 
-[1.0.0]: https://github.com/your-org/ALIGNMENT/releases/tag/v1.0.0
+[1.0.0]: https://github.com/your-org/.alignment/releases/tag/v1.0.0

@@ -2,6 +2,8 @@
 
 Next.js application for repository management and AI-powered development tools.
 
+This repo follows the **Repository Alignment Standard** (see [.alignment/README.md](.alignment/README.md)).
+
 ## Installation
 
 ```bash

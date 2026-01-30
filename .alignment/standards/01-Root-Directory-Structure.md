@@ -367,7 +367,7 @@ Key moves:
 ./scripts/validate-section-1.sh
 
 # Or if scripts are in ALIGNMENT directory
-../ALIGNMENT/scripts/validate-section-1.sh .
+../.alignment/scripts/validate-section-1.sh .
 ```
 
 **Note:** See [scripts/README.md](../scripts/README.md) for validation script usage.

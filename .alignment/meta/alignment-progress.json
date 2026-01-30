@@ -1,0 +1,31 @@
+{
+  "repository": "studio",
+  "started": "2026-01-28",
+  "last_updated": "2026-01-30T00:00:00Z",
+  "decision_points": {
+    "is_versioned_project": true,
+    "project_type": "monorepo",
+    "primary_language": "TypeScript",
+    "cicd_platform": "github",
+    "is_public_repo": true
+  },
+  "sections": {
+    "0": { "status": "completed", "tasks_complete": 5, "tasks_total": 5, "completed_tasks": ["Git initialized", "pnpm chosen", "Decision points answered"], "pending_tasks": [] },
+    "1": { "status": "completed", "tasks_complete": 10, "tasks_total": 10, "completed_tasks": ["README, LICENSE, CONTRIBUTING", ".gitignore, .editorconfig"], "pending_tasks": [] },
+    "2": { "status": "completed", "tasks_complete": 1, "tasks_total": 1, "completed_tasks": ["Source in apps/ and packages/"], "pending_tasks": [] },
+    "3": { "status": "in_progress", "tasks_complete": 2, "tasks_total": 5, "completed_tasks": [".env pattern", ".gitignore for .env"], "pending_tasks": [] },
+    "4": { "status": "completed", "tasks_complete": 1, "tasks_total": 1, "completed_tasks": ["pnpm-workspace, lockfile committed"], "pending_tasks": [] },
+    "5": { "status": "completed", "tasks_complete": 1, "tasks_total": 1, "completed_tasks": ["CI/CD in .github/workflows"], "pending_tasks": [] },
+    "6": { "status": "in_progress", "tasks_complete": 0, "tasks_total": 1, "completed_tasks": [], "pending_tasks": ["Test structure"] },
+    "7": { "status": "in_progress", "tasks_complete": 0, "tasks_total": 1, "completed_tasks": [], "pending_tasks": ["Documentation"] },
+    "8": { "status": "not_started", "tasks_complete": 0, "tasks_total": 1, "completed_tasks": [], "pending_tasks": [] },
+    "9": { "status": "completed", "tasks_complete": 1, "tasks_total": 1, "completed_tasks": ["CODEOWNERS, CONTRIBUTING"], "pending_tasks": [] },
+    "10": { "status": "in_progress", "tasks_complete": 0, "tasks_total": 1, "completed_tasks": [], "pending_tasks": ["SECURITY.md, scanning"] },
+    "11": { "status": "not_started", "tasks_complete": 0, "tasks_total": 1, "completed_tasks": [], "pending_tasks": [] },
+    "12": { "status": "in_progress", "tasks_complete": 0, "tasks_total": 1, "completed_tasks": ["CHANGELOG present"], "pending_tasks": [] },
+    "13": { "status": "not_started", "tasks_complete": 0, "tasks_total": 1, "completed_tasks": [], "pending_tasks": [] }
+  },
+  "next_section": 6,
+  "blockers": [],
+  "overall_progress": { "p0_complete": 6, "p0_total": 14, "p1_complete": 2, "p1_total": 14, "health_score": 52 }
+}
