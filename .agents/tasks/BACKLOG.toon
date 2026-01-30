@@ -1,13 +1,51 @@
-# AI Work Backlog (TOON Template)
+# AI Work Backlog (TOON) — Report-derived items; promote to TODO when ready
 
-meta{status, owner, last_updated}:
-[Draft|Active], [Team or Individual], [YYYY-MM-DD]
+meta{status, owner, last_updated, source}:
+[Active], [Team], [2025-01-30], [REPOSITORY-STATE-REPORT.md]
 
 intake_rules[3]{rule}:
-Only uncommitted ideas and future work
-Must have clear problem statement
-Must include expected outcome
+[Only uncommitted ideas and future work]
+[Must have clear problem statement]
+[Must include expected outcome]
 
-backlog[1]{id, title, priority, owner, requested_by, target_window, problem_statement, proposed_outcome, dependencies, notes}:
-[BACKLOG-001], [Title], [P0|P1|P2], [Name/Team], [Name], [Date or Quarter], [What problem are we solving?], [What does success look like?], [Links or IDs], [Optional]
+backlog[11]{id, title, priority, owner, requested_by, target_window, problem_statement, proposed_outcome, dependencies, notes, designation}:
+[TASK-005], [Extract shared auth/session helpers], [P1], [Agent], [REPOSITORY-STATE-REPORT], [2025-02-28], [getUserId and ensureTimestamps duplicated in 6+ route files and agents page; change requires edits in many places.], [Single module exports getUserId and ensureTimestamps; no duplicate definitions in route or page files.], [TASK-002], [Short-term. Promote to TODO when slot free.], [AGENT]
+[TASK-006], [Update README and CONTRIBUTING], [P1], [Agent], [REPOSITORY-STATE-REPORT], [2025-02-28], [README project structure lists infrastructure/ docs/ tools/ which do not exist; no Developer setup; CONTRIBUTING may have outdated steps.], [README structure matches repo; Developer setup section present; CONTRIBUTING accurate.], [None], [Short-term.], [AGENT]
+[TASK-007], [Standardize package naming], [P1], [Agent], [REPOSITORY-STATE-REPORT], [2025-02-28], [Mixed @repo/ui @repo/utils vs @studio/contracts @studio/api-sdk and tsconfig paths confuse onboarding and tooling.], [One namespace used throughout; tsconfig paths and package names consistent.], [None], [User chooses namespace.], [USER]
+[TASK-008], [Add next.config for web app], [P1], [Agent], [REPOSITORY-STATE-REPORT], [2025-02-28], [No next.config at apps/web; path aliases and future security headers or bundle config have no place.], [next.config exists; build and dev unchanged or improved.], [None], [Short-term.], [AGENT]
+[TASK-009], [Expand test coverage], [P1], [Agent], [REPOSITORY-STATE-REPORT], [2025-03-31], [Only one smoke test planned; validation sanitization path-policy and critical API flows untested.], [Unit tests for validation sanitization path-policy; integration tests for auth and critical flows; coverage in CI.], [TASK-004], [Medium-term.], [AGENT]
+[TASK-010], [Centralize error handling for API routes], [P1], [Agent], [REPOSITORY-STATE-REPORT], [2025-03-31], [API routes use mixed try/catch and generic 500s; risk of leaking stack or internal detail in production.], [Single error-handling path; known errors mapped to safe responses; production does not leak internals.], [None], [Medium-term.], [AGENT]
+[TASK-011], [Use contracts as API source of truth], [P1], [Agent], [REPOSITORY-STATE-REPORT], [2025-03-31], [packages/contracts has minimal schemas; most validation lives in apps/web/lib/validation.ts; contracts underused.], [packages/contracts contains shared API shapes; app validation derives from contracts where applicable.], [None], [Medium-term.], [AGENT]
+[TASK-012], [Rate limiting and cache for production], [P1], [Agent], [REPOSITORY-STATE-REPORT], [2025-03-31], [In-memory rate limit and caches do not scale across instances; production needs shared store.], [Production deployment doc or implementation for shared rate limit/cache store.], [None], [User may decide Redis vs Upstash.], [USER]
+[TASK-013], [Testing pyramid and e2e], [P2], [Agent], [REPOSITORY-STATE-REPORT], [2025-06-30], [No e2e or integration strategy documented; critical user flows untested end-to-end.], [E2e or integration tests for critical flows; testing strategy documented.], [TASK-009], [Long-term.], [AGENT]
+[TASK-014], [Bundle and runtime performance], [P2], [Agent], [REPOSITORY-STATE-REPORT], [2025-06-30], [No bundle analysis; key paths (introspection chat GitHub API) not profiled; scaling assumptions undocumented.], [Bundle analysis available; key paths profiled; scaling assumptions documented.], [TASK-008], [Long-term.], [AGENT]
+[TASK-015], [Technical debt backlog], [P2], [Agent], [REPOSITORY-STATE-REPORT], [2025-06-30], [Duplication long files (e.g. sanitize.ts) and underused contracts not tracked or scheduled.], [Backlog items for duplication and sanitize split; refactors scheduled.], [TASK-011], [User prioritizes.], [USER]
 
+backlog_subtasks[26]{backlog_id, subtitle, designation, description}:
+[TASK-005], [Create lib/auth-helpers.ts (or features/auth) with getUserId and ensureTimestamps], [AGENT], [Implement and export getUserId(session) and ensureTimestamps(messages).]
+[TASK-005], [Refactor API routes to use shared helpers], [AGENT], [Update killswitch chat chat-stream sessions sessions/[id] sessions/[id]/steps to use shared module.]
+[TASK-005], [Refactor app/agents/[id]/page.tsx to use ensureTimestamps], [AGENT], [Remove local ensureTimestamps; import from shared module.]
+[TASK-006], [Update README project structure section], [AGENT], [List scripts/ and actual layout; remove or correct infrastructure/ docs/ tools/.]
+[TASK-006], [Add Developer setup section to README], [AGENT], [Clone; pnpm install; copy .env.example; list required env vars; pnpm dev build test.]
+[TASK-006], [Verify CONTRIBUTING links and steps], [AGENT], [Fix broken links and outdated steps.]
+[TASK-007], [Choose namespace @studio/* or @repo/*], [USER], [Decide single namespace for shared packages.]
+[TASK-007], [Update package.json names and tsconfig path aliases], [AGENT], [Apply chosen namespace consistently across repo.]
+[TASK-008], [Add next.config.js or next.config.mjs], [AGENT], [Create config file at apps/web or root.]
+[TASK-008], [Add path aliases if needed], [AGENT], [Configure path aliases in next.config if required.]
+[TASK-008], [Add placeholder for security headers], [AGENT], [Comment or minimal config for future CSP X-Frame-Options etc.]
+[TASK-009], [Add unit tests for validation sanitization path-policy], [AGENT], [Cover lib/validation.ts lib/security/sanitize.ts lib/security/path-policy.ts.]
+[TASK-009], [Add integration tests for auth and critical API flows], [AGENT], [Cover auth chat sessions GitHub routes as applicable.]
+[TASK-009], [Wire coverage into Turbo and CI], [AGENT], [Ensure coverage output and CI report or gate.]
+[TASK-010], [Introduce error-handling helper or middleware], [AGENT], [Single place to map errors to status and safe message.]
+[TASK-010], [Map known errors to status codes and safe messages], [AGENT], [ValidationError AIAPIError etc. mapped; no stack in response.]
+[TASK-010], [Ensure server-side logging only for details], [AGENT], [Use logger for full error details.]
+[TASK-011], [Move or mirror schemas to packages/contracts], [AGENT], [Identify public API shapes; add to contracts.]
+[TASK-011], [Derive app validation from contracts where possible], [AGENT], [apps/web/lib/validation.ts reuses or extends contracts.]
+[TASK-012], [Decide Redis vs Upstash or other], [USER], [Choose shared store for rate limit and cache.]
+[TASK-012], [Document or implement shared rate limit/cache store], [AGENT], [Implement or document production deployment for multi-instance.]
+[TASK-013], [Add integration and e2e tests for critical flows], [AGENT], [Implement tests for critical user journeys.]
+[TASK-013], [Document testing pyramid in CONTRIBUTING or .alignment], [AGENT], [Document unit vs integration vs e2e strategy.]
+[TASK-014], [Add bundle analysis to Next config or script], [AGENT], [Enable bundle analyzer for client bundle.]
+[TASK-014], [Profile key paths and document scaling assumptions], [AGENT], [Introspection chat GitHub API; document limits.]
+[TASK-015], [Add BACKLOG or TODO items for duplication and long files], [AGENT], [Create backlog entries for sanitize split and duplication.]
+[TASK-015], [Prioritize and schedule refactors], [USER], [Review backlog and assign target windows.]

@@ -1,8 +1,24 @@
-# AI Work TODO (TOON Template)
+# AI Work TODO (TOON) — 3–5 active tasks from REPOSITORY-STATE-REPORT.md
 
-meta{status, owner, last_updated}:
-[Active], [Team or Individual], [YYYY-MM-DD]
+meta{status, owner, last_updated, source}:
+[Active], [Team], [2025-01-30], [REPOSITORY-STATE-REPORT.md]
 
-active_work[1]{id, title, status, priority, owner, due, description, acceptance_criteria, dependencies, notes}:
-[TASK-001], [Title], [Not Started|In Progress|Blocked|Done], [P0|P1|P2], [Name/Team], [YYYY-MM-DD], [What needs to be done], [Criterion 1; Criterion 2], [Links or IDs], [Optional]
+active_work[4]{id, title, status, priority, owner, due, description, acceptance_criteria, dependencies, notes, designation}:
+[TASK-001], [Fix apps/web dependencies], [Not Started], [P0], [Agent], [2025-02-13], [Add next-auth genkit @genkit-ai/google-genai zod @octokit/rest @octokit/auth-app to apps/web/package.json; run pnpm install at root; commit pnpm-lock.yaml if not in .gitignore.], [Dependencies declared in apps/web/package.json; pnpm install succeeds at root; build succeeds; lockfile committed or policy documented.], [REPOSITORY-STATE-REPORT.md], [Immediate 1-2 weeks.], [AGENT]
+[TASK-002], [Fix broken imports in github-app.ts], [Not Started], [P0], [Agent], [2025-02-13], [In apps/web/features/github/lib/github-app.ts replace relative imports with path aliases so module resolution finds lib/security/secrets and lib/logger.], [Imports use @/lib/security/secrets and @/lib/logger; type-check and build pass.], [TASK-001 optional for build.], [Immediate.], [AGENT]
+[TASK-003], [Restore or align config package workspaces], [Not Started], [P0], [Agent], [2025-02-13], [Either create packages/config/eslint-config and jest-config OR remove eslint-config and jest-config from packages/config/package.json workspaces so workspace refs are valid.], [packages/config/package.json workspaces list only existing dirs; no invalid workspace references.], [REPOSITORY-STATE-REPORT.md], [User may decide create vs remove.], [USER]
+[TASK-004], [Introduce at least one real test in apps/web], [Not Started], [P0], [Agent], [2025-02-13], [Add minimal Jest or Vitest config to apps/web and at least one test (e.g. validation or sanitization); replace stub test script so pnpm test runs real tests.], [Test script runs test runner; at least one test exists; pnpm test exits 0 when tests pass.], [TASK-001; TASK-002.], [Immediate.], [AGENT]
 
+active_work_subtasks[12]{task_id, subtitle, designation, description}:
+[TASK-001], [Add all missing deps to apps/web/package.json], [AGENT], [Add next-auth genkit @genkit-ai/google-genai zod @octokit/rest @octokit/auth-app with appropriate version ranges.]
+[TASK-001], [Run pnpm install at repo root], [AGENT], [Run pnpm install and verify no resolution errors.]
+[TASK-001], [Commit or ignore pnpm-lock.yaml], [USER], [Confirm lockfile should be committed; if not add to .gitignore and document.]
+[TASK-001], [Commit pnpm-lock.yaml if policy is to commit], [AGENT], [Commit lockfile after user confirms.]
+[TASK-002], [Replace ./security/secrets with @/lib/security/secrets], [AGENT], [In github-app.ts line 14 change import to @/lib/security/secrets.]
+[TASK-002], [Replace ./logger with @/lib/logger], [AGENT], [In github-app.ts line 15 change import to @/lib/logger.]
+[TASK-002], [Run type-check and build], [AGENT], [Verify pnpm type-check and pnpm build pass.]
+[TASK-003], [Decide create vs remove workspace refs], [USER], [Decide whether to create packages/config/eslint-config and jest-config or remove them from workspaces.]
+[TASK-003], [Implement config package fix], [AGENT], [Either create missing dirs and minimal configs or remove eslint-config and jest-config from workspaces array.]
+[TASK-004], [Add Jest or Vitest config to apps/web], [AGENT], [Add minimal config file and ensure test script invokes it.]
+[TASK-004], [Add one test (e.g. validation or sanitization)], [AGENT], [Add at least one passing test under apps/web.]
+[TASK-004], [Replace stub test script in apps/web/package.json], [AGENT], [Change test script to run real test runner.]
