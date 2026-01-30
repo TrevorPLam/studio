@@ -4,9 +4,7 @@
   "private": true,
   "description": "Shared configuration packages for ESLint, TypeScript, Jest, etc.",
   "workspaces": [
-    "eslint-config",
-    "typescript-config",
-    "jest-config"
+    "typescript-config"
   ],
   "scripts": {
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
