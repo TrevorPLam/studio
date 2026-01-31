@@ -16,4 +16,5 @@ The canonical registry of agents for this repo is:
 - `agents/tasks/BACKLOG.toon` — idea intake
 - `agents/tasks/TODO.toon` — active work
 - `agents/tasks/ARCHIVE.toon` — completed work
+- `agents/hitl/` — HITL items (HITL-XXX.md)
 ```

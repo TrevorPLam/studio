@@ -1,0 +1,57 @@
+# filepath: agents/tasks/templates/FEATURE-WORKFLOW.toon
+# purpose: Standardized feature implementation workflow template
+# last updated: 2026-01-30
+# related tasks: Phase 1 foundation enhancement
+
+# Feature Implementation Workflow Template
+
+meta{template_type, version, last_updated, author}:
+feature, 2.1.0, 2026-01-30, AGENT_SYSTEM
+
+template_description{
+purpose: Standardized workflow for implementing new features across all repositories
+scope: New functionality, enhancements, feature additions
+actor: AGENT (with USER approval for security-sensitive changes)
+}
+
+workflow_steps[8]{step, action, verification, notes}:
+1, Analyze requirements, Review task description and acceptance criteria, Requirements understood, Document assumptions
+2, Create implementation plan, Identify files to change, dependencies, risks, Plan documented in comments, Include security gate check
+3, Implement core functionality, Write code following existing patterns, Code compiles and passes lint, Follow repo conventions
+4, Add tests, Create unit/integration tests for new functionality, Tests pass, Maintain coverage thresholds
+5, Update documentation, Update README, API docs, type definitions, Documentation reflects changes, Include examples
+6, Run verification, Execute make verify and package-specific tests, All checks pass, Fix any failures
+7, Update task tracking, Mark task completed in TODO.toon, Task status updated, Archive completed tasks
+8, Sync across repos, Run cross-repo synchronization if needed, Sync successful, Update related tasks
+
+quality_gates[4]{gate, trigger, action, bypass_allowed}:
+build, Code compilation or build failure, Fix build errors before proceeding, No
+lint, ESLint or formatting violations, Fix lint issues before proceeding, No
+tests, Test failures, Fix failing tests before proceeding, No
+security, Security-sensitive changes, Create HITL for review, No
+
+acceptance_criteria_template[5]{criterion, verification_method, automated_check, evidence_required}:
+functionality, Feature works as specified, Manual testing + automated tests, Yes, Test logs
+performance, No performance regression, Performance benchmarks, Yes, Benchmark results
+compatibility, No breaking changes, Integration tests, Yes, Test results
+documentation, Documentation updated, Documentation review, Partial, Review notes
+security, No security vulnerabilities, Security scan, Yes, Scan results
+
+risk_assessment[4]{risk_category, probability, impact, mitigation}:
+breaking_changes, Low, High, Backward compatibility analysis
+performance_impact, Medium, Medium, Performance testing
+security_vulnerability, Low, High, Security review
+dependency_conflicts, Medium, Medium, Dependency analysis
+
+estimated_timeline{min_hours, max_hours, complexity_factors}:
+4, 16, Feature complexity, dependencies, testing requirements
+
+prerequisites[3]{item, description, verification}:
+clean_workspace, No uncommitted changes, git status clean
+dependencies_installed, Required packages available, make setup succeeds
+tests_passing, Existing tests pass, make verify succeeds
+
+post_implementation[3]{action, description, automation}:
+cleanup, Remove temporary files, Manual
+performance_check, Run performance benchmarks, Automated
+documentation_sync, Update cross-repo docs, Automated

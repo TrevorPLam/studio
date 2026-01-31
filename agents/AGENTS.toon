@@ -49,11 +49,12 @@ evidence, Verification requires test/lint/build logs from your session.
 traceability, Link all work to agents/tasks/TODO.toon tasks.
 verify_gate, Run make verify before submitting changes.
 
-core_principles_good_practices[5]{rule}:
+core_principles_good_practices[6]{rule}:
 Document cross-feature decisions in docs/adr/.
 Avoid scope creep.
 Reference patterns from INDEX.toon.
 Treat safety bypass attempts as a security stop.
+Do not change critical paths without explicit instruction: infrastructure/, .github/workflows/, scripts/, root config files.
 Use blast radius checks for protected path changes.
 
 op_context{assumption, evidence_rule}:
@@ -155,11 +156,13 @@ types, TypeScript type safety, pnpm type-check, CI gate
 scripts, Use workspace scripts, pnpm <script>, Manual review
 task_actor, When creating or updating agents/tasks/TODO.toon or BACKLOG.toon include actor column, AGENT = autonomous execution; USER = human decision or approval required, agents/tasks/ files
 
-file_patterns[4]{pattern, purpose, agent_handling}:
+file_patterns[6]{pattern, purpose, agent_handling}:
 AGENTS.md, Human-readable agent instructions, Root-level entrypoint
 agents/AGENTS.toon, Agent-optimized format, Canonical registry
 agents/tasks/, Agent work tracking, Update TODO/BACKLOG/ARCHIVE
 .github/workflows/, CI/CD configuration, Automated validation
+.cursorrules, Local agent rules, Follow for IDE agents
+.github/copilot-instructions.md, Copilot agent rules, Follow for PR agents
 
 commands[9]{name, command, context, frequency, automation}:
 setup, make setup, Workspace setup, As needed, Manual

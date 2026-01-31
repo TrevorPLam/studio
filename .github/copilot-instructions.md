@@ -20,3 +20,7 @@ related tasks: FIRST.md Phase 2 (Copilot instructions)
 
 ## Tests
 - Add or update tests when behavior changes.
+
+## Review process
+- PRs must have at least 1 human review.
+- Large PRs (>200 lines) should be split.

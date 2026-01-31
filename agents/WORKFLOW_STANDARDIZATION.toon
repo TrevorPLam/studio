@@ -1,0 +1,78 @@
+# filepath: agents/WORKFLOW_STANDARDIZATION.toon
+# purpose: Unified workflow schema and standards across all repositories
+# last updated: 2026-01-30
+# related tasks: Phase 1 foundation enhancement
+
+# Workflow Standardization Schema (TOON)
+
+meta{version, author, scope, last_updated}:
+2.1.0, AGENT_SYSTEM, Cross-repo standardization, 2026-01-30
+
+standard_schema[12]{field, type, required, description, validation}:
+repo_id, string, true, Unique repository identifier, /^[a-z-]+$/
+version, string, true, Schema version, /^\d+\.\d+\.\d+$/
+last_updated, string, true, Last modification timestamp, ISO 8601
+status, enum, true, Workflow status, [Active, Inactive, Maintenance]
+owner, string, true, Repository owner, /^[A-Za-z\s]+$/
+package_manager, enum, true, Package management system, [pnpm, npm, yarn]
+primary_stack, string, true, Main technology stack, TypeScript + Turbo + pnpm
+workspaces, array, true, Workspace patterns, ["apps/*", "packages/*", "services/*"]
+agent_entry_point, object, true, Agent configuration, type, id, $schema, version, purpose
+required_reading_order, array, true, Required reading sequence, ["agents/AGENTS.toon", "agents/tasks/TODO.toon"]
+
+task_schema[15]{field, type, required, description, validation}:
+id, string, true, Unique task identifier, /^[A-Z]+-\d+[a-z]?$/
+parent_id, string, false, Parent task identifier, /^[A-Z]+-\d+[a-z]?$/
+title, string, true, Task title, max 100 chars
+status, enum, true, Task status, [Not Started, In Progress, Blocked, Completed, Partially Complete]
+priority, enum, true, Priority level, [P0, P1, P2, P3]
+owner, string, true, Task owner, /^[A-Za-z\s]+$/
+actor, enum, true, Execution actor, [AGENT, USER]
+due, string, true, Due date, YYYY-MM-DD
+description, string, true, Task description, max 500 chars
+acceptance_criteria, string, true, Success criteria, max 300 chars
+dependencies, string, false, Task dependencies, comma-separated IDs
+notes, string, false, Additional notes, max 200 chars
+created_at, string, true, Creation timestamp, ISO 8601
+updated_at, string, true, Last update timestamp, ISO 8601
+
+hitl_schema[8]{field, type, required, description, validation}:
+id, string, true, HITL identifier, /^HITL-\d{4}$/
+title, string, true, HITL title, max 100 chars
+status, enum, true, HITL status, [Open, Approved, Rejected, Blocked]
+priority, enum, true, Priority level, [P0, P1, P2, P3]
+trigger, string, true, Trigger reason, max 200 chars
+description, string, true, Detailed description, max 500 chars
+created_at, string, true, Creation timestamp, ISO 8601
+resolution, string, false, Resolution details, max 300 chars
+
+workflow_templates[4]{template_name, description, common_fields, usage_pattern}:
+feature, New feature implementation, status=Not Started, actor=AGENT, dependencies="", Group 3-5 features
+bug, Bug fix workflow, status=Not Started, actor=AGENT, dependencies="", Single or grouped bugs
+docs, Documentation update, status=Not Started, actor=AGENT, dependencies="", Usually single task
+security, Security-related changes, status=Not Started, actor=USER, dependencies="", Always requires HITL
+
+validation_rules[6]{rule, description, enforcement, consequence}:
+unique_task_ids, Task IDs must be unique within repo, Automated validation, Reject duplicate IDs
+valid_dependencies, Dependencies must reference existing tasks, Schema validation, Invalid dependency warning
+date_format, All dates must follow YYYY-MM-DD format, Schema validation, Reject invalid dates
+actor_consistency, Security tasks must have actor=USER, Business rule validation, Auto-correct to USER
+required_fields, All required fields must be present, Schema validation, Reject incomplete records
+status_transitions, Status changes must follow valid flow, Business rule validation, Reject invalid transitions
+
+sync_configuration[5]{repo, sync_enabled, sync_frequency, sync_direction, conflict_resolution}:
+OS, true, realtime, bidirectional, latest_timestamp_wins
+aios, true, realtime, bidirectional, latest_timestamp_wins
+studio, true, realtime, bidirectional, latest_timestamp_wins
+firm-template, true, realtime, bidirectional, latest_timestamp_wins
+global, true, hourly, broadcast, master_repo_wins
+
+implementation_steps[8]{step, action, command, verification}:
+1, Create standardized AGENTS.toon, Update schema, diff agents/AGENTS.toon, Schema validation passes
+2, Standardize TODO.toon format, Apply task schema, diff agents/tasks/TODO.toon, All tasks conform to schema
+3, Add workflow templates, Create templates directory, ls agents/tasks/templates/, Templates exist
+4, Implement sync script, Create sync utility, node agents/sync/tasks.js, Sync runs without errors
+5, Add validation hooks, Update verify script, make verify, Validation passes
+6, Create performance tracking, Add metrics collection, cat agents/metrics/latest.json, Metrics collected
+7, Test cross-repo sync, Run sync test, node agents/sync/test.js, All repos synchronized
+8, Update documentation, Reflect changes, diff AGENTS.md, Documentation updated

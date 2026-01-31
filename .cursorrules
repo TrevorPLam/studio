@@ -1,0 +1,18 @@
+# Cursor Rules for Studio
+
+Project: Studio monorepo (pnpm + Turbo)
+
+Commands:
+- setup: make setup
+- verify: make verify
+
+Rules:
+- Do not change protected paths without approval (see scripts/security/protected-paths.txt).
+- Do not add dependencies without approval.
+- Keep changes small and focused.
+- Prefer existing patterns over new abstractions.
+- Plan first for changes over ~200 lines or more than 3 files.
+
+Style:
+- Use existing naming conventions and folder patterns.
+- Keep scripts in scripts/ and docs in docs/ or governance/.

@@ -1,0 +1,63 @@
+# filepath: agents/tasks/templates/BUG-WORKFLOW.toon
+# purpose: Standardized bug fix workflow template
+# last updated: 2026-01-30
+# related tasks: Phase 1 foundation enhancement
+
+# Bug Fix Workflow Template
+
+meta{template_type, version, last_updated, author}:
+bug, 2.1.0, 2026-01-30, AGENT_SYSTEM
+
+template_description{
+purpose: Standardized workflow for fixing bugs across all repositories
+scope: Bug fixes, issue resolution, defect correction
+actor: AGENT (with USER approval for security-sensitive bugs)
+}
+
+workflow_steps[7]{step, action, verification, notes}:
+1, Reproduce issue, Confirm bug exists and understand conditions, Issue reproduced, Document reproduction steps
+2, Identify root cause, Analyze code to find source of bug, Root cause identified, Add debugging comments
+3, Create minimal reproduction, Isolate problem in minimal test case, Reproduction test passes, Add to test suite
+4, Implement fix, Write minimal code change to resolve issue, Fix resolves issue, Avoid over-engineering
+5, Verify fix, Run reproduction test and existing tests, All tests pass, Ensure no regression
+6, Update documentation, Update docs if behavior changed, Documentation accurate, Include bug fix notes
+7, Close task, Mark task completed in TODO.toon, Task status updated, Archive completed tasks
+
+quality_gates[4]{gate, trigger, action, bypass_allowed}:
+reproduction, Bug cannot be reproduced, Create HITL for clarification, No
+minimal_fix, Fix is too complex or invasive, Simplify approach, No
+regression, Fix breaks existing functionality, Revert and retry, No
+tests, Tests fail after fix, Fix test issues, No
+
+acceptance_criteria_template[4]{criterion, verification_method, automated_check, evidence_required}:
+issue_resolved, Original bug no longer occurs, Reproduction test, Yes, Test logs
+no_regression, Existing functionality unchanged, Full test suite, Yes, Test results
+minimal_change, Fix is minimal and focused, Code review, Yes, Diff analysis
+documentation_updated, Docs reflect fix if needed, Documentation check, Partial, Review notes
+
+bug_classification[4]{type, priority, resolution_approach, testing_requirements}:
+critical, P0, Immediate fix with rollback plan, Full regression testing
+high, P1, Fix in next release cycle, Targeted testing
+medium, P2, Fix in planned iteration, Standard testing
+low, P3, Fix when convenient, Basic testing
+
+root_cause_analysis[5]{question, investigation_method, expected_outcome}:
+what_changed, Review recent commits, Identify likely cause
+when_started, Check issue timeline, Narrow investigation scope
+where_affected, Analyze code paths, Focus on relevant areas
+why_undetected, Review test coverage, Add missing tests
+how_prevent, Process improvement, Prevent similar bugs
+
+fix_validation[4]{check, method, success_criteria, automation}:
+reproduction_test, Run original bug scenario, Test passes, Yes
+regression_test, Run full test suite, All tests pass, Yes
+integration_test, Test affected workflows, No failures, Yes
+security_test, Check for security implications, No vulnerabilities, Automated
+
+estimated_timeline{min_hours, max_hours, complexity_factors}:
+1, 8, Bug complexity, reproduction difficulty, fix scope
+
+post_implementation[3]{action, description, automation}:
+root_cause_doc, Document lessons learned, Manual
+test_enhancement, Add tests to prevent regression, Automated
+monitoring, Add monitoring if needed, Automated

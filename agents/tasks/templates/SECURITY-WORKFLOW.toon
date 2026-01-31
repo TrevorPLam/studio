@@ -1,0 +1,68 @@
+# filepath: agents/tasks/templates/SECURITY-WORKFLOW.toon
+# purpose: Standardized security workflow template
+# last updated: 2026-01-30
+# related tasks: Phase 1 foundation enhancement
+
+# Security Workflow Template
+
+meta{template_type, version, last_updated, author}:
+security, 2.1.0, 2026-01-30, AGENT_SYSTEM
+
+template_description{
+purpose: Standardized workflow for security-related changes across all repositories
+scope: Security fixes, vulnerability patches, security enhancements
+actor: USER (with AGENT implementation support)
+}
+
+workflow_steps[8]{step, action, verification, notes}:
+1, Security assessment, Evaluate security impact and risks, Risk assessment complete, Document threat model
+2, Create HITL request, Generate HITL for security review, HITL created, Include all security details
+3, Wait for approval, Await USER security approval, Approval received, Cannot proceed without approval
+4, Implement security fix, Apply security changes following best practices, Fix implemented, Use secure coding practices
+5, Security testing, Run security scans and penetration tests, No vulnerabilities found, Include automated scans
+6, Impact assessment, Verify no breaking security changes, Impact assessed, Test authentication/authorization
+7, Documentation, Document security changes and implications, Security docs updated, Include security advisories
+8, Close task, Mark task completed with security sign-off, Task closed, Archive with security tag
+
+quality_gates[5]{gate, trigger, action, bypass_allowed}:
+hitl_approval, Security changes without HITL approval, Create HITL, Never
+security_scan, Security vulnerabilities detected, Fix vulnerabilities, Never
+breaking_changes, Security changes break existing auth, Revert and redesign, Never
+documentation, Security changes undocumented, Add security docs, Never
+testing, Security tests fail, Fix security tests, Never
+
+acceptance_criteria_template[5]{criterion, verification_method, automated_check, evidence_required}:
+security_approved, HITL approval received, HITL review, No, Approval record
+vulnerability_free, No security vulnerabilities, Security scan, Yes, Scan results
+backward_compatible, Existing security unaffected, Integration tests, Yes, Test logs
+documented, Security changes documented, Documentation review, No, Security docs
+tested, Security tests pass, Security test suite, Yes, Test results
+
+security_classification[4]{level, description, approval_required, testing_requirements}:
+critical, System compromise vulnerability, Full security review, Full penetration testing
+high, Important security feature, Security team review, Security scan + integration tests
+medium, Security enhancement, Technical review, Standard security tests
+low, Security documentation, Documentation review, Basic validation
+
+security_checks[6]{check, tool, frequency, automation}:
+dependency_scan, npm audit, Per change, Yes
+code_analysis, CodeQL or similar, Per PR, Yes
+secrets_scan, GitGuardian or similar, Per commit, Yes
+authentication_test, Auth flow testing, Per change, Yes
+authorization_test, Permission testing, Per change, Yes
+encryption_test, Data encryption verification, Per change, Yes
+
+incident_response[4]{phase, action, timeline, responsibility}:
+detection, Identify security issue, Immediate, Monitoring system
+assessment, Evaluate impact and scope, Within 1 hour, Security team
+containment, Limit damage and exposure, Within 2 hours, Security team
+remediation, Fix and verify, Within 24 hours, Development team
+
+estimated_timeline{min_hours, max_hours, complexity_factors}:
+8, 40, Security complexity, approval process, testing requirements
+
+post_implementation[4]{action, description, automation, urgency}:
+security_advisory, Issue security advisory if needed, Manual, High
+monitoring, Enhanced security monitoring, Automated, High
+rollback_plan, Document rollback procedures, Manual, High
+training, Update security training docs, Manual, Medium

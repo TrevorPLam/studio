@@ -1,0 +1,65 @@
+# filepath: agents/tasks/templates/DOCS-WORKFLOW.toon
+# purpose: Standardized documentation workflow template
+# last updated: 2026-01-30
+# related tasks: Phase 1 foundation enhancement
+
+# Documentation Workflow Template
+
+meta{template_type, version, last_updated, author}:
+docs, 2.1.0, 2026-01-30, AGENT_SYSTEM
+
+template_description{
+purpose: Standardized workflow for documentation updates across all repositories
+scope: Documentation creation, updates, maintenance
+actor: AGENT (with USER review for critical documentation)
+}
+
+workflow_steps[6]{step, action, verification, notes}:
+1, Assess documentation need, Identify what docs need updating, Scope defined, Check existing docs
+2, Gather information, Collect technical details, examples, requirements, Information complete, Interview stakeholders if needed
+3, Write/update documentation, Create or modify docs following repo patterns, Documentation complete, Use consistent formatting
+4, Review for accuracy, Verify technical correctness, Docs accurate, Technical review
+5, Test documentation, Follow documented procedures, Procedures work, Include screenshots/examples
+6, Update task tracking, Mark task completed in TODO.toon, Task status updated, Archive completed tasks
+
+quality_gates[3]{gate, trigger, action, bypass_allowed}:
+accuracy, Technical information incorrect, Fix inaccuracies, No
+completeness, Missing critical information, Add missing details, No
+clarity, Documentation unclear or confusing, Improve clarity, No
+
+acceptance_criteria_template[4]{criterion, verification_method, automated_check, evidence_required}:
+accuracy, Technical information is correct, Expert review, No, Review notes
+completeness, All necessary information included, Coverage check, Partial, Checklist
+clarity, Documentation is easy to understand, User testing, No, User feedback
+findability, Documentation is discoverable, Link verification, Yes, Link check
+
+documentation_types[4]{type, purpose, update_frequency, review_process}:
+api_docs, API reference and examples, Per code change, Technical review
+user_guide, How-to guides and tutorials, Per feature, User review
+architecture_docs, System design and decisions, Per architectural change, Expert review
+setup_docs, Installation and configuration, Per dependency change, Technical review
+
+content_standards[5]{standard, requirement, verification, examples}:
+headings, Consistent heading hierarchy, Markdown lint check, # ## ### ####
+code_blocks, Syntax highlighting and language tags, Markdown validation, ```typescript, ```bash
+links, All links work and are descriptive, Link checker, [Link Text](url)
+examples, Working code examples, Test execution, Copy-paste working
+versioning, Document version and last updated, Header check, # filepath, purpose, last_updated
+
+review_checklist[8]{item, check_type, automation, notes}:
+spelling_grammar, Language check, Automated, Use spell checker
+technical_accuracy, Content verification, Manual, Expert review
+link_validity, Link checking, Automated, Link checker
+format_consistency, Style guide compliance, Automated, Markdown lint
+code_examples, Example testing, Automated, Run examples
+completeness, Coverage assessment, Manual, Review against requirements
+accessibility, Accessibility standards, Automated, Accessibility checker
+version_sync, Version consistency, Automated, Check against code
+
+estimated_timeline{min_hours, max_hours, complexity_factors}:
+1, 6, Documentation scope, technical complexity, review requirements
+
+post_implementation[3]{action, description, automation}:
+link_update, Update related doc links, Automated
+index_update, Update table of contents, Automated
+notification, Notify stakeholders of changes, Automated

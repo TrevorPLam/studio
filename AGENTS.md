@@ -18,7 +18,15 @@ Studio monorepo with TypeScript-first architecture using pnpm + Turbo.
 ## Rules
 - Keep changes small and focused; prefer the existing patterns.
 - Do not add dependencies without approval.
+- Do not modify protected paths without explicit human approval.
 - `make verify` must pass for any PR.
+
+## Protected paths
+Changes touching these require extra review:
+- `infrastructure/`
+- `.github/workflows/`
+- `scripts/`
+- Root config files (e.g. `package.json`, lockfiles, TS config)
 
 ## How to test locally
 ```bash
@@ -37,3 +45,4 @@ This repository uses **TOON (Token‑Oriented Object Notation)** for agent-optim
 - `agents/tasks/TODO.toon` - Active work
 - `agents/tasks/BACKLOG.toon` - Idea intake
 - `agents/tasks/ARCHIVE.toon` - Completed work
+- `agents/hitl/` - Human-In-The-Loop items (HITL-XXX.md)
