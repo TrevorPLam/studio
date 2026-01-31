@@ -39,22 +39,7 @@ import { setUserId, setSessionId } from '@/lib/observability/correlation';
 import { KillSwitchActiveError } from '@/lib/ops/killswitch';
 import { recordHttpRequest, recordBusinessMetric } from '@/lib/observability/metrics';
 import { withSpan } from '@/lib/observability/tracing';
-
-// ============================================================================
-// SECTION: HELPER FUNCTIONS
-// ============================================================================
-
-/**
- * Extract user ID from NextAuth session.
- *
- * Uses email as primary identifier, falls back to name.
- *
- * @param session - NextAuth session object
- * @returns User ID or null if unavailable
- */
-function getUserId(session: Session | null): string | null {
-  return session?.user?.email ?? session?.user?.name ?? null;
-}
+import { getUserId } from '@/lib/auth-helpers';
 
 // ============================================================================
 // SECTION: GET ENDPOINT - LIST SESSIONS

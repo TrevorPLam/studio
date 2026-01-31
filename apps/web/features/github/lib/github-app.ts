@@ -11,8 +11,8 @@
  */
 
 import { createAppAuth } from '@octokit/auth-app';
-import { getGitHubAppConfig } from './security/secrets';
-import { logger } from './logger';
+import { getGitHubAppConfig } from '@/lib/security/secrets';
+import { logger } from '@/lib/logger';
 
 /**
  * Cached installation token with expiration tracking.

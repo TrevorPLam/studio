@@ -39,34 +39,7 @@ import type { AgentMessage } from '@/features/agents';
 import { agentChatRequestSchema, validateRequest, type AgentMessageInput } from '@/lib/validation';
 import { ValidationError } from '@/lib/types';
 import { logger } from '@/lib/logger';
-
-// ============================================================================
-// SECTION: HELPER FUNCTIONS
-// ============================================================================
-
-/**
- * Extract user ID from NextAuth session.
- *
- * @param session - NextAuth session object
- * @returns User ID or null if unavailable
- */
-function getUserId(session: Session | null): string | null {
-  return session?.user?.email ?? session?.user?.name ?? null;
-}
-
-/**
- * Ensure all messages have timestamps.
- *
- * @param messages - Array of message inputs
- * @returns Array of messages with timestamps
- */
-function ensureTimestamps(messages: AgentMessageInput[]): AgentMessage[] {
-  return messages.map((message) => ({
-    role: message.role,
-    content: message.content,
-    timestamp: message.timestamp || new Date().toISOString(),
-  }));
-}
+import { getUserId, ensureTimestamps } from '@/lib/auth-helpers';
 
 // ============================================================================
 // SECTION: POST ENDPOINT - STREAMING CHAT

@@ -38,6 +38,7 @@ import { getAgentSessionById, updateAgentSession } from '@/features/sessions';
 import type { AgentSessionStep } from '@/features/agents';
 import { ValidationError } from '@/lib/types';
 import { KillSwitchActiveError } from '@/lib/ops/killswitch';
+import { getUserId } from '@/lib/auth-helpers';
 
 // ============================================================================
 // SECTION: VALIDATION SCHEMAS
@@ -74,20 +75,6 @@ type SessionParams = {
     id: string;
   }>;
 };
-
-// ============================================================================
-// SECTION: HELPER FUNCTIONS
-// ============================================================================
-
-/**
- * Extract user ID from NextAuth session.
- *
- * @param session - NextAuth session object
- * @returns User ID or null if unavailable
- */
-function getUserId(session: Session | null): string | null {
-  return session?.user?.email ?? session?.user?.name ?? null;
-}
 
 // ============================================================================
 // SECTION: GET ENDPOINT - GET STEPS
