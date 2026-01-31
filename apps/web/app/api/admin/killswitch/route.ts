@@ -40,6 +40,7 @@ import { isAdmin } from '@/features/auth';
 import { getKillSwitchStatus, setKillSwitch, KillSwitchActiveError } from '@/lib/ops/killswitch';
 import { setUserId } from '@/lib/observability/correlation';
 import { logger } from '@/lib/logger';
+import { getUserId } from '@/lib/auth-helpers';
 
 // ============================================================================
 // SECTION: VALIDATION SCHEMAS
@@ -51,22 +52,6 @@ import { logger } from '@/lib/logger';
 const toggleKillSwitchSchema = z.object({
   enabled: z.boolean(),
 });
-
-// ============================================================================
-// SECTION: HELPER FUNCTIONS
-// ============================================================================
-
-/**
- * Extract user ID from NextAuth session.
- *
- * @param session - NextAuth session object
- * @returns User ID or null if unavailable
- */
-function getUserId(
-  session: { user?: { email?: string | null; name?: string | null } } | null
-): string | null {
-  return session?.user?.email ?? session?.user?.name ?? null;
-}
 
 // ============================================================================
 // SECTION: GET ENDPOINT - GET STATUS
