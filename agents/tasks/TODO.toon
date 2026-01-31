@@ -1,8 +1,12 @@
 # AI Work TODO (TOON) — 3–5 active tasks from REPOSITORY-STATE-REPORT.md
+# actor: AGENT = autonomous agent can execute; USER = human decision/approval required.
 
 meta{status, owner, last_updated, source}:
 [Active], [Team], [2026-01-31], [REPOSITORY-STATE-REPORT.md]
 
-active_work[0]{id, title, status, priority, owner, due, description, acceptance_criteria, dependencies, notes, designation}:
+active_work[3]{id, parent_id, title, status, priority, owner, actor, due, description, acceptance_criteria, dependencies, notes}:
+TASK-001, , Standardize package naming, Not Started, P1, Team, AGENT, 2026-02-28, Mixed @repo/ui @repo/utils vs @studio/contracts @studio/api-sdk and tsconfig paths confuse onboarding and tooling., One namespace used throughout; tsconfig paths and package names consistent., , User chooses namespace.
+TASK-002, , Centralize error handling for API routes, Not Started, P1, Team, AGENT, 2026-03-31, API routes use mixed try/catch and generic 500s; risk of leaking stack or internal detail in production., Single error-handling path; known errors mapped to safe responses; production does not leak internals., , Medium-term.
+TASK-003, , Use contracts as API source of truth, Not Started, P1, Team, AGENT, 2026-03-31, packages/contracts has minimal schemas; most validation lives in apps/web/lib/validation.ts; contracts underused., packages/contracts contains shared API shapes; app validation derives from contracts where applicable., , Medium-term.
 
-active_work_subtasks[0]{task_id, subtitle, designation, description}:
+active_work_subtasks[0]{task_id, subtitle, actor, description}:

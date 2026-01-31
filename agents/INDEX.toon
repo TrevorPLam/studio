@@ -1,15 +1,16 @@
 # INDEX.toon
 
 meta{root, generated_at}:
-agents, 2026-01-29T08:08:01Z
+agents, 2026-01-31T04:41:44Z
 
-entries[9]{path, type}:
+entries[10]{path, type}:
 AGENTS.toon, file
 TOON.toon, file
 hitl, dir
+hitl\README.md, file
 log, dir
-log/LOGGING_REQUIREMENTS.toon, file
+log\LOGGING_REQUIREMENTS.toon, file
 tasks, dir
-tasks/ARCHIVE.toon, file
-tasks/BACKLOG.toon, file
-tasks/TODO.toon, file
+tasks\ARCHIVE.toon, file
+tasks\BACKLOG.toon, file
+tasks\TODO.toon, file

@@ -1,7 +1,7 @@
 # INDEX.toon
 
 meta{root, generated_at}:
-scripts, 2026-01-29T08:08:01Z
+scripts, 2026-01-31T04:41:44Z
 
 entries[2]{path, type}:
 generate-index-toon.py, file

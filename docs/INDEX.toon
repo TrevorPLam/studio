@@ -1,0 +1,14 @@
+# INDEX.toon
+
+meta{root, generated_at}:
+docs, 2026-01-31T04:41:44Z
+
+entries[8]{path, type}:
+DEVELOPMENT_WORKFLOW.md, file
+TEAM_TRAINING.md, file
+api, dir
+architecture, dir
+decisions, dir
+onboarding, dir
+quality-attributes.md, file
+security-review-triggers.md, file

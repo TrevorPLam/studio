@@ -1,0 +1,17 @@
+# INDEX.toon
+
+meta{root, generated_at}:
+infrastructure, 2026-01-31T04:41:44Z
+
+entries[11]{path, type}:
+docker, dir
+k8s, dir
+k8s\base, dir
+k8s\overlays, dir
+k8s\overlays\dev, dir
+k8s\overlays\prod, dir
+k8s\overlays\staging, dir
+scripts, dir
+terraform, dir
+terraform\environments, dir
+terraform\modules, dir

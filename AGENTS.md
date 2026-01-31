@@ -1,19 +1,39 @@
-```markdown
 # AGENTS.md
 
-This repository uses **TOON (Token‑Oriented Object Notation)** to store structured, agent-friendly data with lower token overhead than JSON. TOON files declare a schema once and list rows as compact tables, making them efficient for AI agents to parse.
+**⚠️ This is a human-readable pointer. The canonical agent instructions are in `agents/AGENTS.toon`.**
 
-## Canonical Agents Registry
+## What this repo is
+Studio monorepo with TypeScript-first architecture using pnpm + Turbo.
 
-The canonical registry of agents for this repo is:
-- `agents/AGENTS.toon`
+## Project structure
+- `apps/` - React + Vite frontend applications
+- `packages/` - Shared UI components, utilities, contracts, API SDK
+- `scripts/` - Setup and verification scripts
+- `agents/` - Agent governance and task management
 
-`agents/AGENTS.toon` is the single source of truth. If an agent definition changes, update that file.
+## Exact commands
+- **setup**: `make setup`
+- **verify**: `make verify`
 
-## Related Files
+## Rules
+- Keep changes small and focused; prefer the existing patterns.
+- Do not add dependencies without approval.
+- `make verify` must pass for any PR.
 
-- `agents/TOON.toon` — format definition and examples
-- `agents/tasks/BACKLOG.toon` — idea intake
-- `agents/tasks/TODO.toon` — active work
-- `agents/tasks/ARCHIVE.toon` — completed work
+## How to test locally
+```bash
+make setup
+make verify
 ```
+
+## Agent-optimized instructions
+**Read `agents/AGENTS.toon` for complete agent guidance.**
+
+This repository uses **TOON (Token‑Oriented Object Notation)** for agent-optimized data storage with lower token overhead than JSON.
+
+### Key files
+- `agents/AGENTS.toon` - **Canonical agent registry** (source of truth)
+- `agents/TOON.toon` - Format definition and examples
+- `agents/tasks/TODO.toon` - Active work
+- `agents/tasks/BACKLOG.toon` - Idea intake
+- `agents/tasks/ARCHIVE.toon` - Completed work

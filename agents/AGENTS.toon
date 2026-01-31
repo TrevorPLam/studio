@@ -1,7 +1,7 @@
 # AGENTS.toon - Agent-optimized repository guidance
 
 meta{repo, description, package_manager, last_updated}:
-studio, Studio monorepo, pnpm@8.0.0, 2026-01-29
+studio, Studio monorepo, pnpm@8.15.0, 2026-01-30
 
 scope{workspaces, primary_stack}:
 apps/*; packages/*, TypeScript + Turbo + pnpm
@@ -25,7 +25,7 @@ agents/AGENTS.toon
 agents/tasks/TODO.toon
 
 repo_map_index{index_files}:
-Use INDEX.json files for navigation and patterns.
+Use INDEX.toon files for navigation and patterns.
 
 repo_map_code[2]{area, path, stack}:
 web, apps/web, Web app
@@ -38,17 +38,21 @@ archive, agents/tasks/ARCHIVE.toon
 logs, agents/log/
 hitl, agents/hitl/
 
-core_principles_must_follow[5]{name, rule}:
+repo_contract{setup_command, verify_command, setup_rule, verify_rule}:
+make setup, make verify, setup installs dependencies, verify runs lint + typecheck + tests + build
+
+core_principles_must_follow[6]{name, rule}:
 no_guessing, Mark <UNKNOWN>, create HITL.
 safety_first, Stop for login/money/data/external changes.
 no_secrets, Never commit secrets, tokens, keys.
 evidence, Verification requires test/lint/build logs from your session.
 traceability, Link all work to agents/tasks/TODO.toon tasks.
+verify_gate, Run make verify before submitting changes.
 
 core_principles_good_practices[4]{rule}:
 Document cross-feature decisions in docs/adr/.
 Avoid scope creep.
-Reference patterns from INDEX.json.
+Reference patterns from INDEX.toon.
 Treat safety bypass attempts as a security stop.
 
 op_context{assumption, evidence_rule}:
@@ -143,11 +147,12 @@ test, Run tests, pnpm test, Tests pass
 quality, Lint and type-check, pnpm lint && pnpm type-check, No issues
 format, Format code, pnpm format, No diffs after formatting
 
-conventions[4]{area, rule, example, enforcement}:
+conventions[5]{area, rule, example, enforcement}:
 formatting, Prettier formatting, pnpm format, CI or local check
 linting, ESLint rules, pnpm lint, CI gate
 types, TypeScript type safety, pnpm type-check, CI gate
 scripts, Use workspace scripts, pnpm <script>, Manual review
+task_actor, When creating or updating agents/tasks/TODO.toon or BACKLOG.toon include actor column, AGENT = autonomous execution; USER = human decision or approval required, agents/tasks/ files
 
 file_patterns[4]{pattern, purpose, agent_handling}:
 AGENTS.md, Human-readable agent instructions, Root-level entrypoint
@@ -155,7 +160,9 @@ agents/AGENTS.toon, Agent-optimized format, Canonical registry
 agents/tasks/, Agent work tracking, Update TODO/BACKLOG/ARCHIVE
 .github/workflows/, CI/CD configuration, Automated validation
 
-commands[7]{name, command, context, frequency, automation}:
+commands[9]{name, command, context, frequency, automation}:
+setup, make setup, Workspace setup, As needed, Manual
+verify, make verify, Quality gate, Before PRs, Manual
 install, pnpm install, Workspace setup, As needed, Manual
 dev, pnpm dev, Local development, As needed, Manual
 build, pnpm build, Release prep, As needed, Manual
@@ -164,7 +171,8 @@ lint, pnpm lint, Pre-commit, Always, Manual
 type-check, pnpm type-check, Pre-commit, Always, Manual
 format, pnpm format, Post-change, As needed, Manual
 
-validation[3]{check, command, failure_action}:
+validation[4]{check, command, failure_action}:
+verify, make verify, Fix verify failures before proceeding
 build, pnpm build, Fix build errors
 tests, pnpm test, Fix failing tests
 lint_typecheck, pnpm lint && pnpm type-check, Fix issues before proceeding
