@@ -1,29 +1,12 @@
 # filepath: Makefile
 # purpose: Single entry point for setup and verify commands.
-# last updated: 2026-01-31
-# related tasks: Repository alignment and agentic workflow
+# last updated: 2026-01-30
+# related tasks: FIRST.md Phase 1 (repo contract)
 
-.PHONY: setup verify help
+.PHONY: setup verify
 
-help: ## Show this help message
-	@echo "Available commands:"
-	@echo "  setup   - Install dependencies"
-	@echo "  verify  - Run all quality checks (lint, test, build)"
+setup:
+	./scripts/setup.sh
 
-setup: ## Install dependencies
-	@echo "Running setup..."
-	@echo "==> setup: installing dependencies"
-	pnpm install --frozen-lockfile
-	@echo "✅ Setup complete"
-
-verify: ## Run all quality checks
-	@echo "Running verify..."
-	@echo "==> verify: lint"
-	pnpm lint
-	@echo "==> verify: typecheck"
-	pnpm type-check
-	@echo "==> verify: tests"
-	pnpm test
-	@echo "==> verify: build"
-	pnpm build
-	@echo "✅ Verify passed"
+verify:
+	./scripts/verify.sh

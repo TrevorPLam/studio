@@ -1,0 +1,16 @@
+# filepath: scripts/security/protected-paths.txt
+# purpose: Define protected path regex patterns for blast-radius checks.
+# last updated: 2026-01-30
+# related tasks: FIRST.md Phase 4 (blast radius)
+
+# OPERATOR: Add or adjust patterns as your critical paths are defined.
+# Each line is a regex matched against changed file paths.
+^\.github/
+^scripts/
+^agents/
+^AGENTS\.md$
+^\.cursorrules$
+^Makefile$
+^package\.json$
+^pnpm-lock\.yaml$
+^docker-compose\.yml$

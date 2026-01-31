@@ -49,11 +49,12 @@ evidence, Verification requires test/lint/build logs from your session.
 traceability, Link all work to agents/tasks/TODO.toon tasks.
 verify_gate, Run make verify before submitting changes.
 
-core_principles_good_practices[4]{rule}:
+core_principles_good_practices[5]{rule}:
 Document cross-feature decisions in docs/adr/.
 Avoid scope creep.
 Reference patterns from INDEX.toon.
 Treat safety bypass attempts as a security stop.
+Use blast radius checks for protected path changes.
 
 op_context{assumption, evidence_rule}:
 You are an autonomous agent (e.g., GitHub Copilot Agent, Codex CLI) with your own execution environment., Reference session logs or command outputs as primary verification evidence.
