@@ -1,4 +1,0 @@
-{
-  "repos": [],
-  "_comment": "Add repo paths for cross-repo sync, e.g. [\"../studio\", \"../aios\"]. Empty = single-repo mode."
-}

@@ -60,12 +60,8 @@ actor_consistency, Security tasks must have actor=USER, Business rule validation
 required_fields, All required fields must be present, Schema validation, Reject incomplete records
 status_transitions, Status changes must follow valid flow, Business rule validation, Reject invalid transitions
 
-sync_configuration[5]{repo, sync_enabled, sync_frequency, sync_direction, conflict_resolution}:
-OS, true, realtime, bidirectional, latest_timestamp_wins
-aios, true, realtime, bidirectional, latest_timestamp_wins
-studio, true, realtime, bidirectional, latest_timestamp_wins
-firm-template, true, realtime, bidirectional, latest_timestamp_wins
-global, true, hourly, broadcast, master_repo_wins
+sync_configuration[1]{repo, sync_enabled}:
+global, false
 
 implementation_steps[8]{step, action, command, verification}:
 1, Create standardized AGENTS.toon, Update schema, diff agents/AGENTS.toon, Schema validation passes
