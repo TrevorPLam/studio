@@ -38,6 +38,7 @@ import { agentMessageSchema, validateRequest } from '@/lib/validation';
 import { ValidationError } from '@/lib/types';
 import { setUserId, setSessionId } from '@/lib/observability/correlation';
 import { KillSwitchActiveError } from '@/lib/ops/killswitch';
+import { getUserId } from '@/lib/auth-helpers';
 
 // ============================================================================
 // SECTION: VALIDATION SCHEMAS
@@ -77,20 +78,6 @@ type SessionParams = {
     id: string;
   }>;
 };
-
-// ============================================================================
-// SECTION: HELPER FUNCTIONS
-// ============================================================================
-
-/**
- * Extract user ID from NextAuth session.
- *
- * @param session - NextAuth session object
- * @returns User ID or null if unavailable
- */
-function getUserId(session: Session | null): string | null {
-  return session?.user?.email ?? session?.user?.name ?? null;
-}
 
 // ============================================================================
 // SECTION: GET ENDPOINT - GET SESSION

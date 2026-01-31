@@ -40,23 +40,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { ArrowLeft, Send } from 'lucide-react';
-
-// ============================================================================
-// SECTION: HELPER FUNCTIONS
-// ============================================================================
-
-/**
- * Ensure all messages have timestamps.
- *
- * @param messages - Array of messages
- * @returns Array of messages with timestamps
- */
-function ensureTimestamps(messages: AgentMessage[]): AgentMessage[] {
-  return messages.map((message) => ({
-    ...message,
-    timestamp: message.timestamp || new Date().toISOString(),
-  }));
-}
+import { ensureTimestamps } from '@/lib/auth-helpers';
 
 // ============================================================================
 // SECTION: AGENT SESSION PAGE COMPONENT
