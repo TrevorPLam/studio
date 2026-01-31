@@ -1,7 +1,7 @@
 # INDEX.toon
 
 meta{root, generated_at}:
-.agents, 2026-01-29T08:08:01Z
+agents, 2026-01-29T08:08:01Z
 
 entries[9]{path, type}:
 AGENTS.toon, file

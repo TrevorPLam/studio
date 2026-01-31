@@ -1,0 +1,40 @@
+name: Governance Drift
+
+on:
+  pull_request:
+    paths:
+      - '.github/**'
+      - 'scripts/**'
+      - 'AGENTS.md'
+      - '.cursorrules'
+      - 'governance/**'
+      - 'Makefile'
+
+jobs:
+  governance-review:
+    name: Governance Change Review
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Label governance changes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['governance-change', 'requires-extra-review']
+            });
+      
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '⚠️ This PR modifies governance files. Extra review required before merge.'
+            });

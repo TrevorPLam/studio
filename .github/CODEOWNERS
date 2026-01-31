@@ -3,6 +3,7 @@
 
 # Application code
 /apps/ @TrevorPLam
+/services/ @TrevorPLam
 /packages/ @TrevorPLam
 
 # Infrastructure and deployment

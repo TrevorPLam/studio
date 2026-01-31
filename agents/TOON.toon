@@ -44,7 +44,7 @@ purpose{statement}:
 +
 +implementation_path[4]{source, view, example_json, example_toon}:
 +JSON, TOON, INDEX.json, INDEX.toon
-+JSON, TOON, AGENTS.json, .agents/AGENTS.toon
++JSON, TOON, AGENTS.json, agents/AGENTS.toon
 +Markdown, TOON, TODO.md, TODO.toon
 +Markdown, TOON, BACKLOG.md, BACKLOG.toon
 

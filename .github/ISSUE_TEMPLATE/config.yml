@@ -1,0 +1,17 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📖 Studio Documentation
+    url: https://github.com/TrevorPLam/studio/blob/main/README.md
+    about: Check our documentation for common questions and setup instructions
+  - name: 🎨 UI Components
+    url: https://github.com/TrevorPLam/studio/tree/main/packages/ui
+    about: Questions about UI component library and design system
+  - name: 🔧 Development Tools
+    url: https://github.com/TrevorPLam/studio/tree/main/tools
+    about: Questions about AI helpers and code generation tools
+  - name: 🚀 Performance Guide
+    url: https://github.com/TrevorPLam/studio/blob/main/docs/PERFORMANCE.md
+    about: Learn about optimizing Studio performance
+  - name: 💬 Discussions
+    url: https://github.com/TrevorPLam/studio/discussions
+    about: Ask questions, share ideas, and engage with the Studio community
